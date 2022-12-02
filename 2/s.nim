@@ -37,3 +37,11 @@ doAssert [(2, 0), (2, 1), (2, 2)].mapIt(it.winLoseReverse) == @[1, 2, 0]
 
 let score2 = games.mapIt(it[1] * 3 + (it.winLoseReverse + 1))
 echo sum(score2)
+
+# Codegolfing
+
+proc fil(n: int): seq[string] =
+    return readFile($n & "/input").splitLines().filterIt(len(it) > 2)
+
+echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt((it[1]+1-it[0]).mod3*3+(it[1]+1)))
+echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt(it[1]*3+((it[0]+it[1]-1).mod3+1)))
