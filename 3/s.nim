@@ -1,11 +1,8 @@
 import strutils, strformat, sequtils, sugar, algorithm, math, sets
 import ../aoc
 
-# for i in 0 .. 25:
-#     echo chr(i+ord('a')) & " " & chr(i+ord('A'))
 # a->z = 1->25
 # A->Z = 27-52
-
 
 proc priority(c: char): int =
     doAssert isAlphaAscii(c)
@@ -22,18 +19,11 @@ iterator priorities(): int =
             continue
         yield priority(si.pop())
 
-iterator prioritiesB(): int =
+iterator groupsOfThree(): int =
     for group in fil(3).filterIt(len(it) > 0).partition(3):
-        if len(group) != 3:
-            # echo "no3"
-            continue
-        var si = intersection(toHashSet(group[0]), toHashSet(group[1]))
-        si = intersection(si, toHashSet(group[2]))
-        if len(si) == 0:
-            continue
-        doAssert len(si) == 1
+        var si = toHashSet(group[0]) * toHashSet(group[1]) * toHashSet(group[2])
+        doAssert len(si) == 1, "Set length failure"
         yield priority(si.pop())
 
-echo sum(toSeq(prioritiesB))
-
-# echo sum()
+echo sum(toSeq(priorities))
+echo sum(toSeq(groupsOfThree))
