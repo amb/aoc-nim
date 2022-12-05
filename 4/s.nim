@@ -1,5 +1,4 @@
-import strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans
-import ../aoc
+include ../aoc
 
 proc isInside(a, b, x, y: int): bool =
     (a >= x and b <= y) or (x >= a and y <= b)

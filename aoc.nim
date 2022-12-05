@@ -1,4 +1,4 @@
-import strutils, strformat, sequtils, sugar, algorithm, math, sets
+import strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
@@ -25,3 +25,9 @@ proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
             c.setLen(0)
     return os
 
+proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
+    result = -1
+    for i, x in s:
+        if pred(x):
+            result = i
+            break
