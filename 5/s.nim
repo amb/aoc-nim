@@ -33,8 +33,9 @@ for s in 0..8:
 # Part 2
 
 for m in moves:
-    stacksB[m.b] &= stacksB[m.a][^m.count..<len(stacksB[m.a])]
+    stacksB[m.b] &= stacksB[m.a][^m.count..^1]
     stacksB[m.a].setLen(stacksB[m.a].len - m.count)
 
+echo "\nPart 2"
 for s in 0..8:
     stdout.write stacksB[s][^1]
