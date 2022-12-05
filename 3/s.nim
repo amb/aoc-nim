@@ -20,7 +20,7 @@ iterator priorities(): int =
         yield priority(si.pop())
 
 iterator groupsOfThree(): int =
-    for group in fil(3).filterIt(len(it) > 0).partition(3):
+    for group in fil(3, true).partition(3):
         var si = toHashSet(group[0]) * toHashSet(group[1]) * toHashSet(group[2])
         doAssert len(si) == 1, "Set length failure"
         yield priority(si.pop())
