@@ -1,10 +1,12 @@
 include ../aoc
 
 let lines = fil(5)
+
+# Parse the input into arrays
+# ASSUMPTIONS: 9 crates, grid spacing locations are constant
 let numsLoc = findIf(lines, x => x[1].isDigit)
 doAssert len(lines[numsLoc]) == 35 # 3*9 + 8
 
-# Parse the input into arrays
 var stacks = newSeq[seq[char]](9)
 for l in countdown(numsLoc-1, 0):
     for n in 1..9:
@@ -14,7 +16,7 @@ for l in countdown(numsLoc-1, 0):
             stacks[n-1].add(ch)
 
 let moves = collect:
-    for line in lines[numsLoc+1..<lines.len]:
+    for line in lines[numsLoc+1..^1]:
         let (success, count, a, b) = line.scanTuple("move $i from $i to $i")
         if success:
             (count: count, a: a-1, b: b-1)
@@ -27,8 +29,8 @@ for m in moves:
     for i in 0..<m.count:
         stacks[m.b].add(stacks[m.a].pop())
 
-for s in 0..8:
-    stdout.write stacks[s][^1]
+for s in stacks:
+    stdout.write s[^1]
 
 # Part 2
 
@@ -37,5 +39,5 @@ for m in moves:
     stacksB[m.a].setLen(stacksB[m.a].len - m.count)
 
 echo "\nPart 2"
-for s in 0..8:
-    stdout.write stacksB[s][^1]
+for s in stacksB:
+    stdout.write s[^1]
