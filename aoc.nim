@@ -31,3 +31,12 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
         if pred(x):
             result = i
             break
+
+type 
+    WindowView* = object
+        index: int
+        view: string
+
+iterator slidingWindow*(dt: string, size: int): WindowView =
+    for i in 0..dt.len-size:
+        yield WindowView(index: i, view: dt[i..<i+size])
