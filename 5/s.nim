@@ -10,9 +10,7 @@ doAssert len(lines[numsLoc]) == 35 # 3*9 + 8
 var stacks = newSeq[seq[char]](9)
 for l in countdown(numsLoc-1, 0):
     for n in 1..9:
-        let loc = 1 + (n-1)*4
-        let ch = lines[l][loc]
-        if ch.isAlphaAscii:
+        if lines[l][1 + (n-1)*4].isAlphaAscii:
             stacks[n-1].add(ch)
 
 let moves = collect:
