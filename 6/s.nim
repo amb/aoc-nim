@@ -11,7 +11,7 @@ proc allDifferent(dt: seq[char], count: int): bool =
     return true
 
 proc findAllDifferent(dt: string, count: int): int =
-    var ringBuf = newSeq[char](count).map(x => '.')
+    var ringBuf = newSeq[char](count)
     var rbLoc: int = 0
     for idx, ch in dt:
         ringBuf[rbLoc] = ch
