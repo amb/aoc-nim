@@ -13,8 +13,6 @@ var dirData = FileItem(size: -1, name: "root")
 var rootFolder = dirData
 var cwd = dirData
 
-proc isRoot(i: FileItem): bool = i.name == "root" and i.size == -1
-
 proc newItem(size: int, name: string): FileItem =
     result = FileItem(size: size, name: name, parent: cwd)
     cwd.items[name] = result
@@ -34,8 +32,6 @@ echo parser.match(filr(7)).ok
 
 proc sizeWalk(fi: FileItem, sizes: var seq[(FileItem, int)]): int =
     result = fi.size
-    if isRoot(fi):
-        inc result
     for k in fi.items.keys:
         result += sizeWalk(fi.items[k], sizes)
     if fi.size <= 0:
