@@ -3,13 +3,12 @@ import npeg, std/tables, std/hashes
 
 type 
     FileItem = ref object
-        # -1 root, 0 dir, 1+ file
         size: int
         name: string
         parent: FileItem
         items: Table[string, FileItem]
 
-var dirData = FileItem(size: -1, name: "root")
+var dirData = FileItem(size: 0, name: "root")
 var rootFolder = dirData
 var cwd = dirData
 
@@ -29,15 +28,15 @@ let parser = peg "input":
 
 echo parser.match(filr(7)).ok
 
-proc sizeWalk(fi: FileItem, sizes: var seq[(FileItem, int)]): int =
+proc sizeWalk(fi: FileItem, sizes: var seq[int]): int =
     result = fi.size
     for k in fi.items.keys:
         result += sizeWalk(fi.items[k], sizes)
-    if fi.size <= 0:
-        sizes.add((fi, result))
+    if fi.size == 0:
+        sizes.add(result)
 
-var sz = newSeq[(FileItem, int)]()
+var sz = newSeq[int]()
 discard sizeWalk(rootFolder, sz)
 
-let moreSpace = 30_000_000 - (70_000_000 - sz[^1][1])
-echo sz.filterIt(it[1] >= moreSpace).sorted((x, y) => x[1] > y[1])[0][1]
+let moreSpace = 30_000_000 - (70_000_000 - sz[^1])
+echo sz.filterIt(it >= moreSpace).sorted[0]
