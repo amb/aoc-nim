@@ -22,8 +22,7 @@ let parser = peg "input":
     command <- "$ " * +(cd | ls)
     cd <- "cd " * >(".." | "/" | (+Alpha)): 
         cwd = (if $1 == "/": rootFolder elif $1 == "..": cwd.parent else: newItem(0, $1))
-    ls <- "ls" * listing
-    listing <- +('\n' * (lsfile|lsdir))
+    ls <- "ls" * +('\n' * (lsfile|lsdir))
     lsfile <- >(+Digit) * ' ' * >(+{'a'..'z','.'}):
         discard newItem(parseInt($1), $2)
     lsdir <- "dir " * (+Alpha)
