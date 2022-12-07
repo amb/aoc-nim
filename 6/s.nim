@@ -23,5 +23,7 @@ proc findAllDifferent(dt: string, count: int): int =
 echo data.findAllDifferent(4)
 echo data.findAllDifferent(14)
 
+# One liner
 let sdata = "bvwbjplbgvbhsrlpgdmjqwftvncz"
 echo data.slidingWindow(4).toSeq.filter(x => toHashSet(x.view).len == 4)[0].index+4
+# echo data.slidingWindow(4) --> filter(x => toHashSet(x.view).len == 4).take(1)

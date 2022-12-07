@@ -1,12 +1,10 @@
-import strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans
+import strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans, zero_functional
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
-proc fil*(n: int, filt = false): seq[string] =
-    var res = readFile($n & "/input").splitLines()
-    if filt:
-        res = res.filterIt(len(it) > 0)
-    return res
+# proc filt*(n: int): seq[string] = readFile($n & "/input").splitLines()
+proc fil*(n: int): seq[string] = readFile($n & "/input").splitLines()
+proc filr*(n: int): string = readFile($n & "/input")
 
 let lowerLetters* = toHashSet(toSeq(ord('a')..ord('z')))
 let upperLetters* = toHashSet(toSeq(ord('A')..ord('Z')))
