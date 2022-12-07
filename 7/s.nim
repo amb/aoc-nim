@@ -27,7 +27,6 @@ let parser = peg "input":
     lsdir <- "dir " * (+Alpha)
 
 echo parser.match(filr(7)).ok
-
 proc sizeWalk(fi: FileItem, sizes: var seq[int]): int =
     result = fi.size
     for k in fi.items.keys:
@@ -37,6 +36,5 @@ proc sizeWalk(fi: FileItem, sizes: var seq[int]): int =
 
 var sz = newSeq[int]()
 discard sizeWalk(rootFolder, sz)
-
 let moreSpace = 30_000_000 - (70_000_000 - sz[^1])
 echo sz.filterIt(it >= moreSpace).sorted[0]
