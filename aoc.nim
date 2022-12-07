@@ -1,4 +1,5 @@
-import strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans, zero_functional
+import strutils, strformat, sequtils, sugar, algorithm, math, sets, 
+    strscans, zero_functional, tables
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
