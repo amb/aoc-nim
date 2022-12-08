@@ -1,4 +1,4 @@
-import typetraits, tables, sequtils, sugar
+import typetraits, tables, sequtils, sugar, sets
 
 let a = collect:
     for k, v in {'a': 1, 'b': 2}.toTable:
@@ -7,12 +7,13 @@ let a = collect:
 echo a
 echo a.type.name
 
-proc foo(k: char, v: int): array[0..0, (char, int)] =
-    {k: v+1}
+proc foo(k: char, v: int): auto =
+    (k, v+1)
 
 let b = collect:
     for k, v in {'a': 1, 'b': 2}.toTable:
-        foo(k, v)
+        let r = foo(k, v)
+        {r[0]: r[1]}
 
 echo b
 echo b.type.name
