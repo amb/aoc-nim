@@ -1,5 +1,4 @@
 include ../aoc
-import typetraits
 
 # let data = fil(8)
 
@@ -14,8 +13,8 @@ echo data
 
 type 
     TreeLocation = tuple[x: int, y: int]
-    TreeItem = array[0..0, (TreeLocation, Natural)]
     SetOfTrees = Table[TreeLocation, Natural]
+    TreeItem = array[0..0, (TreeLocation, Natural)]
     WarpFunc = proc (k: TreeLocation, v: Natural): TreeItem
 
 var trees: SetOfTrees
@@ -52,10 +51,10 @@ proc keyWarpWorks(tr: SetOfTrees): SetOfTrees =
         for k, v in trees.pairs:
             {(-k[1], k[0]): v}
 
-proc keyWarpBroken(tr: SetOfTrees, warp: proc (k: TreeLocation, v: Natural): TreeItem): SetOfTrees =
-    result = collect:
-        for k, v in trees.pairs:
-            warp(k, v)
+# proc keyWarpBroken(tr: SetOfTrees, warp: proc (k: TreeLocation, v: Natural): TreeItem): SetOfTrees =
+#     result = collect:
+#         for k, v in trees.pairs:
+#             warp(k, v)
 
 # echo scanTrees(trees.keyWarp(k, v => {(-k[1], k[0]): v}))
 
