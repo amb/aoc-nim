@@ -3,7 +3,7 @@ include ../aoc
 proc follow(tail: var Vec2i, head: Vec2i) =
     let disp = head - tail
     if disp.len > 1:
-        tail += (if disp.x * disp.y == 0: disp/len(disp) else: disp/abs(disp))
+        tail += sgn(disp)
 
 let mdir = {'L': (-1, 0), 'R': (1, 0), 'U': (0, -1), 'D': (0, 1)}.toTable
 let moves = collect:
@@ -14,7 +14,7 @@ let moves = collect:
 var knots = newSeq[Vec2i](10)
 var trail1, trail9: HashSet[(int, int)]
 for m in moves:
-    let dir = m/len(m)
+    let dir = sgn(m)
     for step in 0..<m.len:
         knots[0] += dir
         for kn in 1..9:

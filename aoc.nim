@@ -54,5 +54,6 @@ proc `-`(a, b: Vec2i): Vec2i = Vec2i(x: a.x - b.x, y: a.y - b.y)
 proc `+`(a, b: Vec2i): Vec2i = Vec2i(x: a.x + b.x, y: a.y + b.y)
 proc `+=`(a: var Vec2i, b: Vec2i) = a = a+b
 proc abs(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
+proc sgn(a: Vec2i): Vec2i = Vec2i(x: sgn(a.x), y: sgn(a.y))
 proc len(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc asTuple(v: Vec2i): (int, int) = (v.x, v.y)
