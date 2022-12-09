@@ -6,17 +6,15 @@ let moves = collect:
         let (r, d, s) = line.scanTuple("$c $i")
         if r: vec2i(mdir[d]) * s
 
-var knots = newSeq[Vec2i](10)
-var trail1, trail9: HashSet[(int, int)]
-for m in moves:
-    let dir = sgn(m)
-    for step in 0..<m.len:
-        knots[0] += dir
-        for kn in 1..9:
-            let disp = knots[kn-1] - knots[kn]
-            if disp.len > 1:
-                knots[kn] += sgn(disp)
-        trail1.incl(knots[1].asTuple)
-        trail9.incl(knots[9].asTuple)
+proc solve(n: int): HashSet[(int, int)] =
+    var knots = newSeq[Vec2i](10)
+    for m in moves:
+        for step in 0..<m.len:
+            knots[0] += sgn(m)
+            for kn in 1..9:
+                let disp = knots[kn-1] - knots[kn]
+                if disp.len > 1:
+                    knots[kn] += sgn(disp)
+            result.incl(knots[n].asTuple)
 
-echo fmt"1: {trail1.len}, 2: {trail9.len}"
+echo fmt"1: {solve(1).len}, 2: {solve(9).len}"
