@@ -15,9 +15,6 @@ proc `+=`(a: var Vec2i, b: Vec2i) = a = a+b
 proc abs(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
 proc len(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc asTuple(v: Vec2i): (int, int) = (v.x, v.y)
-proc touching(a, b: Vec2i): bool =
-    let adisp = (a-b).abs
-    adisp.x <= 1 and adisp.y <= 1
 
 # (0, 0) is left up cause of how arrays are printed
 proc moveDir(c: char): Option[Vec2i] =
@@ -30,12 +27,12 @@ proc moveDir(c: char): Option[Vec2i] =
 
 proc follow(tail: var Vec2i, head: Vec2i) =
     let disp = head - tail
-    if tail.touching(head): return
-    if disp == vec(-2, 0): tail += vec(-1, 0)
-    elif disp == vec(2, 0): tail += vec(1, 0)
-    elif disp == vec(0, -2): tail += vec(0, -1)
-    elif disp == vec(0, 2): tail += vec(0, 1)
-    else: tail += disp/abs(disp)
+    if abs(disp.x) > 1 or abs(disp.y) > 1:
+        if disp == vec(-2, 0): tail += vec(-1, 0)
+        elif disp == vec(2, 0): tail += vec(1, 0)
+        elif disp == vec(0, -2): tail += vec(0, -1)
+        elif disp == vec(0, 2): tail += vec(0, 1)
+        else: tail += disp/abs(disp)
 
 let moves = fil(9).
     mapIt(it.scanTuple("$c $i")).
