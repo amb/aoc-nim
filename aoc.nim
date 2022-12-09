@@ -46,6 +46,7 @@ type
         x, y: int
 
 proc vec2i(x, y: int): Vec2i = Vec2i(x: x, y: y)
+proc vec2i(t: (int, int)): Vec2i = Vec2i(x: t[0], y: t[1])
 proc `*`(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x*b, y: a.y*b)
 proc `/`(a: Vec2i, b: Vec2i): Vec2i = Vec2i(x: a.x div b.x, y: a.y div b.y)
 proc `/`(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x div b, y: a.y div b)
