@@ -28,10 +28,7 @@ proc moveDir(c: char): Option[Vec2i] =
 proc follow(tail: var Vec2i, head: Vec2i) =
     let disp = head - tail
     if abs(disp.x) > 1 or abs(disp.y) > 1:
-        if disp == vec(-2, 0): tail += vec(-1, 0)
-        elif disp == vec(2, 0): tail += vec(1, 0)
-        elif disp == vec(0, -2): tail += vec(0, -1)
-        elif disp == vec(0, 2): tail += vec(0, 1)
+        if disp.x * disp.y == 0: tail += disp/len(disp)
         else: tail += disp/abs(disp)
 
 let moves = fil(9).
