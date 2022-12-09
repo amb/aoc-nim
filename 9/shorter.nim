@@ -1,10 +1,5 @@
 include ../aoc
 
-proc follow(tail: var Vec2i, head: Vec2i) =
-    let disp = head - tail
-    if disp.len > 1:
-        tail += sgn(disp)
-
 let mdir = {'L': (-1, 0), 'R': (1, 0), 'U': (0, -1), 'D': (0, 1)}.toTable
 let moves = collect:
     for line in fil(9):
@@ -18,7 +13,9 @@ for m in moves:
     for step in 0..<m.len:
         knots[0] += dir
         for kn in 1..9:
-            knots[kn].follow(knots[kn-1])
+            let disp = knots[kn-1] - knots[kn]
+            if disp.len > 1:
+                knots[kn] += sgn(disp)
         trail1.incl(knots[1].asTuple)
         trail9.incl(knots[9].asTuple)
 
