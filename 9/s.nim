@@ -49,16 +49,6 @@ proc follow(tail: var Vec2D, head: Vec2D) =
     else: tail += disp/abs(disp)
 
 let moves = fil(9).
-# let moves = """
-# R 4
-# U 4
-# L 3
-# D 1
-# R 4
-# D 1
-# L 5
-# R 2
-# """.splitLines.
     mapIt(it.scanTuple("$c $i")).
     filterIt(it[0]).
     mapIt(it[1].moveDir.get * it[2])
@@ -68,14 +58,17 @@ for m in moves:
     bb.expand(m)
 echo "Movement area size: ", bb.size
 
-var head: Vec2D
-var tail: Vec2D
-var trail: HashSet[(int, int)]
+var knots = newSeq[Vec2D](10)
+var trail1: HashSet[(int, int)]
+var trail9: HashSet[(int, int)]
 for m in moves:
     let dir = m/len(m)
     for step in 0..<m.len:
-        head += dir
-        tail.follow(head)
-        trail.incl(tail.asTuple)
+        knots[0] += dir
+        for kn in 1..9:
+            knots[kn].follow(knots[kn-1])
+        trail1.incl(knots[1].asTuple)
+        trail9.incl(knots[9].asTuple)
 
-echo trail.len
+echo trail1.len
+echo trail9.len
