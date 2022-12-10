@@ -1,4 +1,4 @@
-import strutils, strformat, sequtils, sugar, algorithm, math, sets, 
+import strutils, strformat, sequtils, sugar, algorithm, math, sets,
     strscans, zero_functional, tables
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
@@ -31,7 +31,7 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
             result = i
             break
 
-type 
+type
     WindowView* = object
         index: int
         view: string
@@ -39,7 +39,6 @@ type
 iterator slidingWindow*(dt: string, size: int): WindowView =
     for i in 0..dt.len-size:
         yield WindowView(index: i, view: dt[i..<i+size])
-
 
 type
     Vec2i = object
