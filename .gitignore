@@ -4,10 +4,14 @@
 # Unignore all with extensions
 !*.*
 
+# Unignore AoC inputs
+!input
+
 # Unignore all dirs
 !*/
 
 ### Above combination will ignore all files without extension ###
+
 .vscode/*
 
 *.o
