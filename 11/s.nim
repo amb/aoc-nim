@@ -1,7 +1,7 @@
 include ../aoc
 
 type
-    OpType = object
+    Operation = object
         value: int
         isSelf: bool
         op: char
@@ -10,28 +10,22 @@ type
         items: seq[int]
         divider: int
         targets: array[2, int]
-        op: OpType
+        op: Operation
 
 let monkeys = collect:
     for monkeyIn in readFile("11/input").split("\n\n"):
-        var newMonkey = Monkey()
-        for lc, line in monkeyIn.splitLines().toSeq.pairs:
-            let parts = line.split(":")
-            if lc == 1:
-                newMonkey.items = collect:
-                    for n in parts[1].strip.split(", "):
-                        n.parseInt
-            if lc == 2:
-                let ip = parts[1].split(" ")[^2..^1]
-                newMonkey.op.op = ip[0][0]
-                newMonkey.op.isSelf = not intParser(ip[1], newMonkey.op.value)
-            if lc == 3:
-                newMonkey.divider = parts[1].split(" ")[^1].parseInt
-            if lc == 4 or lc == 5:
-                newMonkey.targets[lc-4] = parts[1].split(" ")[^1].parseInt
-        newMonkey
+        var nmnk = Monkey()
+        let lines = monkeyIn.splitLines().mapIt(it.split(":")[1])
+        nmnk.items = collect(for n in lines[1].strip.split(", "): n.parseInt)
+        let ip = lines[2].split(" ")[^2..^1]
+        nmnk.op.op = ip[0][0]
+        nmnk.op.isSelf = not intParser(ip[1], nmnk.op.value)
+        nmnk.divider = lines[3].split(" ")[^1].parseInt
+        for i in 0..1:
+            nmnk.targets[i] = lines[4+i].split(" ")[^1].parseInt
+        nmnk
 
-let commonDivider = monkeys.mapIt(it.divider).foldl(a*b)
+let commonDivider = monkeys.mapIt(it.divider).prod
 
 for round in 1..10000:
     for mi in 0..<monkeys.len:
@@ -46,9 +40,4 @@ for round in 1..10000:
             monkeys[mnk.targets[pick]].items.add(worry mod commonDivider)
         mnk.items.setLen(0)
 
-    if round in [20, 1000, 5000, 10000]:
-        echo "Round: ", round
-        for mnk in monkeys:
-            echo mnk.inspections
-
-echo monkeys.mapIt(it.inspections).sorted[^2..^1].foldl(a*b)
+echo monkeys.mapIt(it.inspections).sorted[^2..^1].prod
