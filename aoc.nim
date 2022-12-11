@@ -4,7 +4,6 @@ import memo
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
-# proc filt*(n: int): seq[string] = readFile($n & "/input").splitLines()
 proc fil*(n: int): seq[string] = readFile($n & "/input").splitLines()
 proc filn*(n: int): seq[string] = fil(n)[0..^2]
 proc filr*(n: int): string = readFile($n & "/input")

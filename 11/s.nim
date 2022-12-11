@@ -14,15 +14,15 @@ type
 
 let monkeys = collect:
     for monkeyIn in readFile("11/input").split("\n\n"):
-        let lines = monkeyIn.splitLines.mapIt(it.split(":")[1])
+        let lines = monkeyIn.splitLines
         Monkey(
             items: lines[1].ints,
+            divider: lines[3].ints[0],
+            targets: [lines[4].ints[0], lines[5].ints[0]],
             op: Operation(
                 op: lines[2].split(" ")[^2][0],
                 isSelf: lines[2].ints.len == 0,
-                value: lines[2].ints.getOrZero(0)),
-            divider: lines[3].ints[0],
-            targets: [lines[4].ints[0], lines[5].ints[0]])
+                value: lines[2].ints.getOrZero(0)))
 
 let commonDivider = monkeys.mapIt(it.divider).prod
 
