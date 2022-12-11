@@ -1,10 +1,9 @@
 include ../aoc
 
-let mdir = {'L': (-1, 0), 'R': (1, 0), 'U': (0, -1), 'D': (0, 1)}.toTable
 let moves = collect:
     for line in fil(9):
         let (r, d, s) = line.scanTuple("$c $i")
-        if r: vec2i(mdir[d]) * s
+        if r: vec2i(int(d=='R')-int(d=='L'), int(d=='D')-int(d=='U')) * s
 
 proc solve(n: int): HashSet[(int, int)] =
     var knots = newSeq[Vec2i](10)

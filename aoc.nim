@@ -56,3 +56,9 @@ proc abs*(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
 proc sgn*(a: Vec2i): Vec2i = Vec2i(x: sgn(a.x), y: sgn(a.y))
 proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
+
+# Compiling tips:
+# del 10\s.exe 
+# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc --opt:size 10/s.nim 
+# 10\s.exe 
+# dir 10\s.exe
