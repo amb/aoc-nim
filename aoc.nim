@@ -1,4 +1,4 @@
-import std/[strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans, tables]
+import std/[strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans, tables, re]
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
@@ -13,6 +13,8 @@ proc intParser*(s: string, i: var int): bool =
     except ValueError:
         return false
     true
+
+proc parseInts*(s: string): seq[int] = collect(for r in s.findAll(re"-?\d+"): r.parseInt)
 
 proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
     doAssert len(i) mod ps == 0, fmt"Seq len {len(i)} not divisible with {ps}"

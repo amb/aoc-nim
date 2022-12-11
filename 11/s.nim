@@ -16,13 +16,13 @@ let monkeys = collect:
     for monkeyIn in readFile("11/input").split("\n\n"):
         var nmnk = Monkey()
         let lines = monkeyIn.splitLines().mapIt(it.split(":")[1])
-        nmnk.items = collect(for n in lines[1].strip.split(", "): n.parseInt)
+        nmnk.items = lines[1].parseInts
         let ip = lines[2].split(" ")[^2..^1]
         nmnk.op.op = ip[0][0]
         nmnk.op.isSelf = not intParser(ip[1], nmnk.op.value)
-        nmnk.divider = lines[3].split(" ")[^1].parseInt
+        nmnk.divider = lines[3].parseInts[0]
         for i in 0..1:
-            nmnk.targets[i] = lines[4+i].split(" ")[^1].parseInt
+            nmnk.targets[i] = lines[4+i].parseInts[0]
         nmnk
 
 let commonDivider = monkeys.mapIt(it.divider).prod
