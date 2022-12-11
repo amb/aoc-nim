@@ -1,4 +1,6 @@
-import std/[strutils, strformat, sequtils, sugar, algorithm, math, sets, strscans, tables, re]
+import std/[strutils, strformat, sequtils, sugar, algorithm, math]
+import std/[sets, strscans, tables, re]
+import memo
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 
@@ -14,7 +16,18 @@ proc intParser*(s: string, i: var int): bool =
         return false
     true
 
-proc parseInts*(s: string): seq[int] = collect(for r in s.findAll(re"-?\d+"): r.parseInt)
+proc parseIntsInternal(s: string): seq[int] {.memoized.} = 
+    collect:
+        for r in s.findAll(re"-?\d+"): 
+            r.parseInt
+
+proc ints*(s: string): seq[int] {.inline.} = parseIntsInternal(s)
+
+proc getOrZero*(si: seq[int], d: int): int = 
+    if si.len > 0 and d >= 0 and d < si.len: 
+        si[d] 
+    else: 
+        0
 
 proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
     doAssert len(i) mod ps == 0, fmt"Seq len {len(i)} not divisible with {ps}"
