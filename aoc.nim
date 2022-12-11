@@ -7,8 +7,12 @@ proc fil*(n: int): seq[string] = readFile($n & "/input").splitLines()
 proc filn*(n: int): seq[string] = fil(n)[0..^2]
 proc filr*(n: int): string = readFile($n & "/input")
 
-let lowerLetters* = toHashSet(toSeq(ord('a')..ord('z')))
-let upperLetters* = toHashSet(toSeq(ord('A')..ord('Z')))
+proc intParser*(s: string, i: var int): bool =
+    try:
+        i = parseInt(s.strip)
+    except ValueError:
+        return false
+    true
 
 proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
     doAssert len(i) mod ps == 0, fmt"Seq len {len(i)} not divisible with {ps}"
@@ -36,6 +40,7 @@ type
         index: int
         view: string
 
+# TODO: openArray view instead of slice
 iterator slidingWindow*(dt: string, size: int): WindowView =
     for i in 0..dt.len-size:
         yield WindowView(index: i, view: dt[i..<i+size])
@@ -58,7 +63,4 @@ proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 
 # Compiling tips:
-# del 10\s.exe 
-# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc --opt:size 10/s.nim 
-# 10\s.exe 
-# dir 10\s.exe
+# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
