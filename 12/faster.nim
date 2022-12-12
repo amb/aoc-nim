@@ -2,30 +2,29 @@ include ../aoc
 import std/[monotimes, times]
 
 let data = "12/input".readFile.strip.splitLines
+let height = data.len
+let width = data[0].len
+let asize = height * width
 
 # grid[rows][columns]
-var startLoc, endLoc: (int, int)
-var grid = collect:
-    for y, line in data:
-        collect:
-            for x, c in line:
-                if c=='S': startLoc = (y, x)
-                if c=='E': endLoc = (y, x)
-                c
+var startLoc, endLoc: int
+var grid = newSeq[char](asize)
+for y, line in data:
+    for x, c in line:
+        if c=='S': startLoc = y*width+x
+        if c=='E': endLoc = y*width+x
+        grid[x+y*width] = c
 
-let height = grid.len
-let width = grid[0].len
-
-const dirs: array[4, (int, int)] = [(-1,0),(1,0),(0,1),(0,-1)]
-var mask = newSeqWith(height, newSeq[int](width))
+let dirs: array[4, int] = [-1, 1, width, -width]
+var mask = newSeq[int](asize)
 
 grid[endLoc] = 'z'
 grid[startLoc] = 'a'
 
 # Dijkstra wavefront
-proc forwardWavefront(grd: seq[seq[char]], mask: var seq[seq[int]], sLoc: (int, int), eLoc: (int, int)): int =
+proc forwardWavefront(grd: seq[char], mask: var seq[int], sLoc: int, eLoc: int): int =
     var waveFront = @[sLoc]
-    var newFront: seq[(int, int)]
+    var newFront: seq[int]
     var step = 0
     while waveFront.len > 0:
         inc step
@@ -36,8 +35,8 @@ proc forwardWavefront(grd: seq[seq[char]], mask: var seq[seq[int]], sLoc: (int, 
             mask[item] = 1
             for d in dirs:
                 let loc = item + d
-                if not (loc[0] < 0 or loc[1] < 0 or loc[0] >= height or loc[1] >= width or 
-                grd[item].ord - grd[loc].ord < -1) and mask[loc] != 1:
+                if loc >= 0 and loc < asize and 
+                grd[item].ord - grd[loc].ord >= -1 and mask[loc] != 1:
                     newFront.add(loc)
                     mask[loc] = 1
         waveFront.setLen(0)
@@ -49,10 +48,8 @@ var timeStart = getMonoTime()
 
 let pathLens = collect:
     for i in 0..<height:
-        for y in 0..<height:
-            for x in 0..<width:
-                mask[y][x] = 0
-        forwardWavefront(grid, mask, (i, 0), endLoc)
+        for s in 0..<asize: mask[s] = 0
+        forwardWavefront(grid, mask, i*width, endLoc)
 
 let answer = min(pathLens)
 
