@@ -35,39 +35,46 @@ proc directions(grd: seq[seq[char]], loc: (int, int),
                     (y, x)
 
 # Dijkstra wavefront
-var previous = {startLoc: startLoc}.toTable
-var waveFront = [startLoc].toHashSet
-var newFront: HashSet[(int, int)]
-var step = 0
-while true:
-    for item in waveFront:
-        for loc in grid.directions(item, (a, b) => (a.ord >= b.ord - 1)):
-            if loc notin previous:
-                previous[loc] = item
-                newFront.incl(loc)
-    if newFront.len == 0 or endLoc in newFront: break
-    waveFront = newFront
-    newFront.clear
-    inc step
+proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): (Table[(int, int), (int, int)], int) =
+    var previous = {sLoc: sLoc}.toTable
+    var waveFront = [sLoc].toHashSet
+    var newFront: HashSet[(int, int)]
+    var step = 0
+    while true:
+        for item in waveFront:
+            for loc in grd.directions(item, (a, b) => (a.ord >= b.ord - 1)):
+                if loc notin previous:
+                    previous[loc] = item
+                    newFront.incl(loc)
+        inc step
+        if newFront.len == 0 or eLoc in newFront: break
+        waveFront = newFront
+        newFront.clear
+    (previous, step)
 
-# Track back
+let pathLens = collect:
+    for i in 0..<height:
+        forwardWavefront(grid, (i, 0), endLoc)[1]
+
+echo pathLens
+echo min(pathLens)
+
+# # Track back
 var pathBack: seq[(int, int)]
 var head = endLoc
 while head != startLoc:
     head = previous[head]
     pathBack.add(head)
 
+echo pathBack.len
+
 # Print path back and map
 var drawTv = deepCopy grid
 for t in pathBack: drawTv[t] = ' '
 
-echo collect(for y in 0..<height: 
-        collect(for x in 0..<width: 
+echo collect(for y in 0..<height:
+        collect(for x in 0..<width:
             drawTv[y][x]).join & "\n").join
 
 assert pathBack.len == pathBack.deduplicate.len
 echo pathBack.len
-
-#not 498, not 499, not 500
-
-
