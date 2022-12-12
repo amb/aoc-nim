@@ -46,16 +46,14 @@ proc forwardWavefront(grd: seq[char], mask: var seq[int], sLoc: int, eLoc: int):
 
 var timeStart = getMonoTime()
 
-let pathLens = collect:
-    for i in 0..<height:
-        for s in 0..<asize: mask[s] = 0
-        forwardWavefront(grid, mask, i*width, endLoc)
-
-let answer = min(pathLens)
+var minVal = int.high
+for i in 0..<1:
+    for s in 0..<asize: mask[s] = 0
+    minVal=min(minVal, forwardWavefront(grid, mask, i*width, endLoc))
 
 let mstime = (getMonoTime() - timeStart).inMicroseconds
 let mlsecs = mstime div 1000
 let mcsecs = mstime - (mlsecs * 1000)
-echo "Time: ", mlsecs,".", mcsecs, " ms"
+echo "Time: ", mlsecs," ms, ", mcsecs, " us"
 
-echo answer
+echo minVal
