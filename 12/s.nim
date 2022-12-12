@@ -38,8 +38,7 @@ proc directions(grd: seq[seq[char]], loc: (int, int),
                     (y, x)
 
 # Dijkstra wavefront
-proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): 
-    (Table[(int, int), (int, int)], int) =
+proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): int =
     var previous = {sLoc: sLoc}.toTable
     var waveFront = [sLoc].toHashSet
     var newFront: HashSet[(int, int)]
@@ -54,11 +53,11 @@ proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)):
         if newFront.len == 0 or eLoc in newFront: break
         waveFront = newFront
         newFront.clear
-    (previous, step)
+    step
 
 let pathLens = collect:
     for i in 0..<height:
-        forwardWavefront(grid, (i, 0), endLoc)[1]
+        forwardWavefront(grid, (i, 0), endLoc)
 
 echo pathLens
 echo min(pathLens)

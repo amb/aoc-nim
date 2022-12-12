@@ -94,3 +94,6 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 # Get and set for seq[seq[T]] with tuple (int, int) indexing
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
+
+proc `+`*(a, b: (int, int)): (int, int) =
+    (a[0]+b[0], a[1]+b[1])
