@@ -1,4 +1,7 @@
 include ../aoc
+import std/[monotimes, times]
+
+var timeStart = getMonoTime()
 
 let data = "12/input".readFile.strip.splitLines
 
@@ -59,6 +62,11 @@ let pathLens = collect:
 
 echo pathLens
 echo min(pathLens)
+
+let mstime = (getMonoTime() - timeStart).inMicroseconds
+let mlsecs = mstime div 1000
+let mcsecs = mstime - (mlsecs * 1000)
+echo "Time: ", mlsecs,".", mcsecs, " ms"
 
 # # Track back
 # var pathBack: seq[(int, int)]
