@@ -35,7 +35,8 @@ proc directions(grd: seq[seq[char]], loc: (int, int),
                     (y, x)
 
 # Dijkstra wavefront
-proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): (Table[(int, int), (int, int)], int) =
+proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): 
+    (Table[(int, int), (int, int)], int) =
     var previous = {sLoc: sLoc}.toTable
     var waveFront = [sLoc].toHashSet
     var newFront: HashSet[(int, int)]
@@ -60,21 +61,21 @@ echo pathLens
 echo min(pathLens)
 
 # # Track back
-var pathBack: seq[(int, int)]
-var head = endLoc
-while head != startLoc:
-    head = previous[head]
-    pathBack.add(head)
+# var pathBack: seq[(int, int)]
+# var head = endLoc
+# while head != startLoc:
+#     head = previous[head]
+#     pathBack.add(head)
 
-echo pathBack.len
+# echo pathBack.len
 
-# Print path back and map
-var drawTv = deepCopy grid
-for t in pathBack: drawTv[t] = ' '
+# # Print path back and map
+# var drawTv = deepCopy grid
+# for t in pathBack: drawTv[t] = ' '
 
-echo collect(for y in 0..<height:
-        collect(for x in 0..<width:
-            drawTv[y][x]).join & "\n").join
+# echo collect(for y in 0..<height:
+#         collect(for x in 0..<width:
+#             drawTv[y][x]).join & "\n").join
 
-assert pathBack.len == pathBack.deduplicate.len
-echo pathBack.len
+# assert pathBack.len == pathBack.deduplicate.len
+# echo pathBack.len

@@ -1,3 +1,5 @@
+# Lots of dumb stuff here
+
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
 import std/[sets, strscans, tables, re, options]
 import memo
