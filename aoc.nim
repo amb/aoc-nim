@@ -1,8 +1,9 @@
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
-import std/[sets, strscans, tables, re]
+import std/[sets, strscans, tables, re, options]
 import memo
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
+proc `+`*(a: char, b: int): char = char(ord(a) + b)
 
 proc fil*(n: int): seq[string] = readFile($n & "/input").splitLines()
 proc filn*(n: int): seq[string] = fil(n)[0..^2]
@@ -49,6 +50,14 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
             result = i
             break
 
+proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
+    result = none(T)
+    for x in s:
+        if pred(x):
+            result = some(x)
+            break
+
+
 type
     WindowView* = object
         index: int
@@ -78,3 +87,8 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
+
+
+# Get and set for seq[seq[T]] with tuple (int, int) indexing
+proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
+proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
