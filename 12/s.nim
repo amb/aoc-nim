@@ -25,7 +25,6 @@ let height = grid.len
 let width = grid[0].len
 echo fmt"width: {width}, height: {height}"
 echo fmt"start: {startLoc}, end: {endLoc}"
-
 grid[endLoc] = 'z'-'a'+1
 
 proc neighbours(l: (int, int)): seq[(int, int)] =
@@ -33,46 +32,49 @@ proc neighbours(l: (int, int)): seq[(int, int)] =
     let lx = l[1]
     @[(ly-1, lx), (ly+1, lx), (ly, lx-1), (ly, lx+1)]
 
-proc whereCanGo(grd: seq[seq[int]], loc: (int, int),
+proc directions(grd: seq[seq[int]], loc: (int, int),
     test: proc (a: int, b: int): bool): seq[(int, int)] =
-    let tv = grd[loc]
     let grw = grd[0].len
     let grh = grd.len
     collect:
         for (y, x) in loc.neighbours:
             if y >= 0 and x >= 0 and y < grh and x < grw:
-                if test(tv, grd[y][x]):
+                if test(grd[loc], grd[y][x]):
                     (y, x)
 
-
 # Dijkstra wavefront
-var waveFront = [startLoc].toHashSet
+grid[startLoc] = 0
 var previous = newSeqWith(height, newSeq[(int, int)](width))
 for y in 0..<height:
     for x in 0..<width:
         previous[y][x] = (-1, -1)
 var step = 0
-var traveled = [startLoc].toHashSet
-grid[startLoc] = 0
+var traveled = {startLoc: 0}.toTable
+var newFront: HashSet[(int, int)]
+var waveFront = [startLoc].toHashSet
 while true:
-    var newFront: HashSet[(int, int)]
     for item in waveFront:
-        for loc in grid.whereCanGo(item, (a, b) => (a >= b - 1)):
+        if item == endLoc:
+            newFront.clear
+            break
+        for loc in grid.directions(item, (a, b) => (a >= b - 1)):
             if loc notin traveled:
                 previous[loc] = item
                 newFront.incl(loc)
-                traveled.incl(loc)
+                traveled[loc] = step
     if newFront.len == 0: break
     waveFront = newFront
     newFront.clear
     inc step
+    # if step == 100:
+    #     break
 
 # Track back
 var pathBack: seq[(int, int)]
 var head = endLoc
 while head != startLoc:
-    pathBack.add(head)
     head = previous[head]
+    pathBack.add(head)
 
 # Print path back and map
 var drawTv = newSeqWith(height, newSeq[char](width))
@@ -82,9 +84,15 @@ for y in 0..<height:
 
 for t in pathBack: drawTv[t] = ' '
 
+# for (k, v) in traveled.pairs:
+#     # echo k, " ", v
+#     drawTv[k] = '#'
+
 echo collect(for y in 0..<height: 
         collect(for x in 0..<width: 
             drawTv[y][x]).join & "\n").join
 
 assert pathBack.len == pathBack.deduplicate.len
 echo pathBack.len
+
+#not 498, not 499, not 500
