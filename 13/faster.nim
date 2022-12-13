@@ -1,11 +1,7 @@
 include ../aoc
 import ../tracer
 import std/[monotimes, times]
-
-var timeStart = getMonoTime()
-
-# : is ascii code after 9
-let data = "13/input".readFile
+import zero_functional
 
 proc `>`(a, b: char): bool  {.inline.} = ord(a) > ord(b)
 proc isNum(a: char): bool {.inline.} = not (a == '[' or a == ']' or a == ',')
@@ -53,23 +49,56 @@ proc isRightOrder(x, y: string): int {.meter.} =
         inc pt1
     return 1
 
-proc solve1(lines: seq[string]): int {.meter.} =
-    let answer = collect:
-        for il, l in lines:
-            var pkt = l.splitLines 
-            if isRightOrder(pkt[0], pkt[1]) < 0: il+1 else: 0
-    answer.sum
+iterator spliterator(s: string, stopper: string): Slice[int] =
+    var sloc = 0
+    var loc = 0
+    var tloc = 0
+    while loc < s.len:
+        if stopper[tloc] == s[loc]:
+            inc tloc
+            # Found ending point
+            if tloc == stopper.len:
+                yield (sloc..loc-tloc)
+                # yield s[sloc..loc-tloc]
+                sloc = loc + 1
+                tloc = 0
+        else:
+            tloc = 0
+        inc loc
+    if sloc <= loc-1: 
+        yield (sloc..<loc)
+        # yield s[sloc..<loc]
 
-proc solve2(lines: var seq[string]): int {.meter.} =
+proc splitToTuple(s: string, stopper: char): (string, string) =
+    var loc = 0
+    while loc < s.len:
+        if s[loc] == stopper:
+            return (s[0..<loc], s[loc+1..s.len-1])
+        inc loc
+    return (s, "")
+
+proc solve1(data: string): int {.meter.} =
+    data.spliterator("\n\n") -->
+        map(data[it].splitToTuple('\n')).
+        indexedMap(isRightOrder(it[0], it[1])).
+        map(((-(it.elem-1))*(it.idx+1)) shr 1).
+        sum()
+
+proc solve2(data: string): int {.meter.} =
+    var lines = data.spliterator("\n") --> map(data[it]).filter(it.len > 0)
     lines.add("[[2]]")
     lines.add("[[6]]")
     lines.sort(isRightOrder)
     (lines.findIf(x => x=="[[6]]")+1) * (lines.findIf(x => x=="[[2]]")+1)
-    
+
 resetMetering()
 
-let part1 = solve1(data.split("\n\n"))
-let part2 = solve2(data.split("\n").filterIt(it.len > 0))
+var timeStart = getMonoTime()
+
+let data = "13/input".readFile
+
+let part1 = solve1(data)
+let part2 = solve2(data)
 
 let mstime = (getMonoTime() - timeStart).inMicroseconds
 let mlsecs = mstime div 1000

@@ -38,6 +38,10 @@ var Metrics*: seq[Metadata]
   ## To transfer the compileTime content to runtime at an opportune time.
 
 proc resetMetering*() =
+  ## We can't directly use Metrics at compileTime because it doesn't exist.
+  ## We need `Metrics = static(ctMetrics)`
+  ## To transfer the compileTime content to runtime at an opportune time
+  ## by calling this function.
   Metrics = static(ctMetrics)
 
 # Symbols
