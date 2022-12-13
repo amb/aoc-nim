@@ -2,7 +2,6 @@
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
 import std/[sets, strscans, tables, re, options]
-import memo
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
@@ -18,12 +17,17 @@ proc intParser*(s: string, i: var int): bool =
         return false
     true
 
-proc parseIntsInternal(s: string): seq[int] {.memoized.} = 
+proc ints*(s: string): seq[int] = 
     collect:
         for r in s.findAll(re"-?\d+"): 
             r.parseInt
 
-proc ints*(s: string): seq[int] {.inline.} = parseIntsInternal(s)
+proc firstInt*(s: string): int {.inline.} = 
+    let l = s.findBounds(re"-?\d+")
+    if l != (-1, 0):
+        s[l[0]..l[1]].parseInt
+    else:
+        -1
 
 proc getOrZero*(si: seq[int], d: int): int = 
     if si.len > 0 and d >= 0 and d < si.len: 
@@ -45,6 +49,35 @@ proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
             c.setLen(0)
     return os
 
+iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
+    ## Stop iterating over ```s``` when last characters match ```stopper```
+    var sloc = 0
+    var loc = 0
+    var tloc = 0
+    while loc < s.len:
+        if stopper[tloc] == s[loc]:
+            inc tloc
+            # Found ending point
+            if tloc == stopper.len:
+                yield (sloc..loc-tloc)
+                # yield s[sloc..loc-tloc]
+                sloc = loc + 1
+                tloc = 0
+        else:
+            tloc = 0
+        inc loc
+    if sloc <= loc-1: 
+        yield (sloc..<loc)
+        # yield s[sloc..<loc]
+
+proc stringSplit*(s: string, stopper: char): (string, string) =
+    var loc = 0
+    while loc < s.len:
+        if s[loc] == stopper:
+            return (s[0..<loc], s[loc+1..s.len-1])
+        inc loc
+    return (s, "")
+
 proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
     result = -1
     for i, x in s:
@@ -58,7 +91,6 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
         if pred(x):
             result = some(x)
             break
-
 
 type
     WindowView* = object
@@ -90,10 +122,7 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
 
-
 # Get and set for seq[seq[T]] with tuple (int, int) indexing
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
-
-proc `+`*(a, b: (int, int)): (int, int) =
-    (a[0]+b[0], a[1]+b[1])
+proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])

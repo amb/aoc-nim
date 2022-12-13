@@ -1,6 +1,6 @@
 include ../aoc
 import ../tracer
-import std/[monotimes, times]
+import std/[monotimes, times, streams]
 import zero_functional
 
 proc `>`(a, b: char): bool  {.inline.} = ord(a) > ord(b)
@@ -49,48 +49,36 @@ proc isRightOrder(x, y: string): int {.meter.} =
         inc pt1
     return 1
 
-iterator pieces(s: string, stopper: string): Slice[int] =
-    var sloc = 0
-    var loc = 0
-    var tloc = 0
-    while loc < s.len:
-        if stopper[tloc] == s[loc]:
-            inc tloc
-            # Found ending point
-            if tloc == stopper.len:
-                yield (sloc..loc-tloc)
-                # yield s[sloc..loc-tloc]
-                sloc = loc + 1
-                tloc = 0
-        else:
-            tloc = 0
-        inc loc
-    if sloc <= loc-1: 
-        yield (sloc..<loc)
-        # yield s[sloc..<loc]
-
-proc tupleSplit(s: string, stopper: char): (string, string) =
-    var loc = 0
-    while loc < s.len:
-        if s[loc] == stopper:
-            return (s[0..<loc], s[loc+1..s.len-1])
-        inc loc
-    return (s, "")
+proc anyDigit(s: string): bool =
+    result = false
+    for i in s:
+        if i.isDigit:
+            result = true
 
 proc solve1(data: string): int {.meter.} =
     data.pieces("\n\n") --> 
-        map(data[it].tupleSplit('\n')).
+        map(data[it].stringSplit('\n')).
         indexedMap(isRightOrder(it[0], it[1])).
-        map(((-(it.elem-1))*(it.idx+1)) shr 1).sum()
+        map(if it.elem < 0: it.idx+1 else: 0).sum()
 
 proc solve2(data: string): int {.meter.} =
-    var lines = data.pieces("\n") --> map(data[it]).filter(it.len > 0)
+    # Skip empty lines, count and ignore un-numbered lines
+    var count = 0
+    var lines: seq[string]
+    for line in data.pieces("\n"):
+        let s = data[line]
+        if s.len > 0:
+            inc count
+            if s.anyDigit:
+                lines.add(s)
+
+    let diff = count - lines.len
     lines.add("[[2]]")
     lines.add("[[6]]")
     lines.sort(isRightOrder)
-    (lines.findIf(x => x=="[[6]]")+1) * (lines.findIf(x => x=="[[2]]")+1)
+    (lines.findIf(x => x=="[[6]]")+1+diff) * (lines.findIf(x => x=="[[2]]")+1+diff)
 
-resetMetering()
+metricsConfirm()
 
 var timeStart = getMonoTime()
 
@@ -104,9 +92,8 @@ let mlsecs = mstime div 1000
 let mcsecs = mstime - (mlsecs * 1000)
 echo "Time: ", mlsecs,".", mcsecs, " ms"
 echo "Part 1: ", part1
-assert part1 == 5292
+if part1 != 5292: echo "\n>>> PART 1 TEST FAILURE <<<\n"
 echo "Part 2: ", part2
-assert part2 == 23868
+if part2 != 23868: echo "\n>>> PART 2 TEST FAILURE <<<\n"
 
-for m in Metrics:
-    echo m
+metricsShow()

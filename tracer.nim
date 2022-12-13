@@ -8,8 +8,7 @@
 
 # with some modifications
 
-import
-  std/[macros, times, monotimes]
+import std/[macros, times, monotimes, strformat]
 
 # Only works in single threaded cases
 assert defined(threads) == false
@@ -37,15 +36,16 @@ var Metrics*: seq[Metadata]
   ## We need `Metrics = static(ctMetrics)`
   ## To transfer the compileTime content to runtime at an opportune time.
 
-proc resetMetering*() =
+proc metricsConfirm*() =
   ## We can't directly use Metrics at compileTime because it doesn't exist.
   ## We need `Metrics = static(ctMetrics)`
   ## To transfer the compileTime content to runtime at an opportune time
   ## by calling this function.
   Metrics = static(ctMetrics)
 
-# Symbols
-# --------------------------------------------------
+proc metricsShow*() =
+  for m in Metrics:
+    echo fmt"{m.procname}: {m.numCalls} calls, {m.cumulatedTimeMicros} μs (cumulative)" 
 
 template fnEntry(name: string, id: int, startTime, startCycle: untyped): untyped =
   ## Bench tracing to insert on function entry
@@ -60,11 +60,8 @@ template fnExit(name: string, id: int, startTime, startCycle: untyped): untyped 
     let stopTime = getMonoTime()
     let elapsedTime = inMicroseconds(stopTime - startTime)
     discard Metrics[id].cumulatedTimeMicros.atomicInc(elapsedTime)
-
     # Advice: Use "when name == relevantProc" to isolate specific procedures.
     # strformat doesn't work in templates.
-    # echo static(alignLeft(name, 50)),
-    #   "Time (µs): ", alignLeft(formatFloat(elapsedTime.float64 * 1e-3, precision=3), 10)
 
 macro meterAnnotate(procAst: untyped): untyped =
   procAst.expectKind({nnkProcDef, nnkFuncDef})
