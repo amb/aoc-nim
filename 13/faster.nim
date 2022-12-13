@@ -49,7 +49,7 @@ proc isRightOrder(x, y: string): int {.meter.} =
         inc pt1
     return 1
 
-iterator spliterator(s: string, stopper: string): Slice[int] =
+iterator pieces(s: string, stopper: string): Slice[int] =
     var sloc = 0
     var loc = 0
     var tloc = 0
@@ -69,7 +69,7 @@ iterator spliterator(s: string, stopper: string): Slice[int] =
         yield (sloc..<loc)
         # yield s[sloc..<loc]
 
-proc splitToTuple(s: string, stopper: char): (string, string) =
+proc tupleSplit(s: string, stopper: char): (string, string) =
     var loc = 0
     while loc < s.len:
         if s[loc] == stopper:
@@ -78,14 +78,13 @@ proc splitToTuple(s: string, stopper: char): (string, string) =
     return (s, "")
 
 proc solve1(data: string): int {.meter.} =
-    data.spliterator("\n\n") -->
-        map(data[it].splitToTuple('\n')).
+    data.pieces("\n\n") --> 
+        map(data[it].tupleSplit('\n')).
         indexedMap(isRightOrder(it[0], it[1])).
-        map(((-(it.elem-1))*(it.idx+1)) shr 1).
-        sum()
+        map(((-(it.elem-1))*(it.idx+1)) shr 1).sum()
 
 proc solve2(data: string): int {.meter.} =
-    var lines = data.spliterator("\n") --> map(data[it]).filter(it.len > 0)
+    var lines = data.pieces("\n") --> map(data[it]).filter(it.len > 0)
     lines.add("[[2]]")
     lines.add("[[6]]")
     lines.sort(isRightOrder)
