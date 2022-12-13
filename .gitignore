@@ -15,6 +15,7 @@
 .vscode/*
 .DS_Store
 
+dump.txt
 *.o
 !/icons/*.o
 *.exe
