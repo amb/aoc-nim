@@ -35,22 +35,21 @@ proc getOrZero*(si: seq[int], d: int): int =
     else: 
         0
 
-proc partition*[T](i: seq[T], ps: int): seq[seq[T]] =
-    doAssert len(i) mod ps == 0, fmt"Seq len {len(i)} not divisible with {ps}"
-    var os: seq[seq[T]] = newSeq[seq[T]]()
+# TODO: recursive foldl, for multidimensional seqs
+
+proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
+    assert len(i) mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
     var c: seq[T]
-    var ci = 0
+    assert i.len mod pss == 0
     for v in i:
         c.add(v)
-        ci += 1
-        if ci == ps:
-            ci = 0
-            os.add(c)
+        if c.len == pss:
+            result.add(c)
             c.setLen(0)
-    return os
 
 iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
-    ## Stop iterating over ```s``` when last characters match ```stopper```
+    ## Iterating over `s` until last values match `stopper`.
+    ## Then continue at the next location to do the same again.
     var sloc = 0
     var loc = 0
     var tloc = 0
@@ -59,16 +58,16 @@ iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
             inc tloc
             # Found ending point
             if tloc == stopper.len:
-                yield (sloc..loc-tloc)
-                # yield s[sloc..loc-tloc]
+                # yield (sloc..loc-tloc)
+                yield s[sloc..loc-tloc]
                 sloc = loc + 1
                 tloc = 0
         else:
             tloc = 0
         inc loc
     if sloc <= loc-1: 
-        yield (sloc..<loc)
-        # yield s[sloc..<loc]
+        # yield (sloc..<loc)
+        yield s[sloc..<loc]
 
 proc stringSplit*(s: string, stopper: char): (string, string) =
     var loc = 0
@@ -108,12 +107,15 @@ type
 
 proc vec2i*(x, y: int): Vec2i = Vec2i(x: x, y: y)
 proc vec2i*(t: (int, int)): Vec2i = Vec2i(x: t[0], y: t[1])
+proc vec2i*(t: seq[int]): Vec2i = Vec2i(x: t[0], y: t[1])
 proc `*`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x*b, y: a.y*b)
 proc `/`*(a: Vec2i, b: Vec2i): Vec2i = Vec2i(x: a.x div b.x, y: a.y div b.y)
 proc `/`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x div b, y: a.y div b)
 proc `-`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x - b.x, y: a.y - b.y)
 proc `+`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x + b.x, y: a.y + b.y)
 proc `+=`*(a: var Vec2i, b: Vec2i) = a = a+b
+proc min*(a, b: Vec2i): Vec2i = Vec2i(x: min(a.x, b.x), y: min(a.y, b.y))
+proc max*(a, b: Vec2i): Vec2i = Vec2i(x: max(a.x, b.x), y: max(a.y, b.y))
 proc abs*(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
 proc sgn*(a: Vec2i): Vec2i = Vec2i(x: sgn(a.x), y: sgn(a.y))
 proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))

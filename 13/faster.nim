@@ -71,7 +71,7 @@ proc solve2(data: string): int {.meter.} =
             inc count
             if s.anyDigit:
                 lines.add(s)
-
+                
     let diff = count - lines.len
     lines.add("[[2]]")
     lines.add("[[6]]")

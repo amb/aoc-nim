@@ -17,6 +17,7 @@
 
 dump.txt
 *.o
+*.mp4
 !/icons/*.o
 *.exe
 *.so
