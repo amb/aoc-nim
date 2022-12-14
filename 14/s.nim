@@ -37,8 +37,10 @@ for i in 0..<grSize.x:
 
 var walls = ground.deepCopy
 
+const vMulti = 5
+
 proc printGround() = echo ($ground).replace('0', '.').replace('1', '#')
-proc gridToLoc(v: Vec2i): Vec2i = (v - grSize/2) * 10 + vec2i(500, 500)
+proc gridToLoc(v: Vec2i): Vec2i = (v - grSize/2) * vMulti + vec2i(500, 500)
 
 proc gridToCoords(gd: BitArray2d): seq[Vec2i] =
     collect:
@@ -63,50 +65,42 @@ proc tryMove(v: var Vec2i, move: Vec2i): bool =
 
 # Nanim stuff https://github.com/EriKWDev/nanim
 let scene = newScene()
-scene.width = 660
-scene.height = 1200
+# scene.width = 1200
+# scene.height = 800
 
 let colWall = newColor("#2c6494")
 let colSand = newColor("#663333")
 
 let wlocs = gridToCoords(walls)
 for i in 0..<wlocs.len:
-    var nc = newSquare(side=10)
+    var nc = newSquare(side=vMulti)
     nc.fill(colWall)
     let loc = wlocs[i]
     nc.move(loc.x.float, loc.y.float)
     scene.add(nc)
 
-defaultEasing = linear
-defaultDuration = 30.0
+defaultEasing = (t: float) => (if t < 0.5: 0.0 else: 1.0)
+defaultDuration = 0.02
 var count = 0
 let sandSpawnerLoc = vec2i(500-minV.x+displace.x, 0)
 while inBounds:
     # defaultDuration = 1.0 + pow((float(abs(122-count)) / 122.0), 5.0) * 10.0
-    var nc = newCircle(radius=5)
-    nc.fill(colSand)
-    scene.add(nc)
-
-    var gloc = sandSpawnerLoc.gridToLoc
-    nc.moveTo(gloc.x.float, gloc.y.float)
-
-    var moves: seq[Tween]
 
     var loc = sandSpawnerLoc
     while true:
-        if loc.tryMove(vec2i(0, 1)):
-            moves.add(nc.move(0, 10))
-            continue
-        if loc.tryMove(vec2i(-1, 1)): 
-            moves.add(nc.move(-10, 10))
-            continue
-        if loc.tryMove(vec2i(1, 1)): 
-            moves.add(nc.move(10, 10))
-            continue
+        if loc.tryMove(vec2i(0, 1)): continue
+        if loc.tryMove(vec2i(-1, 1)): continue
+        if loc.tryMove(vec2i(1, 1)): continue
         break
 
     # echo moves.len
-    scene.animate(moves)
+    var gloc = loc.gridToLoc
+    var nc = newCircle(radius=vMulti div 2)
+    nc.fill(colSand)
+    scene.add(nc)
+    nc.position = vec3(gloc.x.float, 0.0, 0.0)
+    scene.play(nc.moveTo(gloc.x.float, gloc.y.float))
+
     loc.place
     inc count
     if loc == sandSpawnerLoc:
@@ -117,5 +111,7 @@ while inBounds:
 # printGround()
 echo count
 # Part 1: 832
+# Part 2: 27601
 
 render(scene)
+# nim c -d:release -d:strip 14\s.nim && 14\s.exe --debug:off -v
