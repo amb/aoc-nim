@@ -16,40 +16,47 @@ for d in scans:
 
 minV.y = 0
 echo maxV, " ", minV
-let groundSize = maxV-minV + vec2i(1, 1)
-echo "size: ", groundSize
+var grSize = maxV-minV + vec2i(1, 1)
 
-var ground = newBitArray2D(groundSize.x, groundSize.y)
+let displace = vec2i(grSize.y-1, 0)
+var ground = newBitArray2D(grSize.x + displace.x*2, grSize.y + 2)
+grSize = vec2i(grSize.x + displace.x*2, grSize.y + 2)
+echo "size: ", grSize
+
 for scan in scans:
     var loc = scan[0]
     for scanLoc in scan[1..^1]:
         let line = scanLoc - loc
         for _ in 0..<line.len:
-            ground[loc - minV] = true
+            ground[loc - minV + displace] = true
             loc += line.sgn
-        ground[loc - minV] = true
+        ground[loc - minV + displace] = true
+
+for i in 0..<grSize.x:
+    ground[grSize.y-1, i] = true
 
 var walls = ground.deepCopy
 
 proc printGround() = echo ($ground).replace('0', '.').replace('1', '#')
-proc gridToLoc(v: Vec2i): Vec2i = v - groundSize/2
+proc gridToLoc(v: Vec2i): Vec2i = (v - grSize/2) * 10 + vec2i(500, 500)
 
 proc gridToCoords(gd: BitArray2d): seq[Vec2i] =
     collect:
-        for x in 0..<groundSize.x: 
-            for y in 0..<groundSize.y:
+        for x in 0..<grSize.x: 
+            for y in 0..<grSize.y:
                 if gd[y, x]: gridToLoc(vec2i(x, y))
 
 var inBounds = true
 
-proc oob(v: Vec2i): bool = v.x < minV.x or v.y < minV.y or v.x > maxV.x or v.y > maxV.y
-proc empty(v: Vec2i): bool = return not ground[v-minV]
-proc place(v: Vec2i) = ground[v-minV] = true
+proc oob(v: Vec2i): bool = v.x < 0 or v.y < 0 or v.x >= grSize.x or v.y >= grSize.y
+proc empty(v: Vec2i): bool = return not ground[v]
+proc place(v: Vec2i) = ground[v] = true
 proc tryMove(v: var Vec2i, move: Vec2i): bool =
-    if oob(v+move):
+    let nextLoc = v+move
+    if nextLoc.oob:
         inBounds = false
         return false
-    if (v+move).empty:
+    if nextLoc.empty:
         v+=move
         return true
     return false
@@ -66,32 +73,26 @@ let wlocs = gridToCoords(walls)
 for i in 0..<wlocs.len:
     var nc = newSquare(side=10)
     nc.fill(colWall)
-    let loc = wlocs[i]*10
-    nc.move(loc.x.float+500, loc.y.float+500)
+    let loc = wlocs[i]
+    nc.move(loc.x.float, loc.y.float)
     scene.add(nc)
 
-var grains: seq[Circle]
-
-# var nc = newCircle(radius=5)
-# nc.fill(colSand)
-# nc.move((glocs[i][0]*10).float+500, (glocs[i][1]*10).float+500)
-# scene.add(nc)
-
 defaultEasing = linear
-defaultDuration = 50.0
+defaultDuration = 30.0
 var count = 0
+let sandSpawnerLoc = vec2i(500-minV.x+displace.x, 0)
 while inBounds:
     # defaultDuration = 1.0 + pow((float(abs(122-count)) / 122.0), 5.0) * 10.0
     var nc = newCircle(radius=5)
     nc.fill(colSand)
     scene.add(nc)
 
-    var gloc = vec2i(500-minV.x, 0).gridToLoc * 10
-    nc.moveTo(gloc.x.float+500, gloc.y.float+500)
+    var gloc = sandSpawnerLoc.gridToLoc
+    nc.moveTo(gloc.x.float, gloc.y.float)
 
     var moves: seq[Tween]
 
-    var loc = vec2i(500, 0)
+    var loc = sandSpawnerLoc
     while true:
         if loc.tryMove(vec2i(0, 1)):
             moves.add(nc.move(0, 10))
@@ -108,10 +109,13 @@ while inBounds:
     scene.animate(moves)
     loc.place
     inc count
+    if loc == sandSpawnerLoc:
+        break
+    if count > 300000:
+        break
 
 # printGround()
-echo count-1
-# 244 too low, 833 too high
+echo count
+# Part 1: 832
 
-when isMainModule:
-    render(scene)
+render(scene)
