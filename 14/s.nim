@@ -63,7 +63,6 @@ proc tryMove(v: var Vec2i, move: Vec2i): bool =
         return true
     return false
 
-# Nanim stuff https://github.com/EriKWDev/nanim
 let scene = newScene()
 # scene.width = 1200
 # scene.height = 800
@@ -84,8 +83,6 @@ defaultDuration = 0.02
 var count = 0
 let sandSpawnerLoc = vec2i(500-minV.x+displace.x, 0)
 while inBounds:
-    # defaultDuration = 1.0 + pow((float(abs(122-count)) / 122.0), 5.0) * 10.0
-
     var loc = sandSpawnerLoc
     while true:
         if loc.tryMove(vec2i(0, 1)): continue
@@ -93,7 +90,6 @@ while inBounds:
         if loc.tryMove(vec2i(1, 1)): continue
         break
 
-    # echo moves.len
     var gloc = loc.gridToLoc
     var nc = newCircle(radius=vMulti div 2)
     nc.fill(colSand)

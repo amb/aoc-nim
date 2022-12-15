@@ -18,9 +18,8 @@ proc intParser*(s: string, i: var int): bool =
     true
 
 proc ints*(s: string): seq[int] = 
-    collect:
-        for r in s.findAll(re"-?\d+"): 
-            r.parseInt
+    for r in s.findAll(re"-?\d+"): 
+        result.add(r.parseInt)
 
 proc firstInt*(s: string): int {.inline.} = 
     let l = s.findBounds(re"-?\d+")
@@ -38,14 +37,15 @@ proc getOrZero*(si: seq[int], d: int): int =
 # TODO: recursive foldl, for multidimensional seqs
 
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
-    assert len(i) mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
+    assert i.len mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
     var c: seq[T]
-    assert i.len mod pss == 0
     for v in i:
         c.add(v)
         if c.len == pss:
             result.add(c)
             c.setLen(0)
+
+# TODO: strided arrays, would solve a lot of edge cases
 
 iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
     ## Iterating over `s` until last values match `stopper`.
@@ -58,16 +58,16 @@ iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
             inc tloc
             # Found ending point
             if tloc == stopper.len:
-                # yield (sloc..loc-tloc)
-                yield s[sloc..loc-tloc]
+                yield (sloc..loc-tloc)
+                # yield s[sloc..loc-tloc]
                 sloc = loc + 1
                 tloc = 0
         else:
             tloc = 0
         inc loc
     if sloc <= loc-1: 
-        # yield (sloc..<loc)
-        yield s[sloc..<loc]
+        yield (sloc..<loc)
+        # yield s[sloc..<loc]
 
 proc stringSplit*(s: string, stopper: char): (string, string) =
     var loc = 0
@@ -91,15 +91,9 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
             result = some(x)
             break
 
-type
-    WindowView* = object
-        index: int
-        view: string
-
-# TODO: openArray view instead of slice
-iterator slidingWindow*(dt: string, size: int): WindowView =
+iterator slidingWindow*(dt: string, size: int): tuple[index: int, view: string] =
     for i in 0..dt.len-size:
-        yield WindowView(index: i, view: dt[i..<i+size])
+        yield (index: i, view: dt[i..<i+size])
 
 type
     Vec2i* = object
@@ -118,8 +112,11 @@ proc min*(a, b: Vec2i): Vec2i = Vec2i(x: min(a.x, b.x), y: min(a.y, b.y))
 proc max*(a, b: Vec2i): Vec2i = Vec2i(x: max(a.x, b.x), y: max(a.y, b.y))
 proc abs*(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
 proc sgn*(a: Vec2i): Vec2i = Vec2i(x: sgn(a.x), y: sgn(a.y))
+# TODO: len should be maxcoord, manhattan should be len
 proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
+proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
+proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
@@ -128,3 +125,33 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
 proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
+
+# import std/monotimes, times, sequtils
+# from os import fileExists
+# proc readInput*(n: int,strut:string  = ""): string = 
+#     for dirs in ["../inputs/", "./inputs/"]:
+#         result = dirs
+#         if n<10:
+#             result = result&"0"
+#         result = result & $n & strut & ".txt"
+#         if result.fileExists:
+#             return result.readFile
+
+
+# template oneTimeIt*(body: untyped): untyped =
+#     let t0 = getMonoTime()
+#     let val = body
+#     let t1 = getMonoTime()
+#     (val, t1-t0)
+
+# template timeIt*(body: untyped): untyped =
+#     var i = 1
+#     var (val, d) = oneTimeIt(body)
+#     var vals = [val].toSeq
+#     while i<3000 and (d*i).inMilliseconds<1000:
+#         let (nval, nd) = oneTimeIt(body)
+#         if nval != val:
+#             vals.add nval
+#         d = min(d, nd)
+#         inc i
+#     (vals[0], d)
