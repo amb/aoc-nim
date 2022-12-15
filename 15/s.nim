@@ -36,40 +36,31 @@ proc sensorScanline(sid: int, y: int): (int, int) {.meter.} =
     let sensor = sensors[sid]
     let ydisp = abs(sensor.location.y-y)
     if ydisp > sensor.area:
-        return (-1, -1)
+        return (1, -1)
     let closeToFringe = (sensor.area-ydisp)
     return (sensor.location.x - closeToFringe, sensor.location.x + closeToFringe)
 
-# For a row in loc y, how many unscanned places?
-proc processRow(y: int): ShadowLines {.meter.} =
-    for si, s in sensors:
-        let r = sensorScanline(si, y)
-        if r != (-1, -1):
-            result = result.addShadow(r)
-
-# TODO: super stupid, doesn't actually clip left or right
-iterator empties(segs: seq[(int, int)], lval, hval: int): (int, int) =
-    var i = 0
-    while i < segs.len-1:
-        let left = segs[i]
-        let right = segs[i+1]
-        yield (left[1], right[0])
-        inc i
-
 proc findBacon(lval, hval: int): (int, int) {.meter.} =
+    var slines: ShadowLines
     for ri in 0..hval:
-        var pr = processRow(ri)
-        pr.finalize()
-        for e in empties(pr.lines, lval, hval):
+        for si, s in sensors:
+            let r = sensorScanline(si, ri)
+            if r != (1, -1):
+                slines.addShadow(r)
+        slines.finalize()
+        for e in slines.empties(lval, hval):
             if e[1]-e[0] > 1:
                 return (e[0]+1, ri)
+        slines.reset()
 
 metricsConfirm()
 
 echo "----- BACON"
 let locs = findBacon(0, 4000000)
+# let locs = findBacon(0, 20)
 let answer = locs[0]*4000000+locs[1]
 assert answer == 12051287042458
+echo locs
 echo answer
 
 metricsShow()

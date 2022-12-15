@@ -2,58 +2,65 @@ import ../tracer
 import std/[algorithm, sugar]
 
 type
-    ShadowLine* = tuple[a: int, b: int]
+    ShadowLine* = object
+        a, b: int
+        valid: bool
     ShadowLines* = object
         lines*: seq[ShadowLine]
         empties: seq[int]
 
-proc finalize*(segs: var ShadowLines) =
-    segs.lines.sort((a, b) => a[0] > b[0])
+proc addItem(sl: var ShadowLines, i: ShadowLine) =
+    if sl.empties.len == 0:
+        sl.lines.add(i)
+    else:
+        let ol = sl.empties.pop()
+        sl.lines[ol] = i
 
-# proc addShadow*(segs: ShadowLines, seg: (int, int)): ShadowLines {.meter.} =
-#     var finalSeg = seg
-#     var isContained = false
-#     for si, s in segs.lines:
-#         if (finalSeg[0] <= s[1] and finalSeg[0] >= s[0] and s[1] <= finalSeg[1]):
-#             # Touching from left side
-#             finalSeg[0] = s[0]
-#         elif (finalSeg[1] <= s[1] and finalSeg[1] >= s[0] and s[0] >= finalSeg[0]):
-#             # Touching from right side
-#             finalSeg[1] = s[1]
-#         elif (finalSeg[1] >= s[1] and finalSeg[0] <= s[0]):
-#             # Seg inside finalseg
-#             discard
-#         elif (finalSeg[1] <= s[1] and finalSeg[0] >= s[0]):
-#             # FinalSeg inside seg
-#             isContained = true
-#             result.lines.add(s)
-#         else:
-#             # Completely outside
-#             result.lines.add(s)
+proc markRemoved(sl: var ShadowLines, i: int) =
+    sl.lines[i].valid = false
+    sl.empties.add(i)
 
-#     if not isContained:
-#         result.lines.add(finalSeg)
+proc finalize*(sl: var ShadowLines) =
+    sl.lines = collect:
+        for l in sl.lines:
+            if l.valid: l
+    sl.lines.sort((a, b) => a.a > b.a)
 
-proc addShadow*(segs: var ShadowLines, seg: (int, int)) =
-    var finalSeg = seg
+proc reset*(sl: var ShadowLines) =
+    sl.empties.setLen(0)
+    sl.lines.setLen(0)
+
+proc addShadow*(sl: var ShadowLines, seg: (int, int)) =
+    var finalSeg = ShadowLine(a: seg[0], b: seg[1], valid: true)
     var isContained = false
-    for si, s in segs.lines:
-        if (finalSeg[0] <= s[1] and finalSeg[0] >= s[0] and s[1] <= finalSeg[1]):
+    for si in 0..<sl.lines.len:
+        let s = sl.lines[si]
+        if not s.valid:
+            continue
+        if (finalSeg.a <= s.b and finalSeg.a >= s.a and s.b <= finalSeg.b):
             # Touching from left side
-            finalSeg[0] = s[0]
-        elif (finalSeg[1] <= s[1] and finalSeg[1] >= s[0] and s[0] >= finalSeg[0]):
+            finalSeg.a = s.a
+            sl.markRemoved(si)
+        elif (finalSeg.b <= s.b and finalSeg.b >= s.a and s.a >= finalSeg.a):
             # Touching from right side
-            finalSeg[1] = s[1]
-        elif (finalSeg[1] >= s[1] and finalSeg[0] <= s[0]):
+            finalSeg.b = s.b
+            sl.markRemoved(si)
+        elif (finalSeg.b >= s.b and finalSeg.a <= s.a):
             # Seg inside finalseg
-            discard
-        elif (finalSeg[1] <= s[1] and finalSeg[0] >= s[0]):
+            sl.markRemoved(si)
+        elif (finalSeg.b <= s.b and finalSeg.a >= s.a):
             # FinalSeg inside seg
             isContained = true
-            result.lines.add(s)
-        else:
-            # Completely outside
-            result.lines.add(s)
 
     if not isContained:
-        result.lines.add(finalSeg)
+        sl.addItem(finalSeg)
+
+# TODO: super stupid, doesn't actually clip left or right
+iterator empties*(segs: ShadowLines, lval, hval: int): (int, int) =
+    var i = 0
+    while i < segs.lines.len-1:
+        let left = segs.lines[i]
+        let right = segs.lines[i+1]
+        assert right.a > left.b
+        yield (left.b, right.a)
+        inc i
