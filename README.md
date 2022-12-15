@@ -6,6 +6,8 @@ Other repositories for Nim AoC 2022:
 https://github.com/MichalMarsalek/Advent-of-code/tree/master/2022/Nim
 https://github.com/auxym/AdventOfCode/tree/master/2022
 https://github.com/beef331/nimtrest/tree/master/aoc2022
+https://github.com/DestyNova/advent_of_code_2022
+https://github.com/srozb/aoc/tree/master/22/src
 
 Cool solutions:
 https://zigbin.io/7d0f8c

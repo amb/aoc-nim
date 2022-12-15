@@ -7,7 +7,7 @@ type
         location: Vec2i
         area: int
 
-proc sensorScanline(sensor: Sensor, sid: int, y: int): Option[(int, int)] =
+proc sensorScanline(sensor: Sensor, y: int): Option[(int, int)] =
     let ydisp = abs(sensor.location.y-y)
     if ydisp > sensor.area:
         return none((int, int))
@@ -16,15 +16,15 @@ proc sensorScanline(sensor: Sensor, sid: int, y: int): Option[(int, int)] =
 
 proc findBacon(sensors: seq[Sensor], lval, hval: int): (int, int) =
     var slines: ShadowLines
-    for ri in 0..hval:
+    for ry in 0..hval:
         for si, s in sensors:
-            let r = s.sensorScanline(si, ri)
+            let r = s.sensorScanline(ry)
             if r.isSome:
                 slines.addShadow(r.get)
         slines.finalize()
         for e in slines.empties(lval, hval):
             if e[1]-e[0] > 1:
-                return (e[0]+1, ri)
+                return (e[0]+1, ry)
         slines.reset()
 
 const dscan = "Sensor at x=$i, y=$i: closest beacon is at x=$i, y=$i"
@@ -34,6 +34,8 @@ for line in "15/input".lines:
     if line.scanf(dscan, sx, sy, bx, by):
         let s = vec2i(sx, sy)
         sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
+
+sensors.sort((a, b) => (a.location.x > b.location.x))
 
 let timeStart = getMonoTime()
 let locs = sensors.findBacon(0, 4000000)
