@@ -7,6 +7,21 @@ type
     ShadowLines* = object
         lines*: seq[ShadowLine]
         empties: seq[int]
+    SegRelationship* = enum
+        TouchingLeft, TouchingRight, Inside, Container, Outside
+
+
+proc segRelationship(a, b: ShadowLine): SegRelationship =
+    if (a.a <= b.b and a.a >= b.a and b.b <= a.b): 
+        return SegRelationship.TouchingLeft
+    elif (a.b <= b.b and a.b >= b.a and b.a >= a.a): 
+        return SegRelationship.TouchingRight
+    elif (a.b >= b.b and a.a <= b.a): 
+        return SegRelationship.Inside
+    elif (a.b <= b.b and a.a >= b.a): 
+        return SegRelationship.Container
+    else: 
+        return SegRelationship.Outside
 
 proc addItem(sl: var ShadowLines, i: ShadowLine) =
     if sl.empties.len == 0:
@@ -29,30 +44,48 @@ proc reset*(sl: var ShadowLines) =
     sl.empties.setLen(0)
     sl.lines.setLen(0)
 
+proc addShadowSorted4*(sl: var ShadowLines, seg: (int, int)) =
+    var finalSeg = ShadowLine(a: seg[0], b: seg[1], valid: true)
+    assert sl.lines.len <= 4
+    
+    template snet(id1, id0: untyped): untyped =
+        if sl.lines[id1].a < sl.lines[id0].a: swap(sl.lines[id1], sl.lines[id0])
+    if sl.lines.len == 4:
+        snet(2, 0); snet(3, 1); snet(1, 0); snet(3, 2)
+    elif sl.lines.len == 3:
+        snet(1, 0); snet(2, 0); snet(2, 1)
+    elif sl.lines.len == 2:
+        snet(1, 0)
+
+    var slc = 0
+    var sline = sl.lines[slc]
+    if finalSeg.b < sline.a:
+        sl.addItem(finalSeg)
+    if finalSeg.a < sline.a and finalSeg.b >= sline.a and finalSeg.b < sline.b:
+        finalSeg.b = sline.b
+        sl.markRemoved(slc)
+
+    assert false, "Undone"
+
 proc addShadow*(sl: var ShadowLines, seg: (int, int)) =
     var finalSeg = ShadowLine(a: seg[0], b: seg[1], valid: true)
-    var isContained = false
     for si in 0..<sl.lines.len:
         let s = sl.lines[si]
-        if not s.valid:
-            continue
-        if (finalSeg.a <= s.b and finalSeg.a >= s.a and s.b <= finalSeg.b):
-            # Touching from left side
+        if not s.valid: continue
+        case segRelationship(finalSeg, s):
+        of Container:
+            return
+        of TouchingLeft:
             finalSeg.a = s.a
             sl.markRemoved(si)
-        elif (finalSeg.b <= s.b and finalSeg.b >= s.a and s.a >= finalSeg.a):
-            # Touching from right side
+        of TouchingRight:
             finalSeg.b = s.b
             sl.markRemoved(si)
-        elif (finalSeg.b >= s.b and finalSeg.a <= s.a):
-            # Seg inside finalseg
+        of Inside:
             sl.markRemoved(si)
-        elif (finalSeg.b <= s.b and finalSeg.a >= s.a):
-            # FinalSeg inside seg
-            isContained = true
-
-    if not isContained:
-        sl.addItem(finalSeg)
+        of Outside:
+            discard
+    sl.addItem(finalSeg)
 
 # TODO: super stupid, doesn't actually clip left or right
 iterator empties*(segs: ShadowLines, lval, hval: int): (int, int) =
