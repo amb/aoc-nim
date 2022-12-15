@@ -1,7 +1,7 @@
 # Lots of dumb stuff here
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
-import std/[sets, strscans, tables, re, options]
+import std/[sets, strscans, tables, re, options, monotimes, times]
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
@@ -126,7 +126,12 @@ proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
 proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
 
-# import std/monotimes, times, sequtils
+proc prtTime*(t: Duration) =
+    let mstime = t.inMicroseconds
+    let mlsecs = mstime div 1000
+    let mcsecs = mstime - (mlsecs * 1000)
+    echo "Time: ", mlsecs,".", mcsecs, " ms"
+
 # from os import fileExists
 # proc readInput*(n: int,strut:string  = ""): string = 
 #     for dirs in ["../inputs/", "./inputs/"]:

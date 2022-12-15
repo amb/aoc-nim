@@ -1,4 +1,3 @@
-import ../tracer
 import std/[algorithm, sugar]
 
 type
