@@ -2,6 +2,7 @@ include ../aoc
 import ../tracer
 import std/[parseutils, heapqueue]
 import kdtree
+import shadows
 
 type
     Sensor = object
@@ -39,96 +40,35 @@ proc sensorScanline(sid: int, y: int): (int, int) {.meter.} =
     let closeToFringe = (sensor.area-ydisp)
     return (sensor.location.x - closeToFringe, sensor.location.x + closeToFringe)
 
-proc addShadow(segs: seq[(int, int)], seg: (int, int)): seq[(int, int)] {.meter.} =
-    var matchingFirst = -1
-    var matchingLast = -1
-    var finalSeg = seg
-    var isContained = false
-    for si, s in segs:
-        if (finalSeg[0] <= s[1] and finalSeg[0] >= s[0] and s[1] <= finalSeg[1]):
-            # Touching from left side
-            assert matchingFirst == -1
-            matchingFirst = si
-            finalSeg[0] = s[0]
-            # echo s, " -> ", finalSeg
-    
-        elif (finalSeg[1] <= s[1] and finalSeg[1] >= s[0] and s[0] >= finalSeg[0]):
-            # Touching from right side
-            assert matchingLast == -1
-            matchingLast = si
-            finalSeg[1] = s[1]
-            # echo s, " -> ", finalSeg
-
-        elif (finalSeg[1] >= s[1] and finalSeg[0] <= s[0]):
-            # Seg inside finalseg
-            # echo "inside: ", s
-            discard
-
-        elif (finalSeg[1] <= s[1] and finalSeg[0] >= s[0]):
-            # FinalSeg inside seg
-            # echo "contained: ", s
-            isContained = true
-            result.add(s)
-        
-        else:
-            # Completely outside
-            result.add(s)
-
-    if not isContained:
-        result.add(finalSeg)
-
 # For a row in loc y, how many unscanned places?
-proc processRow(y: int): seq[(int, int)] {.meter.} =
+proc processRow(y: int): ShadowLines {.meter.} =
     for si, s in sensors:
         let r = sensorScanline(si, y)
         if r != (-1, -1):
-            # echo "n: ", r
             result = result.addShadow(r)
-            # echo result
 
-# TODO: doesn't handle the cases of beacons in the same row
-# let rw = processRow(10)
-# let rw = processRow(2000000)
-
-# Counted manually 8 beacons that are at the same location on row 2M
-# echo rw.mapIt(it[1]-it[0]+1).sum-1
-
-# Part 1
-# 4917958 too high
-# 4725489 too low
-# 4725496 was right
-
-proc empties(segs: var seq[(int, int)], lval, hval: int): seq[(int, int)] {.meter.} =
-    if segs.len == 0:
-        result.add((lval, hval))
-        return
-
-    segs.sort((a, b) => a[0] > b[0])
-
-    # Add middles
-    var a, b: int
+# TODO: super stupid, doesn't actually clip left or right
+iterator empties(segs: seq[(int, int)], lval, hval: int): (int, int) =
     var i = 0
     while i < segs.len-1:
         let left = segs[i]
         let right = segs[i+1]
-        result.add((left[1], right[0]))
+        yield (left[1], right[0])
         inc i
-    # for s in segs
 
-proc findBacon(lval, hval: int): seq[(int, int)] {.meter.} =
+proc findBacon(lval, hval: int): (int, int) {.meter.} =
     for ri in 0..hval:
         var pr = processRow(ri)
-        let emt = empties(pr, lval, hval)
-        if emt.len > 0:
-            for e in emt:
-                if e[1]-e[0] > 1:
-                    result.add((e[0]+1, ri))
+        pr.finalize()
+        for e in empties(pr.lines, lval, hval):
+            if e[1]-e[0] > 1:
+                return (e[0]+1, ri)
 
 metricsConfirm()
 
 echo "----- BACON"
 let locs = findBacon(0, 4000000)
-let answer = locs[0][0]*4000000+locs[0][1]
+let answer = locs[0]*4000000+locs[1]
 assert answer == 12051287042458
 echo answer
 
