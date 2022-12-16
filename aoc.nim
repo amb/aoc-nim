@@ -130,7 +130,7 @@ proc prtTime*(t: Duration) =
     let mstime = t.inMicroseconds
     let mlsecs = mstime div 1000
     let mcsecs = mstime - (mlsecs * 1000)
-    echo "Time: ", mlsecs,".", mcsecs, " ms"
+    echo fmt"Time: {mlsecs} ms, {mcsecs} µs"
 
 # from os import fileExists
 # proc readInput*(n: int,strut:string  = ""): string = 
