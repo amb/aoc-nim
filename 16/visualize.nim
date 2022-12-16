@@ -15,7 +15,7 @@ proc `$`(v: Valve): string =
     fmt"{v.name} -> {v.rate} ({v.nodes.mapIt(it.name).join(csep)})"
 
 # Parse data
-let data = "16/test".readFile.strip.splitLines
+let data = "16/input".readFile.strip.splitLines
 var valves: Table[string, Valve]
 for line in data:
     let vlv = line[6..7]
@@ -38,12 +38,12 @@ let image = newImage(512, 512)
 image.fill(colWhite)
 
 var font = readFont("notosans.ttf")
-font.size = 20
+font.size = 12
 # font.paint.color = colWhite
 
 proc drawNode(ctx: var Context, loc: Vec2, text: string) =
     ctx.fillStyle = colBlack
-    let circleSize = 20.float
+    let circleSize = 10.float
     ctx.fillCircle(circle(loc, circleSize+3))
 
     ctx.fillStyle = colGreen
@@ -59,21 +59,30 @@ proc drawNode(ctx: var Context, loc: Vec2, text: string) =
         translate(loc - vec2(circleSize, circleSize)))
 
 # Try and equalize edge lengths
-let normLength = 60.float
-let normStep = 4.float
-for _ in 0..500:
+let normLength = 40.float
+let normStep = 10.float
+for _ in 0..5000:
     for k in valves.keys:
         var vloc = valves[k].location
+
+        valves[k].location.x = vloc.x.clamp(10.0, 502.0)
+        valves[k].location.y = vloc.y.clamp(10.0, 502.0)
+
         var angles: seq[(float, int)]
         for kci, kc in valves[k].nodes:
             var bloc = valves[kc.name].location
-            assert bloc.x < 1024 and bloc.y < 1024 and bloc.x > -512 and bloc.y > -512
+            # assert bloc.x < 1024 and bloc.y < 1024 and bloc.x > -512 and bloc.y > -512
 
             let diff = bloc-vloc
             let diffl = diff.length
             let dir = diff/diffl
-            angles.add((dir.angle.float, kci))
-            
+
+            var vang = dir
+            vang.y = -vang.y
+            # Y was flipped (facepalm)
+            let ang = vang.angle.float
+            angles.add((ang, kci))
+
             if diffl < normLength-normStep:
                 valves[k].location -= dir * normStep
                 valves[kc.name].location += dir * normStep
@@ -81,8 +90,9 @@ for _ in 0..500:
                 valves[k].location += dir * normStep
                 valves[kc.name].location -= dir * normStep
 
-        let aMove = 2.0
+        let aMove = normStep/4
         let desiredAngle = (2.0*PI)/(angles.len.float)
+        # echo fmt"For count: {angles.len}, angle has to be: {desiredAngle}"
         angles.sort()
         for ai in 0..<angles.len-1:
             assert angles.len > 1
@@ -111,13 +121,18 @@ for _ in 0..500:
                 valves[name0].location += vec2(-avec.y, avec.x)*aMove
                 valves[name1].location += vec2(bvec.y, -bvec.x)*aMove
 
-
-    valves["AA"].location = vec2(256.0, 256.0)
+    # valves["AA"].location = vec2(256.0, 256.0)
 
 # Draw edges
 for k in valves.keys:
     let vloc = valves[k].location
     var ctx = newContext(image)
+    ctx.strokeStyle = "#FFFFFF"
+    ctx.lineWidth = 6
+    for kc in valves[k].nodes:
+        let bloc = valves[kc.name].location
+        ctx.strokeSegment(segment(vloc, bloc))
+    ctx.strokeStyle = "#000000"
     ctx.lineWidth = 3
     for kc in valves[k].nodes:
         let bloc = valves[kc.name].location
