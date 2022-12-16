@@ -16,6 +16,7 @@
 .DS_Store
 
 dump.txt
+graph.png
 *.o
 *.mp4
 !/icons/*.o

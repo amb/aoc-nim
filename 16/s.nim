@@ -67,24 +67,26 @@ while true:
         echo fmt"Valve {openValves.toSeq.join(csep)} is open, releasing {valvesRate} pressure."
     else:
         echo fmt"Valves {openValves.toSeq.join(csep)} are open, releasing {valvesRate} pressure."
-
+    # totalPressure += valvesRate
+    
     # Set rate to zero, as it's open so it isn't counted anymore
     valves[loc].rate = 0
 
     let nextSteps = valves[loc].traverseBFS.pairs.toSeq
+    
     let goLocs = nextSteps.mapIt((timeLeft-it[1]-1) * valves[it[0]].rate).maxIndex
     timeLeft -= nextSteps[goLocs][1]
     let goHere = nextSteps[goLocs][0]
+    if goHere == loc:
+        break
     echo fmt"Walk {nextSteps[goLocs][1]} steps to {goHere}."
     totalPressure += valvesRate * nextSteps[goLocs][1]
-
-
+    
     if cvalverate > 0:
         openValves.incl(loc)
     valvesRate += cvalverate
 
-    if valves[goHere].rate == 0:
-        break
     loc = goHere
 
-echo totalPressure
+echo ""
+echo totalPressure + timeLeft * valvesRate
