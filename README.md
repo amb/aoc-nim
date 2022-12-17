@@ -11,3 +11,5 @@ https://github.com/srozb/aoc/tree/master/22/src
 
 Cool solutions:
 https://zigbin.io/7d0f8c
+
+Unfinished: 16
