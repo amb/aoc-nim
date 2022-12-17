@@ -21,20 +21,11 @@ proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"): 
         result.add(r.parseInt)
 
-proc firstInt*(s: string): int {.inline.} = 
-    let l = s.findBounds(re"-?\d+")
-    if l != (-1, 0):
-        s[l[0]..l[1]].parseInt
-    else:
-        -1
-
 proc getOrZero*(si: seq[int], d: int): int = 
     if si.len > 0 and d >= 0 and d < si.len: 
         si[d] 
     else: 
         0
-
-# TODO: recursive foldl, for multidimensional seqs
 
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
     assert i.len mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
@@ -84,6 +75,11 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
             result = i
             break
 
+iterator findAllIf*[T](s: seq[T], pred: proc(x: T): bool): int =
+    for i, x in s:
+        if pred(x):
+            yield i
+
 proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
     result = none(T)
     for x in s:
@@ -91,9 +87,24 @@ proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
             result = some(x)
             break
 
+proc firstInt*(s: string): int {.inline.} = 
+    let l = s.findBounds(re"-?\d+")
+    if l != (-1, 0):
+        s[l[0]..l[1]].parseInt
+    else:
+        -1
+
 iterator slidingWindow*(dt: string, size: int): tuple[index: int, view: string] =
     for i in 0..dt.len-size:
         yield (index: i, view: dt[i..<i+size])
+
+iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
+    for li in 0..sc.len-dt.len:
+        var l2 = 0
+        while l2 < dt.len and li+l2 < sc.len and sc[li+l2] == dt[l2]:
+            inc l2
+        if l2 == dt.len:
+            yield li
 
 type
     Vec2i* = object

@@ -1,4 +1,5 @@
 include ../aoc
+import std/[bitops]
 
 type Grid[T] = seq[seq[T]]
 
@@ -7,32 +8,50 @@ type
         grid: Grid[int]
         width, height: int
 
-const CLMAX = 4000
-
 type
-    Clutter = object
+    RingGrid = object
         grid: Grid[int]
-        head, size: int
+        size: int
+        maxSize: int
 
-proc get(cl: Clutter, i, j: int): int =
-    assert i > cl.size - CLMAX
-    cl.grid[(i+cl.head) mod CLMAX][j]
+proc newRingGrid(msize: int): RingGrid =
+    assert msize > 0
+    result.maxSize = msize
+    result
 
-proc set(cl: var Clutter, i, j: int, val: int) =
-    assert i > cl.size - CLMAX
-    cl.grid[(i+cl.head) mod CLMAX][j] = val
+proc get(cl: RingGrid, i, j: int): int =
+    cl.grid[i mod cl.maxSize][j]
 
-proc len(cl: Clutter): int = cl.size
+proc set(cl: var RingGrid, i, j: int, val: int) =
+    cl.grid[i mod cl.maxSize][j] = val
 
-proc add(cl: var Clutter) =
-    if cl.grid.len < CLMAX:
+proc len(cl: RingGrid): int = cl.size
+
+proc add(cl: var RingGrid) =
+    assert cl.maxSize != 0
+    if cl.grid.len < cl.maxSize:
         cl.grid.add(newSeq[int](7))
         cl.size = cl.grid.len
     else:
-        cl.head = (cl.head + 1) mod CLMAX
         inc cl.size
+        let yloc = (cl.size-1) mod cl.maxSize
         for i in 0..6:
-            cl.set(cl.size-1, i, 0)
+            cl.grid[yloc][i] = 0
+
+
+type
+    Engine = object
+        ringGrid: RingGrid
+        highPoint: int
+        blocksCount: int
+        windCounter: int
+
+proc newEngine(): Engine =
+    Engine(ringGrid: newRingGrid(4000))
+
+proc show(e: Engine) =
+    for l in e.ringGrid.grid:
+        echo "|" & l.mapIt(if it==1: "#" else: " ").join & "|"
 
 # Read blocks
 let bdata = "17/blocks".readFile.split("\n\n")
@@ -53,14 +72,11 @@ for blk in bdata:
     # for l in newBlock:
     #     echo l.mapIt(if it==1: "#" else: " ").join
     blocks.add(Piece(grid: newBlock, width: width+1, height: newBlock.len))
-
-# echo blocks
+echo "blocks: ", blocks.len
 
 # Read test data
-let winds = "17/input".readFile
-# echo winds
-for i in winds:
-    assert i != '\n'
+let winds = "17/input".readFile.mapIt(if it=='<': -1 else: 1)
+echo "winds: ", winds.len
 
 # chamber width: 7
 # rocks appear at loc 2, starting from 0
@@ -79,108 +95,127 @@ for i in winds:
 #  ^ x: 0
 #
 # y up, x right
-
+#
 # These grids are indexed from opposite ends vertically
-proc collideLine(blk: Piece, blkx, blky: int, clt: Clutter, y: int): bool =
+
+proc collideLine(blk: Piece, blkx, blky: int, clt: RingGrid, y: int): int =
     let cltIdx = -1-y
-
-    if cltIdx < 0:
-        return false
-
-    if clt.len==0:
-        return false
-
-    if cltIdx >= clt.len:
-        return false
-
-    if y<blky or y>blky+(blk.height-1):
-        assert false, "Not inside block"
-
     let blkIdx = -(blky-y)
-    if blkIdx < 0 or blkIdx >= blk.height:
-        assert false, "wrong block index"
-
-    # assert clt[cltIdx].len == 7
     for i in 0..<blk.width:
-        # if clt[cltIdx][blkx+i] != 0 and
-        if clt.get(cltIdx, blkx+i) != 0 and
-            blk.grid[blkIdx][i] != 0:
-            return true
+        let cvl = clt.get(cltIdx, blkx+i)
+        let gvl = blk.grid[blkIdx][i]
+        result = bitor(result, cvl * gvl)
 
-proc collide(blk: Piece, blkx, blky: int, clt: Clutter): bool =
+proc collide(blk: Piece, blkx, blky: int, clt: RingGrid): int =
     if blky+blk.height-1 >= 0:
-        return true
-
+        return 1
     for blkl in 0..<blk.height:
-        if collideLine(blk, blkx, blky, clt, blky + blkl):
-            return true
-    return false
+        let yl = blky + blkl
+        if -1-yl < clt.len:
+            result = bitor(result, collideLine(blk, blkx, blky, clt, yl))
 
-# clutter 0-index is lowest point
-# var clutter: Grid[int]
-var clutter: Clutter
-var highPoint = 0
-var x, y: int
+var codes: seq[uint8]
+var loopcount: seq[int]
 
-var blocksCount = 0
-var windCounter = 0
+proc run(e: var Engine, cycles: int): int =
+    var x, y: int
+    while e.blocksCount < cycles:
+        var blk = blocks[e.blocksCount mod blocks.len]
+        inc e.blocksCount
 
-let windDir = {'<': -1, '>': 1}.toTable
+        x = 2
+        y = e.highPoint - 3 - blk.height
 
-# while blocksCount < 5:
-while blocksCount < 2022:
-    var blk = blocks[blocksCount mod blocks.len]
-    inc blocksCount
+        # Make the piece fall down
+        while true:
+            # Wind test
+            let wind = winds[e.windCounter mod winds.len]
+            inc e.windCounter
+            if x+wind >= 0 and x+wind+blk.width-1 <= 6:
+                if collide(blk, x+wind, y, e.ringGrid) == 0:
+                    x=x+wind
 
-    x = 2
-    y = highPoint - 3 - blk.height - 1
+            # Ground collision
+            if collide(blk, x, y+1, e.ringGrid) != 0:
+                break
 
-    # echo "\nblock: ", blocksCount
-    # echo "hp: ", highPoint
+            inc y
 
-    # Make the piece fall down
-    while true:
-        inc y
-        # echo fmt"fall to ({y})"
 
-        # Wind test
-        let wind = windDir[winds[windCounter mod winds.len]]
-        inc windCounter
-        if x+wind >= 0 and x+wind+blk.width-1 <= 6:
-            if not collide(blk, x+wind, y, clutter):
-                x=x+wind
-        #         echo "w-win:", wind
-        #     else:
-        #         echo "w-l:", wind
-        # else:
-        #     echo "w-b:", wind
+        # If not enough space to draw piece, add more
+        let newRows = -y-e.ringGrid.len
+        for i in 0..<newRows:
+            e.ringGrid.add()
 
-        # Ground collision
-        if collide(blk, x, y+1, clutter):
-            # echo "broke"
-            break
+        # Draw piece
+        for i in 0..<blk.height:
+            let yl = i+y
+            for xl in x..<x+4:
+                if blk.grid[i][xl-x] == 1:
+                    e.ringGrid.set(-yl-1, xl, 1)
 
-    assert y < 0
+        if codes.len < 500000:
+            for i in e.ringGrid.len-newRows..<e.ringGrid.len:
+                var code = 0
+                for j in 0..6:
+                    code = bitor(code, e.ringGrid.get(i, j) shl j)
+                codes.add(code.uint8)
+                loopcount.add(e.blocksCount.int)
 
-    # If not enough space to draw piece, add more
-    for i in 0..<(-y-clutter.len):
-        # clutter.add(newSeq[int](7))
-        clutter.add()
+        e.highPoint = min(y, e.highPoint)
+        # assert highPoint == -RingGrid.len, fmt"Hp: {highPoint}, Cl: {-RingGrid.len}"
 
-    # Draw piece
-    for i in 0..<blk.height:
-        let yl = i+y
-        for xl in x..<x+4:
-            if blk.grid[i][xl-x] == 1:
-                # clutter[-yl-1][xl] = 1
-                clutter.set(-yl-1, xl, 1)
-
-    highPoint = min(y, highPoint)
-    assert highPoint == -clutter.len, fmt"Hp: {highPoint}, Cl: {-clutter.len}"
-
-# for l in clutter:
-#     echo "|" & l.mapIt(if it==1: "#" else: " ").join & "|"
+    e.ringGrid.len
 
 # Part 1
-echo clutter.len
-assert clutter.len == 3175
+var engine = newEngine()
+let p1 = engine.run(2022)
+assert p1 == 3175
+
+# Part 2
+codes.setLen(0)
+loopcount.setLen(0)
+
+engine = newEngine()
+let p2 = engine.run(10_000)
+let res = codes.searchSeq(codes[^100..^1].mapIt(it.uint8)).toSeq
+
+# echo res[1]-res[0]
+# echo res[2]-res[1]
+# echo res[3]-res[2]
+# echo res[4]-res[3]
+
+var a = res[0]
+var b = res[1]
+while codes[a] == codes[b]:
+    dec a; dec b
+inc a; inc b
+
+echo fmt"Repeating part: {a} -> {b}"
+echo fmt"At iterations: {loopcount[a]}, {loopcount[b]}"
+echo fmt"So, {loopcount[b]-loopcount[a]} iterations gives {b-a} increase after {a}."
+
+# 1_000_000_000_000
+let offset = a
+let loopDiff = loopcount[b]-loopcount[a]
+let incDiff = b-a
+let big = 1000000000000.int
+let afterRepeating = ((big-offset) div loopDiff) * incDiff + offset
+let remainingSteps = (big-offset) mod loopDiff
+
+echo afterRepeating
+echo remainingSteps
+
+# Repeating segment playback
+var loc = a
+var moreStacks = 0
+while loc-a < remainingSteps:
+    moreStacks += 1
+    inc loc
+
+
+
+# let more = engine.run(remainingSteps)
+# echo more
+
+# 1555113636800 too high
