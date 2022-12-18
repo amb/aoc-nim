@@ -129,11 +129,100 @@ proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 
-let cubeLocations = [
+
+# Cubism
+
+const CUBEDIRS = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
     (0, 0, 1), (0, 0, -1)
 ]
+
+type CubeCoord = (int, int, int)
+type CubeLocs = HashSet[CubeCoord]
+
+proc cubecoord(x, y, z: int): CubeCoord = (x, y, z)
+
+proc `-`(a, b: (int, int, int)): (int, int, int) = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+proc `+`(a, b: (int, int, int)): (int, int, int) = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+proc max(a, b: (int, int, int)): (int, int, int) =
+    (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
+proc min(a, b: (int, int, int)): (int, int, int) =
+    (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
+
+proc asCubeCoord(v: seq[int]): CubeCoord =
+    assert v.len == 3
+    (v[0], v[1], v[2])
+
+proc `+`(cb: CubeLocs, v: CubeCoord): CubeLocs = 
+    for cube in cb: 
+        result.incl(cube+v)
+
+proc max(cb: CubeLocs): CubeCoord =
+    result = (int.low, int.low, int.low)
+    for c in cb:
+        result = max(result, c)
+
+proc min(cb: CubeLocs): CubeCoord =
+    result = (int.high, int.high, int.high)
+    for c in cb:
+        result = min(result, c)
+
+proc neighbours(cb: CubeLocs): CubeLocs =
+    for cube in cb:
+        for loc in CUBEDIRS:
+            result.incl(cube+loc)
+    result = result - cb
+
+proc allDirections(cb: CubeLocs): seq[CubeCoord] =
+    for cube in cb:
+        for loc in CUBEDIRS:
+            result.add(cube+loc)
+
+proc fillBoundary(cmin, cmax: CubeCoord): CubeLocs =
+    for x in cmin[0]..cmax[0]:
+        for y in cmin[1]..cmax[1]:
+            result.incl(cubecoord(x, y, cmin[2]))
+            result.incl(cubecoord(x, y, cmax[2]))
+    for x in cmin[0]..cmax[0]:
+        for z in cmin[2]..cmax[2]:
+            result.incl(cubecoord(x, cmin[1], z))
+            result.incl(cubecoord(x, cmax[1], z))
+    for y in cmin[1]..cmax[1]:
+        for z in cmin[2]..cmax[2]:
+            result.incl(cubecoord(cmin[0], y, z))
+            result.incl(cubecoord(cmax[0], y, z))
+
+iterator throwNet[T](cubes: CubeLocs, run: proc (ind: CubeLocs): T): T =
+    let cmin = cubes.min - (2,2,2)
+    let cmax = cubes.max + (2,2,2)
+    var outerNodes = fillBoundary(cmin - (1,1,1), cmax + (1,1,1))
+    var innerNodes = fillBoundary(cmin, cmax)
+    while innerNodes.len > 0:
+        let nextStep = (innerNodes.neighbours - outerNodes - cubes)
+        outerNodes = innerNodes
+        innerNodes = nextStep
+        yield run(innerNodes)
+
+proc `-`(ca, cb: CubeLocs): CubeLocs =
+    for cube in ca:
+        if cube notin cb:
+            result.incl(cube)
+
+proc `+`(ca, cb: CubeLocs): CubeLocs =
+    for cube in ca:
+        result.incl(cube)
+    for loc in cb:
+        result.incl(loc)
+
+proc `&`(ca, cb: CubeLocs): CubeLocs =
+    for loc in cb:
+        if loc in ca:
+            result.incl(loc)
+
+# let cubeNb = cubes.neighbours
+# assert cubeNb.len <= cubes.len * 6
+# assert (cubes.len * 6 - cubeNb.len) == (cubeNb - cubes).len
 
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
