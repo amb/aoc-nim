@@ -45,6 +45,8 @@ type
         highPoint: int
         blocksCount: int
         windCounter: int
+        codes: seq[uint8]
+        loopcount: seq[int]
 
 proc newEngine(): Engine =
     Engine(ringGrid: newRingGrid(4000))
@@ -114,9 +116,6 @@ proc collide(blk: Piece, blkx, blky: int, clt: RingGrid): int =
         if -1-yl < clt.len:
             result = bitor(result, collideLine(blk, blkx, blky, clt, yl))
 
-var codes: seq[uint8]
-var loopcount: seq[int]
-
 proc run(e: var Engine, cycles: int): int =
     var x, y: int
     while e.blocksCount < cycles:
@@ -134,13 +133,10 @@ proc run(e: var Engine, cycles: int): int =
             if x+wind >= 0 and x+wind+blk.width-1 <= 6:
                 if collide(blk, x+wind, y, e.ringGrid) == 0:
                     x=x+wind
-
             # Ground collision
             if collide(blk, x, y+1, e.ringGrid) != 0:
                 break
-
             inc y
-
 
         # If not enough space to draw piece, add more
         let newRows = -y-e.ringGrid.len
@@ -154,18 +150,52 @@ proc run(e: var Engine, cycles: int): int =
                 if blk.grid[i][xl-x] == 1:
                     e.ringGrid.set(-yl-1, xl, 1)
 
-        if codes.len < 500000:
+        if e.codes.len < 500000:
             for i in e.ringGrid.len-newRows..<e.ringGrid.len:
                 var code = 0
                 for j in 0..6:
                     code = bitor(code, e.ringGrid.get(i, j) shl j)
-                codes.add(code.uint8)
-                loopcount.add(e.blocksCount.int)
+                e.codes.add(code.uint8)
+                e.loopcount.add(e.blocksCount.int)
+                # if e.blocksCount == 4103:
+                #     echo e.codes.len
 
         e.highPoint = min(y, e.highPoint)
         # assert highPoint == -RingGrid.len, fmt"Hp: {highPoint}, Cl: {-RingGrid.len}"
-
     e.ringGrid.len
+
+proc getRepeatingResult(e: var Engine, tryCount, totalCount: int): int =
+    let p2 = e.run(tryCount)
+    let res = e.codes.searchSeq(e.codes[^100..^1].mapIt(it.uint8)).toSeq
+
+    var a = res[0]
+    var b = res[1]
+    while e.codes[a] == e.codes[b]:
+        dec a; dec b
+    inc a; inc b
+
+    echo fmt"Repeating part: {a} -> {b}"
+    echo fmt"At iterations: {e.loopcount[a]}, {e.loopcount[b]}"
+    echo fmt"So, {e.loopcount[b]-e.loopcount[a]} iterations gives {b-a} increase after {a}."
+
+    # Repeating segment playback
+    let loopDiff = e.loopcount[b]-e.loopcount[a]
+    echo "ldiff: ", loopDiff
+    let repetitions = (totalCount-e.loopcount[a]) div loopDiff
+    echo "repetitions: ", repetitions
+    var headLoc = e.loopcount[a] + loopDiff*repetitions
+    echo "head: ", headLoc
+    var rowCount = a + (b-a) * repetitions
+    echo "rowstart: ", rowCount
+    # echo a+b-a, " ", b+b-a, " ", (b+b-a-(a+b-a))
+    while headLoc < totalCount:
+        for rowLoc in a+b-a..<b+b-a:
+            if e.loopcount[rowLoc] > e.loopcount[rowLoc-1]:
+                if headLoc >= totalCount:
+                    break
+                inc headLoc
+            inc rowCount
+    rowCount
 
 # Part 1
 var engine = newEngine()
@@ -173,49 +203,11 @@ let p1 = engine.run(2022)
 assert p1 == 3175
 
 # Part 2
-codes.setLen(0)
-loopcount.setLen(0)
+engine = newEngine()
+# echo getRepeatingResult(10_000, 1000000000000.int)
+echo engine.getRepeatingResult(10_000, 5_000.int)
 
 engine = newEngine()
-let p2 = engine.run(10_000)
-let res = codes.searchSeq(codes[^100..^1].mapIt(it.uint8)).toSeq
-
-# echo res[1]-res[0]
-# echo res[2]-res[1]
-# echo res[3]-res[2]
-# echo res[4]-res[3]
-
-var a = res[0]
-var b = res[1]
-while codes[a] == codes[b]:
-    dec a; dec b
-inc a; inc b
-
-echo fmt"Repeating part: {a} -> {b}"
-echo fmt"At iterations: {loopcount[a]}, {loopcount[b]}"
-echo fmt"So, {loopcount[b]-loopcount[a]} iterations gives {b-a} increase after {a}."
-
-# 1_000_000_000_000
-let offset = a
-let loopDiff = loopcount[b]-loopcount[a]
-let incDiff = b-a
-let big = 1000000000000.int
-let afterRepeating = ((big-offset) div loopDiff) * incDiff + offset
-let remainingSteps = (big-offset) mod loopDiff
-
-echo afterRepeating
-echo remainingSteps
-
-# Repeating segment playback
-var loc = a
-var moreStacks = 0
-while loc-a < remainingSteps:
-    moreStacks += 1
-    inc loc
-
-
-
-# let more = engine.run(remainingSteps)
-# echo more
+echo "Real: ", engine.run(5_000)
 
 # 1555113636800 too high

@@ -163,4 +163,4 @@ while blocksCount < 2022:
 
 # Part 1
 echo clutter.len
-# assert clutter.len == 3175
+assert clutter.len == 3175
