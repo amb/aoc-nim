@@ -129,6 +129,12 @@ proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 
+let cubeLocations = [
+    (1, 0, 0), (-1, 0, 0),
+    (0, 1, 0), (0, -1, 0),
+    (0, 0, 1), (0, 0, -1)
+]
+
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
 
