@@ -69,16 +69,10 @@ for blk in bdata:
                 width = max(ci, width)
             scanline[ci] = occupied
         newBlock.add(scanline)
-    # echo "---"
-    # echo fmt"Width: {width+1}, Height: {newBlock.len}"
-    # for l in newBlock:
-    #     echo l.mapIt(if it==1: "#" else: " ").join
     blocks.add(Piece(grid: newBlock, width: width+1, height: newBlock.len))
-echo "blocks: ", blocks.len
 
 # Read test data
 let winds = "17/input".readFile.mapIt(if it=='<': -1 else: 1)
-echo "winds: ", winds.len
 
 # chamber width: 7
 # rocks appear at loc 2, starting from 0
@@ -157,8 +151,8 @@ proc run(e: var Engine, cycles: int): int =
                     code = bitor(code, e.ringGrid.get(i, j) shl j)
                 e.codes.add(code.uint8)
                 e.loopcount.add(e.blocksCount.int)
-                # if e.blocksCount == 4103:
-                #     echo e.codes.len
+
+            assert e.ringGrid.size == e.codes.len
 
         e.highPoint = min(y, e.highPoint)
         # assert highPoint == -RingGrid.len, fmt"Hp: {highPoint}, Cl: {-RingGrid.len}"
@@ -174,40 +168,46 @@ proc getRepeatingResult(e: var Engine, tryCount, totalCount: int): int =
         dec a; dec b
     inc a; inc b
 
-    echo fmt"Repeating part: {a} -> {b}"
-    echo fmt"At iterations: {e.loopcount[a]}, {e.loopcount[b]}"
-    echo fmt"So, {e.loopcount[b]-e.loopcount[a]} iterations gives {b-a} increase after {a}."
+    # echo fmt"Repeating part: {a} -> {b}"
+    # echo fmt"At iterations: {e.loopcount[a]}, {e.loopcount[b]}"
+    # echo fmt"So, {e.loopcount[b]-e.loopcount[a]} iterations gives {b-a} increase after {a}."
+    # echo ""
 
     # Repeating segment playback
     let loopDiff = e.loopcount[b]-e.loopcount[a]
-    echo "ldiff: ", loopDiff
     let repetitions = (totalCount-e.loopcount[a]) div loopDiff
-    echo "repetitions: ", repetitions
-    var headLoc = e.loopcount[a] + loopDiff*repetitions
-    echo "head: ", headLoc
+    var headLoc = e.loopcount[a] + loopDiff * repetitions
     var rowCount = a + (b-a) * repetitions
-    echo "rowstart: ", rowCount
-    # echo a+b-a, " ", b+b-a, " ", (b+b-a-(a+b-a))
-    while headLoc < totalCount:
-        for rowLoc in a+b-a..<b+b-a:
-            if e.loopcount[rowLoc] > e.loopcount[rowLoc-1]:
-                if headLoc >= totalCount:
-                    break
-                inc headLoc
-            inc rowCount
+    for rowLoc in a+(b-a)..<b+(b-a):
+        let thisLoop = e.loopcount[rowLoc]
+        let previousLoop = e.loopcount[rowLoc-1]
+        if thisLoop > previousLoop:
+            if headLoc > totalCount:
+                break
+            headLoc += thisLoop - previousLoop
+        inc rowCount
+
     rowCount
 
 # Part 1
 var engine = newEngine()
 let p1 = engine.run(2022)
-assert p1 == 3175
+# assert p1 == 3175
+echo p1
 
 # Part 2
 engine = newEngine()
-# echo getRepeatingResult(10_000, 1000000000000.int)
-echo engine.getRepeatingResult(10_000, 5_000.int)
+echo engine.getRepeatingResult(10_000, 1000000000000.int)
 
-engine = newEngine()
-echo "Real: ", engine.run(5_000)
+for i in 1..10:
+    let tval = 5000 + i*3333
+
+    engine = newEngine()
+    let ta = engine.getRepeatingResult(10_000, tval)
+
+    engine = newEngine()
+    let tb = engine.run(tval)
+
+    assert ta == tb, fmt"Not matching for {i}: {ta}, {tb}"
 
 # 1555113636800 too high
