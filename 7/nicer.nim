@@ -88,7 +88,7 @@ $ ls
 """
 
 echo parser.match(test_input).ok
-# echo parser.match(filr(7)).ok
+# echo parser.match("7/input".readFile).ok
 
 proc printTree(fi: FileItem, d: int) =
     echo "  ".repeat(d) & "- " & fi.repr

@@ -1,6 +1,6 @@
 include ../aoc
 
-let data = fil(6)[0]
+let data = "5/input".readFile
 
 proc allDifferent(dt: seq[char], count: int): bool =
     # TODO: optimization

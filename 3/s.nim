@@ -11,7 +11,7 @@ proc priority(c: char): int =
     else: 0
 
 iterator priorities(): int =
-    for line in fil(3):
+    for line in "3/input".readFile.splitLines:
         doAssert len(line) mod 2 == 0
         let ll = len(line) div 2
         var si = intersection(toHashSet(line[0..<ll]), toHashSet(line[ll..<line.len]))
@@ -20,10 +20,12 @@ iterator priorities(): int =
         yield priority(si.pop())
 
 iterator groupsOfThree(): int =
-    for group in fil(3, true).partition(3):
+    for group in "3/input".readFile.splitLines.partition(3):
         var si = toHashSet(group[0]) * toHashSet(group[1]) * toHashSet(group[2])
         doAssert len(si) == 1, "Set length failure"
         yield priority(si.pop())
 
 echo sum(toSeq(priorities))
-echo sum(toSeq(groupsOfThree))
+# Bork after refactor
+# echo sum(toSeq(groupsOfThree))
+

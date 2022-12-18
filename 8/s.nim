@@ -14,7 +14,7 @@ type
 # 33549
 # 35390
 # """.splitLines
-let data = fil(8)
+let data = "8/input".readFile.splitLines
 
 # Account for newline at the end
 let height: Natural = data.len-1

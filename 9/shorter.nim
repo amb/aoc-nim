@@ -1,7 +1,7 @@
 include ../aoc
 
 let moves = collect:
-    for line in fil(9):
+    for line in "9/input".readFile.splitLines:
         let (r, d, s) = line.scanTuple("$c $i")
         if r: vec2i(int(d=='R')-int(d=='L'), int(d=='D')-int(d=='U')) * s
 

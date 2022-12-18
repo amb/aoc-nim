@@ -1,6 +1,6 @@
 include ../aoc
 
-let lines = fil(5)
+let lines = "5/input".readFile.splitLines
 
 # Parse the input into arrays
 # ASSUMPTIONS: 9 crates, grid spacing locations are constant
@@ -10,7 +10,8 @@ doAssert len(lines[numsLoc]) == 35 # 3*9 + 8
 var stacks = newSeq[seq[char]](9)
 for l in countdown(numsLoc-1, 0):
     for n in 1..9:
-        if lines[l][1 + (n-1)*4].isAlphaAscii:
+        let ch = lines[l][1 + (n-1)*4]
+        if ch.isAlphaAscii:
             stacks[n-1].add(ch)
 
 let moves = collect:

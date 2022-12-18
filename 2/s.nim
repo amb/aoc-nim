@@ -40,8 +40,8 @@ echo sum(score2)
 
 # Codegolfing
 
-proc fil(n: int): seq[string] =
-    return readFile($n & "/input").splitLines().filterIt(len(it) > 2)
+# proc fil(n: int): seq[string] =
+#     return readFile($n & "/input").splitLines().filterIt(len(it) > 2)
 
-echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt((it[1]+1-it[0]).mod3*3+(it[1]+1)))
-echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt(it[1]*3+((it[0]+it[1]-1).mod3+1)))
+# echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt((it[1]+1-it[0]).mod3*3+(it[1]+1)))
+# echo sum(fil(2).mapIt((it[0]-'A',it[2]-'X')).mapIt(it[1]*3+((it[0]+it[1]-1).mod3+1)))

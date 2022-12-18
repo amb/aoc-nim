@@ -25,7 +25,7 @@ let parser = peg "input":
     lsfile <- >(+Digit) * ' ' * >(+{'a'..'z','.'}):
         discard newItem(parseInt($1), $2)
     lsdir <- "dir " * (+Alpha)
-echo parser.match(filr(7)).ok
+echo parser.match("7/input".readFile).ok
 
 proc sizeWalk(fi: FileItem, sizes: var seq[int]): int =
     result = fi.size

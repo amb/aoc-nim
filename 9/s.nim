@@ -48,7 +48,7 @@ proc follow(tail: var Vec2D, head: Vec2D) =
     elif disp == vec(0, 2): tail += vec(0, 1)
     else: tail += disp/abs(disp)
 
-let moves = fil(9).
+let moves = "9/input".readFile.splitLines.
     mapIt(it.scanTuple("$c $i")).
     filterIt(it[0]).
     mapIt(it[1].moveDir.get * it[2])

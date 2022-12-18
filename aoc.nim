@@ -6,25 +6,21 @@ import std/[sets, strscans, tables, re, options, monotimes, times]
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
 
-proc fil*(n: int): seq[string] = readFile($n & "/input").splitLines()
-proc filn*(n: int): seq[string] = fil(n)[0..^2]
-proc filr*(n: int): string = readFile($n & "/input")
+# proc intParser*(s: string, i: var int): bool =
+#     try:
+#         i = parseInt(s.strip)
+#     except ValueError:
+#         return false
+#     true
 
-proc intParser*(s: string, i: var int): bool =
-    try:
-        i = parseInt(s.strip)
-    except ValueError:
-        return false
-    true
-
-proc ints*(s: string): seq[int] = 
-    for r in s.findAll(re"-?\d+"): 
+proc ints*(s: string): seq[int] =
+    for r in s.findAll(re"-?\d+"):
         result.add(r.parseInt)
 
-proc getOrZero*(si: seq[int], d: int): int = 
-    if si.len > 0 and d >= 0 and d < si.len: 
-        si[d] 
-    else: 
+proc getOrZero*(si: seq[int], d: int): int =
+    if si.len > 0 and d >= 0 and d < si.len:
+        si[d]
+    else:
         0
 
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
@@ -56,7 +52,7 @@ iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
         else:
             tloc = 0
         inc loc
-    if sloc <= loc-1: 
+    if sloc <= loc-1:
         yield (sloc..<loc)
         # yield s[sloc..<loc]
 
@@ -75,24 +71,24 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
             result = i
             break
 
-iterator findAllIf*[T](s: seq[T], pred: proc(x: T): bool): int =
-    for i, x in s:
-        if pred(x):
-            yield i
+# iterator findAllIf*[T](s: seq[T], pred: proc(x: T): bool): int =
+#     for i, x in s:
+#         if pred(x):
+#             yield i
 
-proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
-    result = none(T)
-    for x in s:
-        if pred(x):
-            result = some(x)
-            break
+# proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
+#     result = none(T)
+#     for x in s:
+#         if pred(x):
+#             result = some(x)
+#             break
 
-proc firstInt*(s: string): int {.inline.} = 
-    let l = s.findBounds(re"-?\d+")
-    if l != (-1, 0):
-        s[l[0]..l[1]].parseInt
-    else:
-        -1
+# proc firstInt*(s: string): int {.inline.} =
+#     let l = s.findBounds(re"-?\d+")
+#     if l != (-1, 0):
+#         s[l[0]..l[1]].parseInt
+#     else:
+#         -1
 
 iterator slidingWindow*(dt: string, size: int): tuple[index: int, view: string] =
     for i in 0..dt.len-size:
@@ -131,7 +127,6 @@ proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 
 
 # Cubism
-
 const CUBEDIRS = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
@@ -141,21 +136,19 @@ const CUBEDIRS = [
 type CubeCoord = (int, int, int)
 type CubeLocs = HashSet[CubeCoord]
 
-proc cubecoord(x, y, z: int): CubeCoord = (x, y, z)
-
-proc `-`(a, b: (int, int, int)): (int, int, int) = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
-proc `+`(a, b: (int, int, int)): (int, int, int) = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
-proc max(a, b: (int, int, int)): (int, int, int) =
-    (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
-proc min(a, b: (int, int, int)): (int, int, int) =
-    (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
-
-proc asCubeCoord(v: seq[int]): CubeCoord =
+proc cubecoord(v: seq[int]): CubeCoord =
     assert v.len == 3
     (v[0], v[1], v[2])
 
-proc `+`(cb: CubeLocs, v: CubeCoord): CubeLocs = 
-    for cube in cb: 
+proc cubecoord(x, y, z: int): CubeCoord = (x, y, z)
+
+proc `-`(a, b: CubeCoord): CubeCoord = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+proc `+`(a, b: CubeCoord): CubeCoord = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+proc max(a, b: CubeCoord): CubeCoord = (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
+proc min(a, b: CubeCoord): CubeCoord = (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
+
+proc `+`(cb: CubeLocs, v: CubeCoord): CubeLocs =
+    for cube in cb:
         result.incl(cube+v)
 
 proc max(cb: CubeLocs): CubeCoord =
@@ -220,12 +213,8 @@ proc `&`(ca, cb: CubeLocs): CubeLocs =
         if loc in ca:
             result.incl(loc)
 
-# let cubeNb = cubes.neighbours
-# assert cubeNb.len <= cubes.len * 6
-# assert (cubes.len * 6 - cubeNb.len) == (cubeNb - cubes).len
-
 # Compiling tips:
-# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim 
+# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim
 
 # Get and set for seq[seq[T]] with tuple (int, int) indexing
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
@@ -239,7 +228,7 @@ proc prtTime*(t: Duration) =
     echo fmt"Time: {mlsecs} ms, {mcsecs} µs"
 
 # from os import fileExists
-# proc readInput*(n: int,strut:string  = ""): string = 
+# proc readInput*(n: int,strut:string  = ""): string =
 #     for dirs in ["../inputs/", "./inputs/"]:
 #         result = dirs
 #         if n<10:
