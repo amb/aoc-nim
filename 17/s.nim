@@ -171,13 +171,15 @@ proc getRepeatingResult(e: var Engine, tryCount, totalCount: int): int =
     # echo fmt"Repeating part: {a} -> {b}"
     # echo fmt"At iterations: {e.loopcount[a]}, {e.loopcount[b]}"
     # echo fmt"So, {e.loopcount[b]-e.loopcount[a]} iterations gives {b-a} increase after {a}."
-    # echo ""
 
     # Repeating segment playback
     let loopDiff = e.loopcount[b]-e.loopcount[a]
     let repetitions = (totalCount-e.loopcount[a]) div loopDiff
     var headLoc = e.loopcount[a] + loopDiff * repetitions
     var rowCount = a + (b-a) * repetitions
+
+    # NOTE: I got stuck here for so long because of faulty assumptions:
+    #       Sometimes headLoc increases, but rowCount does not---is the right way
     for rowLoc in a+(b-a)..<b+(b-a):
         let thisLoop = e.loopcount[rowLoc]
         let previousLoop = e.loopcount[rowLoc-1]
@@ -192,12 +194,12 @@ proc getRepeatingResult(e: var Engine, tryCount, totalCount: int): int =
 # Part 1
 var engine = newEngine()
 let p1 = engine.run(2022)
-# assert p1 == 3175
-echo p1
+assert p1 == 3175
 
 # Part 2
 engine = newEngine()
-echo engine.getRepeatingResult(10_000, 1000000000000.int)
+let p2 = engine.getRepeatingResult(10_000, 1000000000000.int)
+assert p2 == 1555113636385
 
 for i in 1..10:
     let tval = 5000 + i*3333
@@ -208,6 +210,4 @@ for i in 1..10:
     engine = newEngine()
     let tb = engine.run(tval)
 
-    assert ta == tb, fmt"Not matching for {i}: {ta}, {tb}"
-
-# 1555113636800 too high
+    assert ta == tb, fmt"Not matching for {i} ({tval}): {ta}, {tb}"
