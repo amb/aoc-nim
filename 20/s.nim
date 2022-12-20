@@ -51,27 +51,27 @@ for i in 0..input.len-1:
     var bloc = loc+dir
     var counter = abs(input[loc].value)
     while counter > 0:
-        assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4], $counter
-        if bloc >= input.len:
+        # assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4], $counter
+        # echo input.mapIt(it.value)
+        swapThem(aloc, bloc)
+        if bloc == input.len-1:
             rollRight()
+            aloc = bloc
             bloc = 0
-            inc counter
-        elif bloc < 0:
+        elif bloc == 0:
             rollLeft()
-            bloc = input.len - 1
-            inc counter
-        else:
-            assert abs(aloc-bloc) < 2
-            swapThem(aloc, bloc)
-        bloc = bloc+dir
+            aloc = bloc
+            bloc = input.len-1
+
+        bloc = (bloc+dir).floorMod(input.len)
         aloc = (aloc+dir).floorMod(input.len)
+
         dec counter
-    echo input.mapIt(it.value)
-    # echo positions
-    assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4]
-    # echo positions
+
+    # echo input.mapIt(it.value)
 
 echo "---"
 echo input
 echo input.mapIt(it.value)
 echo positions
+# assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4], $counter
