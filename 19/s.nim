@@ -2,6 +2,7 @@ include ../aoc
 
 type
     Mineral = enum Ore, Clay, Obsidian, Geode
+    MineralCount = array[Mineral, int]
     Goods = array[Mineral, int]
     Robots = array[Mineral, int]
     Blueprint = array[Mineral, Goods]
@@ -32,6 +33,9 @@ proc `<=`(a, b: Goods): bool =
 proc sgn(a: Goods): Goods =
     for i in Mineral:
         result[i] = (if a[i]>0: 1 else: 0)
+proc `/`(a, b: Goods): Goods =
+    for i in Mineral:
+        result[i] = a[i].ceilDiv(b[i])
 proc `+`(a, b: Goods): Goods =
     for i in Mineral:
         result[i] = a[i] + b[i]
@@ -53,51 +57,52 @@ proc tryBuild(bench: var Situation, rb: Mineral, nrb: var Option[Mineral]): bool
         nrb = none(Mineral)
         return false
 
-proc turnsToBuild(bench: Situation, rb: Mineral): int =
-    var tinv = bench.inventory
-
+proc turnsToBuild(bench: Situation, rb: Mineral): Option[int] =
     # Have robots to eventually build it?
     if bench.blueprint[rb].sgn <= bench.robots:
         # How long will it take?
-        # inventory + robots * turns > blueprint[rb]
+
+        # inventory + robots * turns >= blueprint[rb]
         # turns = (blueprint[rb] - inventory) / robots
+        
         # (2-2)/1 => 0 (0)
         # (2-1)/3 => 1 (0)
         # (2-5)/2 => 0 (-1)
         # (12-2)/2 => 5 (5)
         # (12-1)/2 => 6 (5)
         # (12-0)/2 => 6 (6)
+        # div (math.ceilDiv)
 
+        var turns: Goods
         for m in Mineral:
-            tinv[m] += bench.robots[m]
+            let mrob = bench.robots[m]
+            let tdif = bench.blueprint[rb][m] - bench.inventory[m]
+            if mrob > 0 and tdif >= 0:
+                turns[m] = tdif.ceilDiv(mrob)
+
+        return some(max(turns))
         
-    return 999
+    return none(int)
 
-proc shouldWait(bench: Situation, rb: Mineral): bool =
-    # What mats and how much do I need?
-    var required = bench.blueprint[rb] - bench.inventory
-    for m in Mineral:
-        required[m] = max(0, required[m])
+proc doesNotDelay(bench: Situation, rba, rbb: Mineral): bool =
+    var tb = bench
 
-    # if turnsToBuild(rb) < 2:
-    #     etc...
-
-    if required[Ore] < 2:
+    let t0 = tb.turnsToBuild(rba)
+    if not t0.isSome:
         return true
 
-    return false
+    # Sim next step
+    var created = false
+    if tb.blueprint[rbb] <= tb.inventory:
+        tb.inventory -= tb.blueprint[rbb]
+        created = true
+    tb.runRobots
+    if created:
+        inc tb.robots[rbb]
 
-# proc canAfford(iv: Goods, rb: Mineral, bp: Blueprint): bool = bp[rb] <= iv
-
-# proc canFutureBuild(iv: Goods, rb: Mineral, robots: Robots, bp: Blueprint): bool =
-#     var trob = robots
-#     var tinv = iv
-#     for count in 1..4:
-#         tinv.runRobots(trob)
-#         if tinv.canAfford(rb, bp):
-#             echo count
-#             break
-#     return false
+    let t1 = tb.turnsToBuild(rba).get
+    
+    return t0.get < t1
 
 var bench: Situation
 bench.blueprint = blueprints[0]
@@ -109,17 +114,15 @@ for timeStep in 1..24:
     var newRobot: Option[Mineral]
 
     if not bench.tryBuild(Geode, newRobot):
-        if bench.inventory[Obsidian] < bench.blueprint[Geode][Obsidian]:
+        if bench.doesNotDelay(Geode, Obsidian):
             if not bench.tryBuild(Obsidian, newRobot):
-                if bench.inventory[Clay] < bench.blueprint[Obsidian][Clay]:
+                if bench.doesNotDelay(Obsidian, Clay):
                     discard bench.tryBuild(Clay, newRobot)
 
     bench.runRobots
 
     if newRobot.isSome:
         inc bench.robots[newRobot.get]
-
-    # discard bench.inventory.canFutureBuild(Obsidian, bench.robots, bench.blueprint)
 
     echo fmt"Time: {timeStep}, {bench.inventory}, {bench.robots}"
 
