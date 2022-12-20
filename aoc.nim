@@ -286,6 +286,9 @@ type
         index: seq[int]
         position: seq[int]
 
+proc `[]`[T](p: Positionals[T], l: int): T = p.data[l]
+proc len[T](p: Positionals[T]): int = p.data.len
+
 proc newPositionals[T](d: seq[T]): Positionals[T] =
     result.data = d
     result.index = toSeq(0..d.len-1)
