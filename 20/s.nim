@@ -2,8 +2,7 @@ include ../aoc
 
 proc solve(p: var Positionals[int], mp: int): int =
     for _ in 1..mp:
-        for i in 0..p.len-1:
-            let a = p.position[i]
+        for a in p.position:
             let b = (a + p[a]).floorMod(p.len-1)
             if a < b:
                 for j in countup(a, b-1):
