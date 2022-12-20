@@ -1,62 +1,45 @@
 include ../aoc
 import std/[enumerate, intsets]
 
-proc roller(p: var Positionals, aloc, bloc: var int) =
-    ## If moved to the edge, roll around
-    if bloc == p.data.len-1:
-        p.rollRight()
-        aloc = bloc
-        bloc = 0
-    elif bloc == 0:
-        p.rollLeft()
-        aloc = bloc
-        bloc = p.data.len-1
-
-proc solve(ifile: string): Positionals[int] =
-    var input = collect:
-        for line in ifile.readFile.strip.splitLines:
-            line.parseInt
-
-    var p = newPositionals(input)
-
-    for i in 0..p.data.len-1:
-        let loc = p.position[i]
-        let dir = p.data[loc].sgn
-        if dir == 0:
-            continue
-        
-        var aloc = loc
-        var bloc = loc+dir
-        
-        if bloc < 0:
-            p.rollLeft()
-            bloc = p.data.len-2
-            aloc = p.data.len-1
-        elif bloc >= p.data.len:
-            p.rollRight()
-            bloc = 1
-            aloc = 0
-
-        for _ in 1..abs(p.data[loc]):
-            p.swapItems(aloc, bloc)
-            p.roller(aloc, bloc)
-            bloc = (bloc+dir).floorMod(p.data.len)
-            aloc = (aloc+dir).floorMod(p.data.len)
-
-    return p
+proc solve(p: var Positionals[int], mp: int) =
+    for _ in 1..mp:
+        for i in 0..p.data.len-1:
+            let a = p.position[i]
+            let b = (a + p.data[a]).floorMod(p.data.len-1)
+            if a < b:
+                for j in countup(a, b-1):
+                    p.swapItems(j, j+1)
+                if b ==  p.data.len - 1:
+                    p.rollRight
+            elif a > b:
+                for j in countdown(a, b+1):
+                    p.swapItems(j, j-1)
+                if b == 0:
+                    p.rollLeft
 
 proc calculate(p: Positionals[int]): int =
     let zeroAt = p.data.find(0)
     [1000, 2000, 3000].mapIt(p.data[(zeroAt+it).floorMod(p.data.len)]).sum
 
+proc parse(ifile: string): Positionals[int] =
+    ifile.readFile.strip.splitlines.mapIt(it.parseInt).newPositionals
 
-let p1test = solve("20/test")
+var p1test = "20/test".parse
+solve(p1test, 1)
 assert p1test.data == @[1, 2, -3, 4, 0, 3, -2]
 assert p1test.position.mapIt(p1test.data[it]) == @[1, 2, -3, 3, -2, 0, 4]
 assert calculate(p1test) == 3
 
-echo solve("20/input").calculate
+var p1i = "20/input".parse
+p1i.solve(1)
+assert p1i.calculate == 14526
 
+var p2test = "20/test".parse
+p2test.data *= 811589153
+solve(p2test, 10)
+assert p2test.calculate == 1623178306
 
-# Not -3052
-# Not 9735, too low
+var p2i = "20/input".parse
+p2i.data *= 811589153
+solve(p2i, 10)
+echo p2i.calculate

@@ -6,6 +6,15 @@ import std/[sets, strscans, tables, re, options, monotimes, times]
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
 
+proc `*`*(l: seq[int], v: int): seq[int] =
+    for i in 0..l.len-1:
+        result.add(l[i] * v)
+    assert result.len == l.len
+
+proc `*=`*(l: var seq[int], v: int) =
+    for i in 0..l.len-1:
+        l[i] *= v
+
 # proc intParser*(s: string, i: var int): bool =
 #     try:
 #         i = parseInt(s.strip)
