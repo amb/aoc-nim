@@ -14,14 +14,16 @@ proc solve(p: var Positionals[int], mp: int): int =
                     p.swapItems(j, j-1)
                 if b == 0:
                     p.rollLeft()
-
+                    
     let zeroAt = p.data.find(0)
     return [1000, 2000, 3000].mapIt(p[(zeroAt+it).floorMod(p.len)]).sum
 
 let input = "20/input".readFile.ints
-var p1i = input.newPositionals
-assert p1i.solve(1) == 14526
+echo fmt"Len: {input.len}, min heap: {nextPowerOfTwo(input.len)}"
+let answer = oneTimeIt:
+    var p1i = input.newPositionals
+    var p2i = input.newPositionals
+    p2i.data *= 811589153
+    (p1i.solve(1), p2i.solve(10))
 
-var p2i = input.newPositionals
-p2i.data *= 811589153
-assert p2i.solve(10) == 9738258246847
+assert answer == (14526, 9738258246847.int)
