@@ -1,77 +1,62 @@
 include ../aoc
 import std/[enumerate, intsets]
 
-var input = collect:
-    for (il, line) in enumerate("20/test".readFile.strip.splitLines):
-        (value: line.parseInt, index: il)
+proc roller(p: var Positionals, aloc, bloc: var int) =
+    ## If moved to the edge, roll around
+    if bloc == p.data.len-1:
+        p.rollRight()
+        aloc = bloc
+        bloc = 0
+    elif bloc == 0:
+        p.rollLeft()
+        aloc = bloc
+        bloc = p.data.len-1
 
-# Fails on input, not on test:
-# assert input.len == input.mapIt(it[0]).deduplicate.len
+proc solve(ifile: string): Positionals[int] =
+    var input = collect:
+        for line in ifile.readFile.strip.splitLines:
+            line.parseInt
 
-var positions = toSeq(0..input.len-1)
-assert positions.len == input.len
+    var p = newPositionals(input)
 
-proc swapThem(a, b: int) =
-    swap(input[a], input[b])
-    swap(positions[input[a].index], positions[input[b].index])
+    for i in 0..p.data.len-1:
+        let loc = p.position[i]
+        let dir = p.data[loc].sgn
+        if dir == 0:
+            continue
+        
+        var aloc = loc
+        var bloc = loc+dir
+        
+        if bloc < 0:
+            p.rollLeft()
+            bloc = p.data.len-2
+            aloc = p.data.len-1
+        elif bloc >= p.data.len:
+            p.rollRight()
+            bloc = 1
+            aloc = 0
 
-proc rollR[T](a: var seq[T]) =
-    let t = a[^1]
-    for i in countdown(a.len-1, 1): 
-        a[i] = a[i-1]
-    a[0] = t
+        for _ in 1..abs(p.data[loc]):
+            p.swapItems(aloc, bloc)
+            p.roller(aloc, bloc)
+            bloc = (bloc+dir).floorMod(p.data.len)
+            aloc = (aloc+dir).floorMod(p.data.len)
 
-proc rollL[T](a: var seq[T]) =
-    let t = a[0]
-    for i in countup(0, a.len-2): 
-        a[i] = a[i+1]
-    a[^1] = t
+    return p
 
-proc rollRight() =
-    input.rollR
-    for i in 0..<positions.len:
-        inc positions[i]
-        if positions[i] >= positions.len:
-            positions[i] = 0
+proc calculate(p: Positionals[int]): int =
+    let zeroAt = p.data.find(0)
+    [1000, 2000, 3000].mapIt(p.data[(zeroAt+it).floorMod(p.data.len)]).sum
 
-proc rollLeft() =
-    input.rollL
-    for i in 0..<positions.len:
-        dec positions[i]
-        if positions[i] < 0:
-            positions[i] = positions.len-1
 
-for i in 0..input.len-1:
-    let loc = positions[i]
-    let dir = input[loc].value.sgn
-    if dir == 0:
-        continue
-    echo fmt"Move {input[positions[i]].value} at {positions[i]}"
-    var aloc = loc
-    var bloc = loc+dir
-    var counter = abs(input[loc].value)
-    while counter > 0:
-        # assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4], $counter
-        # echo input.mapIt(it.value)
-        swapThem(aloc, bloc)
-        if bloc == input.len-1:
-            rollRight()
-            aloc = bloc
-            bloc = 0
-        elif bloc == 0:
-            rollLeft()
-            aloc = bloc
-            bloc = input.len-1
+let p1test = solve("20/test")
+assert p1test.data == @[1, 2, -3, 4, 0, 3, -2]
+assert p1test.position.mapIt(p1test.data[it]) == @[1, 2, -3, 3, -2, 0, 4]
+assert calculate(p1test) == 3
 
-        bloc = (bloc+dir).floorMod(input.len)
-        aloc = (aloc+dir).floorMod(input.len)
+echo solve("20/input").calculate
 
-        dec counter
 
-    # echo input.mapIt(it.value)
-
-echo "---"
-echo input
-echo input.mapIt(it.value)
-echo positions
-# assert positions.mapIt(input[it].value) == @[1, 2, -3, 3, -2, 0, 4], $counter
+# Not -3052
+# Not 9735, too low

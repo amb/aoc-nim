@@ -23,6 +23,20 @@ proc getOrZero*(si: seq[int], d: int): int =
     else:
         0
 
+
+proc rollR[T](a: var seq[T]) =
+    let t = a[^1]
+    for i in countdown(a.len-1, 1): 
+        a[i] = a[i-1]
+    a[0] = t
+
+proc rollL[T](a: var seq[T]) =
+    let t = a[0]
+    for i in countup(0, a.len-2): 
+        a[i] = a[i+1]
+    a[^1] = t
+
+
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
     assert i.len mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
     var c: seq[T]
@@ -255,3 +269,39 @@ proc prtTime*(t: Duration) =
 #         d = min(d, nd)
 #         inc i
 #     (vals[0], d)
+
+
+type
+    Positionals[T] = object
+        data: seq[T]
+        index: seq[int]
+        position: seq[int]
+
+proc newPositionals[T](d: seq[T]): Positionals[T] =
+    result.data = d
+    result.index = toSeq(0..d.len-1)
+    result.position = toSeq(0..d.len-1)
+    assert result.data.len == result.position.len
+
+proc swapItems(p: var Positionals, a, b: int) =
+    swap(p.data[a], p.data[b])
+    swap(p.index[a], p.index[b])
+    swap(p.position[p.index[a]], p.position[p.index[b]])
+
+proc rollRight(p: var Positionals) =
+    p.data.rollR
+    p.index.rollR
+    for i in 0..<p.position.len:
+        inc p.position[i]
+        if p.position[i] >= p.position.len:
+            p.position[i] = 0
+
+proc rollLeft(p: var Positionals) =
+    p.data.rollL
+    p.index.rollL
+    for i in 0..<p.position.len:
+        dec p.position[i]
+        if p.position[i] < 0:
+            p.position[i] = p.position.len-1
+
+
