@@ -87,6 +87,10 @@ proc addShadow*(sl: var ShadowLines, seg: (int, int)) =
             discard
     sl.addItem(finalSeg)
 
+# TODO: two sorted shadowline (set of non-intersecting ranges)
+#       do not require sorting to join or test for collisions
+#       IMPLEMENT both
+
 # TODO: super stupid, doesn't actually clip left or right
 iterator empties*(segs: ShadowLines, lval, hval: int): (int, int) =
     var i = 0

@@ -15,12 +15,10 @@ proc `*=`*(l: var seq[int], v: int) =
     for i in 0..l.len-1:
         l[i] *= v
 
-# proc intParser*(s: string, i: var int): bool =
-#     try:
-#         i = parseInt(s.strip)
-#     except ValueError:
-#         return false
-#     true
+# Get and set for seq[seq[T]] with tuple (int, int) indexing
+proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
+proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
+proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
 
 proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"):
@@ -31,7 +29,6 @@ proc getOrZero*(si: seq[int], d: int): int =
         si[d]
     else:
         0
-
 
 proc rollR[T](a: var seq[T]) =
     let t = a[^1]
@@ -45,7 +42,6 @@ proc rollL[T](a: var seq[T]) =
         a[i] = a[i+1]
     a[^1] = t
 
-
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
     assert i.len mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
     var c: seq[T]
@@ -54,8 +50,6 @@ proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
         if c.len == pss:
             result.add(c)
             c.setLen(0)
-
-# TODO: strided arrays, would solve a lot of edge cases
 
 iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
     ## Iterating over `s` until last values match `stopper`.
@@ -94,24 +88,10 @@ proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
             result = i
             break
 
-# iterator findAllIf*[T](s: seq[T], pred: proc(x: T): bool): int =
-#     for i, x in s:
-#         if pred(x):
-#             yield i
-
-# proc findFirst*[T](s: seq[T], pred: proc(x: T): bool): Option[T] =
-#     result = none(T)
-#     for x in s:
-#         if pred(x):
-#             result = some(x)
-#             break
-
-# proc firstInt*(s: string): int {.inline.} =
-#     let l = s.findBounds(re"-?\d+")
-#     if l != (-1, 0):
-#         s[l[0]..l[1]].parseInt
-#     else:
-#         -1
+iterator findAllIf*[T](s: seq[T], pred: proc(x: T): bool): int =
+    for i, x in s:
+        if pred(x):
+            yield i
 
 iterator slidingWindow*(dt: string, size: int): tuple[index: int, view: string] =
     for i in 0..dt.len-size:
@@ -239,33 +219,17 @@ proc `&`(ca, cb: CubeLocs): CubeLocs =
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim
 
-# Get and set for seq[seq[T]] with tuple (int, int) indexing
-proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
-proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
-proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
-
 proc prtTime*(t: Duration) =
     let mstime = t.inMicroseconds
     let mlsecs = mstime div 1000
     let mcsecs = mstime - (mlsecs * 1000)
     echo fmt"Time: {mlsecs} ms, {mcsecs} µs"
 
-# from os import fileExists
-# proc readInput*(n: int,strut:string  = ""): string =
-#     for dirs in ["../inputs/", "./inputs/"]:
-#         result = dirs
-#         if n<10:
-#             result = result&"0"
-#         result = result & $n & strut & ".txt"
-#         if result.fileExists:
-#             return result.readFile
-
-
-# template oneTimeIt*(body: untyped): untyped =
-#     let t0 = getMonoTime()
-#     let val = body
-#     let t1 = getMonoTime()
-#     (val, t1-t0)
+template oneTimeIt(body: untyped): untyped =
+    let timeStart = getMonoTime()
+    let val = body
+    (getMonoTime() - timeStart).prtTime
+    val
 
 # template timeIt*(body: untyped): untyped =
 #     var i = 1
@@ -278,7 +242,6 @@ proc prtTime*(t: Duration) =
 #         d = min(d, nd)
 #         inc i
 #     (vals[0], d)
-
 
 type
     Positionals[T] = object
