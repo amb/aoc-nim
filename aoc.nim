@@ -282,3 +282,30 @@ proc rollLeft(p: var Positionals, ps, pe: int) =
     p.index.rollL(ps, pe)
 
 
+proc findRoot(fn: proc (v: int): int, maxSteps = int.high): int =
+    ## Bisection for integer funtions
+    # Apparently this is called bisection
+    # https://en.wikipedia.org/wiki/Bisection_method
+    var step = 100
+    var curResult = 0
+    var prevResult = 0
+    var tryValue = 1000
+    var curLoop = maxSteps
+    while curLoop > 0:
+        prevResult = curResult
+        curResult = fn(tryValue)
+        if curResult == 0:
+            return tryValue
+
+        if prevResult.sgn == curResult.sgn:
+            step += step div 3 + 1
+        elif prevResult.sgn != curResult.sgn:
+            step = step div 2
+
+        if curResult < 0:
+            tryValue -= step
+        elif curResult > 0:
+            tryValue += step
+
+        dec curLoop
+    return 0
