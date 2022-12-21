@@ -33,9 +33,9 @@ var monkeys = parse("21/input".readFile.strip)
 proc calculate(tryThis: int): int =
     var cloneMonkeys = monkeys.deepCopy
     cloneMonkeys["humn"].value = some(tryThis)
-    while not cloneMonkeys["root"].value.isSome:
+    while cloneMonkeys["root"].value.isNone:
         for k, m in cloneMonkeys.pairs:
-            if not m.value.isSome and m.op != nil:
+            if m.value.isNone and m.op != nil:
                 let va = cloneMonkeys[m.a].value
                 let vb = cloneMonkeys[m.b].value
                 if va.isSome and vb.isSome:
