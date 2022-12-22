@@ -131,8 +131,10 @@ proc `*`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x*b, y: a.y*b)
 proc `/`*(a: Vec2i, b: Vec2i): Vec2i = Vec2i(x: a.x div b.x, y: a.y div b.y)
 proc `/`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x div b, y: a.y div b)
 proc `-`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x - b.x, y: a.y - b.y)
+proc `-=`*(a: var Vec2i, b: Vec2i) = a = a-b
 proc `+`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x + b.x, y: a.y + b.y)
 proc `+=`*(a: var Vec2i, b: Vec2i) = a = a+b
+proc `==`*(a: var Vec2i, b: (int, int)): bool = a.x == b[0] and a.y == b[1]
 proc min*(a, b: Vec2i): Vec2i = Vec2i(x: min(a.x, b.x), y: min(a.y, b.y))
 proc max*(a, b: Vec2i): Vec2i = Vec2i(x: max(a.x, b.x), y: max(a.y, b.y))
 proc abs*(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
@@ -142,6 +144,12 @@ proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
+proc rotate90*(v: var Vec2i, d: int) = 
+    if d != -1 and d != 1:
+        return
+    let t = v.x
+    v.x = -v.y * d
+    v.y = t * d
 
 # _________                         .___             __          
 # \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
@@ -149,7 +157,6 @@ proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 # \     \___(  <_> |  <_> )  | \/ /_/ |\___ \\  ___/|  |  \___ \ 
 #  \______  /\____/ \____/|__|  \____ /____  >\___  >__| /____  >
 #         \/                         \/    \/     \/          \/ 
-
 
 type Coord2D = (int, int)
 type Coords2D = HashSet[Coord2D]
@@ -178,34 +185,35 @@ proc `+`(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
 proc max(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
 proc min(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
 
-proc fill(T: typedesc[Coord2D], v: int) = (v, v)
-proc fill(T: typedesc[Coord3D], v: int) = (v, v, v)
+proc fill(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
+proc fill(T: typedesc[Coords3D], v: int): Coord3D = (v, v, v)
 
-proc faces(T: typedesc[Coords2D]): array[4, Coords2D] = [
+proc faces(T: typedesc[Coords2D]): array[4, Coord2D] = [
     (1, 0), (-1, 0),
     (0, 1), (0, -1)]
 
-proc faces(T: typedesc[Coords3D]): array[6, Coords3D] = [
+proc faces(T: typedesc[Coords3D]): array[6, Coord3D] = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
     (0, 0, 1), (0, 0, -1)]
 
-proc one(T: typedesc[Coords2D]): Coords2D = (1, 1)
-proc one(T: typedesc[Coords3D]): Coords3D = (1, 1, 1)
+proc one(T: typedesc[Coords2D]): Coord2D = (1, 1)
+proc one(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
 
-proc `+`[AnyCoords](cb: AnyCoords, v: AnyCoords): AnyCoords =
-    for i in cb:
-        result.incl(i+v)
-
-proc max[AnyCoords](cb: AnyCoords): AnyCoords =
-    result = fill[AnyCoords](int.low)
+proc max(cb: AnyCoords): AnyCoord =
+    result = AnyCoords.fill(int.low)
     for c in cb:
         result = max(result, c)
 
-proc min[AnyCoords](cb: AnyCoords): AnyCoords =
-    result = fill[AnyCoords](int.high)
+proc min(cb: AnyCoords): AnyCoord =
+    result = AnyCoords.fill(int.high)
     for c in cb:
         result = min(result, c)
+
+proc `+`(cb: AnyCoords, v: AnyCoord): AnyCoords =
+    for i in cb:
+        result.excl(v)
+        result.incl(i+v)
 
 proc `-`(ca, cb: AnyCoords): AnyCoords =
     for cube in ca:
@@ -256,14 +264,14 @@ proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
             result.incl(coord3d(cmin[0], y, z))
             result.incl(coord3d(cmax[0], y, z))
 
-iterator throwNet[T](cubes: AnyCoords, run: proc (ind: AnyCoords): T): T =
+iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T): T =
     let drone = AnyCoords.one
     let cmin = cubes.min - drone * 2
     let cmax = cubes.max + drone * 2
     var outerNodes = fillBoundary(cmin - drone, cmax + drone)
     var innerNodes = fillBoundary(cmin, cmax)
     while innerNodes.len > 0:
-        let nextStep = (innerNodes.neighbours - outerNodes - cubes)
+        let nextStep = (innerNodes.neighbours - outerNodes) - cubes
         outerNodes = innerNodes
         innerNodes = nextStep
         yield run(innerNodes)
