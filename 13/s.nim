@@ -49,7 +49,7 @@ var lines = data.split("\n").filterIt(it.len > 0)
 lines.add("[[2]]")
 lines.add("[[6]]")
 lines.sort(isRightOrder)
-echo "Part 2: ", (lines.findIf(x => x=="[[6]]")+1) * (lines.findIf(x => x=="[[2]]")+1)
+echo "Part 2: ", (lines.find("[[6]]")+1) * (lines.find("[[2]]")+1)
 
 # 3446 too low
 # 5292 part 1 right 8:30

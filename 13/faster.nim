@@ -55,6 +55,14 @@ proc anyDigit(s: string): bool =
         if i.isDigit:
             result = true
 
+proc stringSplit*(s: string, stopper: char): (string, string) =
+    var loc = 0
+    while loc < s.len:
+        if s[loc] == stopper:
+            return (s[0..<loc], s[loc+1..s.len-1])
+        inc loc
+    return (s, "")
+
 proc solve1(data: string): int {.meter.} =
     data.pieces("\n\n") --> 
         map(data[it].stringSplit('\n')).
@@ -76,7 +84,7 @@ proc solve2(data: string): int {.meter.} =
     lines.add("[[2]]")
     lines.add("[[6]]")
     lines.sort(isRightOrder)
-    (lines.findIf(x => x=="[[6]]")+1+diff) * (lines.findIf(x => x=="[[2]]")+1+diff)
+    (lines.find("[[6]]")+1+diff) * (lines.find("[[2]]")+1+diff)
 
 metricsConfirm()
 
