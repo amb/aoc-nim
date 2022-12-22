@@ -7,3 +7,7 @@ let destroy = collect:
 
 for f in destroy:
     f.removeFile
+
+# getFileInfo
+# FileInfo.permissions
+# FilePermission.fpUserExec, fpGroupExec, fpOthersExec

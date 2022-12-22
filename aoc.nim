@@ -1,7 +1,17 @@
 # Lots of dumb stuff here
+# Compiling tips:
+# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
 import std/[sets, strscans, tables, re, options, monotimes, times]
+
+# _________                                  .__                            
+# \_   ___ \  ____   _______  __ ____   ____ |__| ____   ____   ____  ____  
+# /    \  \/ /  _ \ /    \  \/ // __ \ /    \|  |/ __ \ /    \_/ ___\/ __ \ 
+# \     \___(  <_> )   |  \   /\  ___/|   |  \  \  ___/|   |  \  \__\  ___/ 
+#  \______  /\____/|___|  /\_/  \___  >___|  /__|\___  >___|  /\___  >___  >
+#         \/            \/          \/     \/        \/     \/     \/    \/ 
+# https://patorjk.com/software/taag/#p=display&f=Graffiti
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
@@ -15,20 +25,31 @@ proc `*=`*(l: var seq[int], v: int) =
     for i in 0..l.len-1:
         l[i] *= v
 
-# Get and set for seq[seq[T]] with tuple (int, int) indexing
-proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
-proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
-proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
+# __________                     .__                
+# \______   \_____ _______  _____|__| ____    ____  
+#  |     ___/\__  \\_  __ \/  ___/  |/    \  / ___\ 
+#  |    |     / __ \|  | \/\___ \|  |   |  \/ /_/  >
+#  |____|    (____  /__|  /____  >__|___|  /\___  / 
+#                 \/           \/        \//_____/  
+
+proc stringSplit*(s: string, stopper: char): (string, string) =
+    var loc = 0
+    while loc < s.len:
+        if s[loc] == stopper:
+            return (s[0..<loc], s[loc+1..s.len-1])
+        inc loc
+    return (s, "")
 
 proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"):
         result.add(r.parseInt)
 
-proc getOrZero*(si: seq[int], d: int): int =
-    if si.len > 0 and d >= 0 and d < si.len:
-        si[d]
-    else:
-        0
+#   _________                                                      
+#  /   _____/ ____  ________ __   ____   ____   ____  ____   ______
+#  \_____  \_/ __ \/ ____/  |  \_/ __ \ /    \_/ ___\/ __ \ /  ___/
+#  /        \  ___< <_|  |  |  /\  ___/|   |  \  \__\  ___/ \___ \ 
+# /_______  /\___  >__   |____/  \___  >___|  /\___  >___  >____  >
+#         \/     \/   |__|           \/     \/     \/    \/     \/ 
 
 proc rollR[T](a: var seq[T], ps, pe: int) =
     let t = a[pe]
@@ -41,6 +62,11 @@ proc rollL[T](a: var seq[T], ps, pe: int) =
     for i in countup(ps, pe-1): 
         a[i] = a[i+1]
     a[pe] = t
+
+# Get and set for seq[seq[T]] with tuple (int, int) indexing
+proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
+proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
+proc `+`*(a, b: (int, int)): (int, int) = (a[0]+b[0], a[1]+b[1])
 
 proc partition*[T](i: seq[T], pss: int): seq[seq[T]] =
     assert i.len mod pss == 0, fmt"Seq len {len(i)} not divisible with {pss}"
@@ -73,14 +99,6 @@ iterator pieces*[T](s: openArray[T], stopper: openArray[T]): Slice[int] =
         yield (sloc..<loc)
         # yield s[sloc..<loc]
 
-proc stringSplit*(s: string, stopper: char): (string, string) =
-    var loc = 0
-    while loc < s.len:
-        if s[loc] == stopper:
-            return (s[0..<loc], s[loc+1..s.len-1])
-        inc loc
-    return (s, "")
-
 proc findIf*[T](s: seq[T], pred: proc(x: T): bool): int =
     result = -1
     for i, x in s:
@@ -105,6 +123,13 @@ iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
         if l2 == dt.len:
             yield li
 
+# .___        __                         __                       
+# |   | _____/  |_  ___  __ ____   _____/  |_  ___________  ______
+# |   |/    \   __\ \  \/ // __ \_/ ___\   __\/  _ \_  __ \/  ___/
+# |   |   |  \  |    \   /\  ___/\  \___|  | (  <_> )  | \/\___ \ 
+# |___|___|  /__|     \_/  \___  >\___  >__|  \____/|__|  /____  >
+#          \/                  \/     \/                       \/ 
+
 type
     Vec2i* = object
         x, y: int
@@ -128,8 +153,13 @@ proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 
+# _________                         .___             __          
+# \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
+# /    \  \/ /  _ \ /  _ \_  __ \/ __ |/  ___// __ \   __\/  ___/
+# \     \___(  <_> |  <_> )  | \/ /_/ |\___ \\  ___/|  |  \___ \ 
+#  \______  /\____/ \____/|__|  \____ /____  >\___  >__| /____  >
+#         \/                         \/    \/     \/          \/ 
 
-# Cubism
 const CUBEDIRS = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
@@ -216,8 +246,12 @@ proc `&`(ca, cb: CubeLocs): CubeLocs =
         if loc in ca:
             result.incl(loc)
 
-# Compiling tips:
-# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim
+# ___________.__        .__                
+# \__    ___/|__| _____ |__| ____    ____  
+#   |    |   |  |/     \|  |/    \  / ___\ 
+#   |    |   |  |  Y Y  \  |   |  \/ /_/  >
+#   |____|   |__|__|_|  /__|___|  /\___  / 
+#                     \/        \//_____/  
 
 proc prtTime*(t: Duration) =
     let mstime = t.inMicroseconds
@@ -242,6 +276,13 @@ template oneTimeIt(body: untyped): untyped =
 #         d = min(d, nd)
 #         inc i
 #     (vals[0], d)
+
+# .____                         __  .__                                                            
+# |    |    ____   ____ _____ _/  |_|__| ____   ____     _____   ____   _____   ___________ ___.__.
+# |    |   /  _ \_/ ___\\__  \\   __\  |/  _ \ /    \   /     \_/ __ \ /     \ /  _ \_  __ <   |  |
+# |    |__(  <_> )  \___ / __ \|  | |  (  <_> )   |  \ |  Y Y  \  ___/|  Y Y  (  <_> )  | \/\___  |
+# |_______ \____/ \___  >____  /__| |__|\____/|___|  / |__|_|  /\___  >__|_|  /\____/|__|   / ____|
+#         \/          \/     \/                    \/        \/     \/      \/              \/     
 
 type
     Positionals[T] = object
@@ -281,15 +322,22 @@ proc rollLeft(p: var Positionals, ps, pe: int) =
     p.data.rollL(ps, pe)
     p.index.rollL(ps, pe)
 
+# __________                                                       
+# \______   \ ____   ____  __ _________  ______ ___________  ______
+#  |       _// __ \_/ ___\|  |  \_  __ \/  ___// __ \_  __ \/  ___/
+#  |    |   \  ___/\  \___|  |  /|  | \/\___ \\  ___/|  | \/\___ \ 
+#  |____|_  /\___  >\___  >____/ |__|  /____  >\___  >__|  /____  >
+#         \/     \/     \/                  \/     \/           \/ 
 
-proc findRoot(fn: proc (v: int): int, maxSteps = int.high): int =
+proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int =
     ## Bisection for integer funtions
     # Apparently this is called bisection
+    # ad-hoc implementation, probably could be improved by a lot
     # https://en.wikipedia.org/wiki/Bisection_method
-    var step = 100
+    var step = startVal div 2
     var curResult = 0
     var prevResult = 0
-    var tryValue = 1000
+    var tryValue = startVal
     var curLoop = maxSteps
     while curLoop > 0:
         prevResult = curResult
@@ -298,14 +346,14 @@ proc findRoot(fn: proc (v: int): int, maxSteps = int.high): int =
             return tryValue
 
         if prevResult.sgn == curResult.sgn:
-            step += step div 3 + 1
+            step += step div 2 + 1
         elif prevResult.sgn != curResult.sgn:
             step = step div 2
-
+        
         if curResult < 0:
             tryValue -= step
         elif curResult > 0:
             tryValue += step
-
         dec curLoop
-    return 0
+
+    assert false, "findRoot reached end without finding anything"
