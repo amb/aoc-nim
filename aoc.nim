@@ -144,12 +144,7 @@ proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
-proc rotate90*(v: var Vec2i, d: int) = 
-    if d != -1 and d != 1:
-        return
-    let t = v.x
-    v.x = -v.y * d
-    v.y = t * d
+proc rot90*(v: Vec2i, d: int): Vec2i = (if d==1 or d== -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
 
 # _________                         .___             __          
 # \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
@@ -172,6 +167,11 @@ proc coord3d(v: seq[int]): Coord3D = (v[0], v[1], v[2])
 
 proc coord2d(x, y: int): Coord2D = (x, y)
 proc coord3d(x, y, z: int): Coord3D = (x, y, z)
+
+# def cross(a, b):
+#     c = [a[1]*b[2] - a[2]*b[1],
+#          a[2]*b[0] - a[0]*b[2],
+#          a[0]*b[1] - a[1]*b[0]]
 
 proc `*`(a: Coord3D, b: int): Coord3D = (a[0]*b, a[1]*b, a[2]*b)
 proc `-`(a, b: Coord3D): Coord3D = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
