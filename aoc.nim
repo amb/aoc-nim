@@ -25,6 +25,15 @@ proc `*=`*(l: var seq[int], v: int) =
     for i in 0..l.len-1:
         l[i] *= v
 
+let compass = {"N": (0, -1),
+    "S": (0, 1),
+    "E": (1, 0),
+    "W": (-1, 0),
+    "NE": (1, -1),
+    "SE": (1, 1),
+    "NW": (-1, -1),
+    "SW": (-1, 1)}.toTable
+
 # Get and set for seq[seq[T]] with tuple (int, int) indexing
 # TODO: [y][x] instead of [x][y]
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
@@ -144,7 +153,7 @@ proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
 proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
-proc rot90*(v: Vec2i, d: int): Vec2i = (if d==1 or d== -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
+proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
 
 # _________                         .___             __          
 # \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
@@ -198,6 +207,7 @@ proc faces(T: typedesc[Coords3D]): array[6, Coord3D] = [
     (0, 0, 1), (0, 0, -1)]
 
 proc one(T: typedesc[Coords2D]): Coord2D = (1, 1)
+proc zero(T: typedesc[Coords2D]): Coord2D = (0, 0)
 proc one(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
 
 proc max(cb: AnyCoords): AnyCoord =
@@ -275,6 +285,21 @@ iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T)
         outerNodes = innerNodes
         innerNodes = nextStep
         yield run(innerNodes)
+
+iterator filter(cds: Coords2D, run: proc (ind: Coord2D): bool): Coord2D =
+    for c in cds:
+        if run(c):
+            yield c
+
+proc toCoords2D(data: seq[string], symbol: char): Coords2D =
+    for yi, y in data:
+        for xi, x in y:
+            if x == symbol:
+                result.incl((xi, yi))
+
+proc toCoords2D(data: seq[Coord2D]): Coords2D =
+    for i in data:
+        result.incl(i)
 
 
 # ___________.__        .__                
