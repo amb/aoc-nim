@@ -5,12 +5,12 @@
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
 import std/[sets, strscans, tables, re, options, monotimes, times]
 
-# _________                                  .__                            
-# \_   ___ \  ____   _______  __ ____   ____ |__| ____   ____   ____  ____  
-# /    \  \/ /  _ \ /    \  \/ // __ \ /    \|  |/ __ \ /    \_/ ___\/ __ \ 
-# \     \___(  <_> )   |  \   /\  ___/|   |  \  \  ___/|   |  \  \__\  ___/ 
+# _________                                  .__
+# \_   ___ \  ____   _______  __ ____   ____ |__| ____   ____   ____  ____
+# /    \  \/ /  _ \ /    \  \/ // __ \ /    \|  |/ __ \ /    \_/ ___\/ __ \
+# \     \___(  <_> )   |  \   /\  ___/|   |  \  \  ___/|   |  \  \__\  ___/
 #  \______  /\____/|___|  /\_/  \___  >___|  /__|\___  >___|  /\___  >___  >
-#         \/            \/          \/     \/        \/     \/     \/    \/ 
+#         \/            \/          \/     \/        \/     \/     \/    \/
 # https://patorjk.com/software/taag/#p=display&f=Graffiti
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
@@ -39,12 +39,12 @@ let compass = {"N": (0, -1),
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
 
-# __________                     .__                
-# \______   \_____ _______  _____|__| ____    ____  
-#  |     ___/\__  \\_  __ \/  ___/  |/    \  / ___\ 
+# __________                     .__
+# \______   \_____ _______  _____|__| ____    ____
+#  |     ___/\__  \\_  __ \/  ___/  |/    \  / ___\
 #  |    |     / __ \|  | \/\___ \|  |   |  \/ /_/  >
-#  |____|    (____  /__|  /____  >__|___|  /\___  / 
-#                 \/           \/        \//_____/  
+#  |____|    (____  /__|  /____  >__|___|  /\___  /
+#                 \/           \/        \//_____/
 
 proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"):
@@ -52,22 +52,22 @@ proc ints*(s: string): seq[int] =
 
 # TODO: notInts
 
-#   _________                                                      
+#   _________
 #  /   _____/ ____  ________ __   ____   ____   ____  ____   ______
 #  \_____  \_/ __ \/ ____/  |  \_/ __ \ /    \_/ ___\/ __ \ /  ___/
-#  /        \  ___< <_|  |  |  /\  ___/|   |  \  \__\  ___/ \___ \ 
+#  /        \  ___< <_|  |  |  /\  ___/|   |  \  \__\  ___/ \___ \
 # /_______  /\___  >__   |____/  \___  >___|  /\___  >___  >____  >
-#         \/     \/   |__|           \/     \/     \/    \/     \/ 
+#         \/     \/   |__|           \/     \/     \/    \/     \/
 
 proc rollR[T](a: var seq[T], ps, pe: int) =
     let t = a[pe]
-    for i in countdown(pe, ps+1): 
+    for i in countdown(pe, ps+1):
         a[i] = a[i-1]
     a[ps] = t
 
 proc rollL[T](a: var seq[T], ps, pe: int) =
     let t = a[ps]
-    for i in countup(ps, pe-1): 
+    for i in countup(ps, pe-1):
         a[i] = a[i+1]
     a[pe] = t
 
@@ -122,12 +122,12 @@ iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
         if l2 == dt.len:
             yield li
 
-# .___        __                         __                       
+# .___        __                         __
 # |   | _____/  |_  ___  __ ____   _____/  |_  ___________  ______
 # |   |/    \   __\ \  \/ // __ \_/ ___\   __\/  _ \_  __ \/  ___/
-# |   |   |  \  |    \   /\  ___/\  \___|  | (  <_> )  | \/\___ \ 
+# |   |   |  \  |    \   /\  ___/\  \___|  | (  <_> )  | \/\___ \
 # |___|___|  /__|     \_/  \___  >\___  >__|  \____/|__|  /____  >
-#          \/                  \/     \/                       \/ 
+#          \/                  \/     \/                       \/
 
 type
     Vec2i* = object
@@ -155,12 +155,12 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
 
-# _________                         .___             __          
+# _________                         .___             __
 # \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
 # /    \  \/ /  _ \ /  _ \_  __ \/ __ |/  ___// __ \   __\/  ___/
-# \     \___(  <_> |  <_> )  | \/ /_/ |\___ \\  ___/|  |  \___ \ 
+# \     \___(  <_> |  <_> )  | \/ /_/ |\___ \\  ___/|  |  \___ \
 #  \______  /\____/ \____/|__|  \____ /____  >\___  >__| /____  >
-#         \/                         \/    \/     \/          \/ 
+#         \/                         \/    \/     \/          \/
 
 type Coord2D = (int, int)
 type Coords2D = HashSet[Coord2D]
@@ -301,13 +301,26 @@ proc toCoords2D(data: seq[Coord2D]): Coords2D =
     for i in data:
         result.incl(i)
 
+proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
+    var total: seq[string]
+    let h = dims[1]
+    let w = dims[0]
+    for y in 0..h-1:
+        var l: seq[char]
+        for x in 0..w-1:
+            if (x, y) + offset in cds:
+                l.add('#')
+            else:
+                l.add('.')
+        total.add(l.join)
+    total.join("\n") & "\n"
 
-# ___________.__        .__                
-# \__    ___/|__| _____ |__| ____    ____  
-#   |    |   |  |/     \|  |/    \  / ___\ 
+# ___________.__        .__
+# \__    ___/|__| _____ |__| ____    ____
+#   |    |   |  |/     \|  |/    \  / ___\
 #   |    |   |  |  Y Y  \  |   |  \/ /_/  >
-#   |____|   |__|__|_|  /__|___|  /\___  / 
-#                     \/        \//_____/  
+#   |____|   |__|__|_|  /__|___|  /\___  /
+#                     \/        \//_____/
 
 proc prtTime*(t: Duration) =
     let mstime = t.inMicroseconds
@@ -333,12 +346,12 @@ template oneTimeIt(body: untyped): untyped =
 #         inc i
 #     (vals[0], d)
 
-# .____                         __  .__                                                            
+# .____                         __  .__
 # |    |    ____   ____ _____ _/  |_|__| ____   ____     _____   ____   _____   ___________ ___.__.
 # |    |   /  _ \_/ ___\\__  \\   __\  |/  _ \ /    \   /     \_/ __ \ /     \ /  _ \_  __ <   |  |
 # |    |__(  <_> )  \___ / __ \|  | |  (  <_> )   |  \ |  Y Y  \  ___/|  Y Y  (  <_> )  | \/\___  |
 # |_______ \____/ \___  >____  /__| |__|\____/|___|  / |__|_|  /\___  >__|_|  /\____/|__|   / ____|
-#         \/          \/     \/                    \/        \/     \/      \/              \/     
+#         \/          \/     \/                    \/        \/     \/      \/              \/
 
 type
     Positionals[T] = object
@@ -378,12 +391,12 @@ proc rollLeft(p: var Positionals, ps, pe: int) =
     p.data.rollL(ps, pe)
     p.index.rollL(ps, pe)
 
-# __________                                                       
+# __________
 # \______   \ ____   ____  __ _________  ______ ___________  ______
 #  |       _// __ \_/ ___\|  |  \_  __ \/  ___// __ \_  __ \/  ___/
-#  |    |   \  ___/\  \___|  |  /|  | \/\___ \\  ___/|  | \/\___ \ 
+#  |    |   \  ___/\  \___|  |  /|  | \/\___ \\  ___/|  | \/\___ \
 #  |____|_  /\___  >\___  >____/ |__|  /____  >\___  >__|  /____  >
-#         \/     \/     \/                  \/     \/           \/ 
+#         \/     \/     \/                  \/     \/           \/
 
 proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int =
     ## Bisection for integer funtions
@@ -405,7 +418,7 @@ proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int
             step += step div 2 + 1
         elif prevResult.sgn != curResult.sgn:
             step = step div 2
-        
+
         if curResult < 0:
             tryValue -= step
         elif curResult > 0:

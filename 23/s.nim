@@ -1,15 +1,21 @@
 include ../aoc
 
 let test = """
-.....
-..##.
-..#..
-.....
-..##.
-....."""
+..............
+..............
+.......#......
+.....###.#....
+...#...#.#....
+....#...##....
+...#.###......
+...##.#.##....
+....#..#......
+..............
+..............
+.............."""
 
-# let data = "23/input".readFile.strip.split("\n")
-let data = test.strip.split("\n")
+let data = "23/input".readFile.strip.split("\n")
+# let data = test.strip.split("\n")
 
 var elfCheck: seq[seq[Coord2D]]
 for dirs in @[("NE", "N", "NW"), ("SE", "S", "SW"), ("NW", "W", "SW"), ("NE", "E", "SE")]:
@@ -18,6 +24,8 @@ for dirs in @[("NE", "N", "NW"), ("SE", "S", "SW"), ("NW", "W", "SW"), ("NE", "E
     il.add(compass[dirs[1]])
     il.add(compass[dirs[2]])
     elfCheck.add(il)
+
+let surround = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"].mapIt(compass[it]).toCoords2D
 
 proc proposal(elf: Coord2D, tiles, bounds: Coords2D): Option[Coord2D] =
     for dirs in elfCheck:
@@ -34,18 +42,33 @@ var elfs = data.toCoords2D('#')
 
 let width = data[0].len
 let height = data.len
+echo data[0][^5..^1]
+echo data[^1]
+echo fmt"w:{width} h:{height}"
+# var boundary = fillBoundary((-1, -1), (width, height))
+var boundary = Coords2D()
 
-let boundary = fillBoundary((-1, -1), (width+1, height+1))
+let display = false
 
-for _ in 1..4:
+# for r in 1..10:
+var r = 0
+while true:
+    inc r
+    if display:
+        echo fmt"== Round: {r}"
+
     # Gather suggestions
     var props: Table[Coord2D, Coords2D]
     for elf in elfs:
-        let move = elf.proposal(elfs, boundary)
-        if move.isSome:
-            if move.get notin props:
-                props[move.get] = Coords2D()
-            props[move.get].incl(elf)
+        if surround.mapIt(int((elf+it) in elfs)).sum > 0:
+            let move = elf.proposal(elfs, boundary)
+            if move.isSome:
+                if move.get notin props:
+                    props[move.get] = Coords2D()
+                props[move.get].incl(elf)
+
+    if props.len == 0:
+        break
 
     for elf in elfs:
         let move = elf.proposal(elfs, boundary)
@@ -53,7 +76,18 @@ for _ in 1..4:
             props.del(move.get)
 
     for move, elf in props.pairs:
-        elfs.incl(move)
         elfs.excl(elf)
+        elfs.incl(move)
     
-    echo elfs
+    if display:
+        echo elfs.show((width, height))
+
+    elfCheck.rollL(0, elfCheck.high)
+
+let box = elfs.max-elfs.min+(1,1)
+echo box[0] * box[1] - elfs.len
+
+echo r
+
+# p1 2526 too low, 4045 right
+
