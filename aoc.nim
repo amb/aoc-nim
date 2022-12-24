@@ -1,6 +1,6 @@
 # Lots of dumb stuff here
 # Compiling tips:
-# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:arc 10/s.nim
+# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:orc 10/s.nim
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
 import std/[sets, strscans, tables, re, options, monotimes, times]
