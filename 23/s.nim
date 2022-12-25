@@ -18,6 +18,7 @@ proc proposal(elf: Coord2D, tiles: Coords2D): Option[Coord2D] =
         for direction in dirs:
             if (elf+direction) in tiles:
                 hasPos = false
+                break
         if hasPos:
             return some(elf+dirs[1])
     return none(Coord2D)
@@ -27,34 +28,47 @@ var elfs = data.toCoords2D('#')
 let width = data[0].len
 let height = data.len
 
-var r = 0
-while true:
-    inc r
+proc solve(): (int, int) =
+    var r = 0
+    while true:
+        inc r
 
-    # Gather suggestions
-    var props: Table[Coord2D, Coords2D]
-    for elf in elfs:
-        if surround.mapIt(int((elf+it) in elfs)).sum > 0:
-            let move = elf.proposal(elfs)
-            if move.isSome:
-                if move.get notin props:
-                    props[move.get] = Coords2D()
-                props[move.get].incl(elf)
+        # Gather suggestions
+        var props: Table[Coord2D, Coords2D]
+        for elf in elfs:
+            var hugging = false
+            for it in surround:
+                if elf+it in elfs:
+                    hugging = true
+                    break
+            if hugging:
+                let move = elf.proposal(elfs)
+                if move.isSome:
+                    if move.get notin props:
+                        props[move.get] = Coords2D()
+                    props[move.get].incl(elf)
 
-    if props.len == 0:
-        break
+        if props.len == 0:
+            break
 
-    for elf in elfs:
-        let move = elf.proposal(elfs)
-        if move.isSome and move.get in props and props[move.get].len > 1:
-            props.del(move.get)
+        for move in props.keys.toSeq:
+            if props[move].len > 1:
+                props.del(move)
 
-    for move, elf in props.pairs:
-        elfs.excl(elf)
-        elfs.incl(move)
- 
-    elfCheck.rollL(0, elfCheck.high)
+        for move, elf in props.pairs:
+            elfs.excl(elf)
+            elfs.incl(move)
 
-let box = elfs.max-elfs.min+(1,1)
-echo box[0] * box[1] - elfs.len
-echo r
+        elfCheck.rollL(0, elfCheck.high)
+
+    let box = elfs.max-elfs.min+(1,1)
+    (box[0] * box[1] - elfs.len, r)
+
+let s = oneTimeIt:
+    solve()
+
+assert s == (15173, 963)
+echo s
+
+# 15173
+# 963
