@@ -1,4 +1,5 @@
 include ../aoc
+import ../tracer
 
 let data = "23/input".readFile.strip.split("\n")
 
@@ -12,7 +13,9 @@ for dirs in @[("NE", "N", "NW"), ("SE", "S", "SW"), ("NW", "W", "SW"), ("NE", "E
 
 let surround = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"].mapIt(compass[it]).toCoords2D
 
-proc proposal(elf: Coord2D, tiles: Coords2D): Option[Coord2D] =
+const MAGIC = (-555,-555)
+
+proc proposal(elf: Coord2D, tiles: Coords2D): Coord2D {.meter.} =
     for dirs in elfCheck:
         var hasPos = true
         for direction in dirs:
@@ -20,52 +23,66 @@ proc proposal(elf: Coord2D, tiles: Coords2D): Option[Coord2D] =
                 hasPos = false
                 break
         if hasPos:
-            return some(elf+dirs[1])
-    return none(Coord2D)
+            return elf+dirs[1]
+    return MAGIC
 
-var elfs = data.toCoords2D('#')
+# crd in crds
+# crd + crd
+# Coord2D -> Packed2D
+# Packed2D -> Coord2D
 
-let width = data[0].len
-let height = data.len
+proc getprops(elfs: Coords2D): Table[Coord2D, Coord2D] {.meter.} =
+    # Gather suggestions
+    for elf in elfs:
+        var hugging = false
+        for it in surround:
+            if elf+it in elfs:
+                hugging = true
+                break
+        if hugging:
+            let move = elf.proposal(elfs)
+            if move != MAGIC:
+                if move notin result:
+                    result[move] = elf
+                else:
+                    result[move] = MAGIC
 
-proc solve(): (int, int) =
+proc solve(elfs: var Coords2D): (int, int) {.meter.} =
     var r = 0
     while true:
         inc r
+        if r > 1000:
+            assert false, "Too too long to run."
 
-        # Gather suggestions
-        var props: Table[Coord2D, Coords2D]
-        for elf in elfs:
-            var hugging = false
-            for it in surround:
-                if elf+it in elfs:
-                    hugging = true
-                    break
-            if hugging:
-                let move = elf.proposal(elfs)
-                if move.isSome:
-                    if move.get notin props:
-                        props[move.get] = Coords2D()
-                    props[move.get].incl(elf)
+        let props = getprops(elfs)
 
         if props.len == 0:
             break
 
-        for move in props.keys.toSeq:
-            if props[move].len > 1:
-                props.del(move)
-
-        for move, elf in props.pairs:
-            elfs.excl(elf)
-            elfs.incl(move)
+        for move, elf in props:
+            if elf != MAGIC:
+                elfs.excl(elf)
+                elfs.incl(move)
 
         elfCheck.rollL(0, elfCheck.high)
 
     let box = elfs.max-elfs.min+(1,1)
     (box[0] * box[1] - elfs.len, r)
 
-let s = oneTimeIt:
-    solve()
+metricsConfirm()
+
+var elfs = data.toCoords2D('#')
+
+let width = data[0].len
+let height = data.len
+
+echo fmt"w: {width}, h: {height}"
+echo fmt"elfs: {elfs.len}"
+
+# let s = oneTimeIt:
+let s = solve(elfs)
+
+metricsShow()
 
 assert s == (15173, 963)
 echo s
