@@ -3,7 +3,7 @@
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:orc 10/s.nim
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math]
-import std/[sets, strscans, tables, re, options, monotimes, times]
+import std/[sets, intsets, strscans, tables, re, options, monotimes, times]
 
 # _________                                  .__
 # \_   ___ \  ____   _______  __ ____   ____ |__| ____   ____   ____  ____
@@ -12,6 +12,7 @@ import std/[sets, strscans, tables, re, options, monotimes, times]
 #  \______  /\____/|___|  /\_/  \___  >___|  /__|\___  >___|  /\___  >___  >
 #         \/            \/          \/     \/        \/     \/     \/    \/
 # https://patorjk.com/software/taag/#p=display&f=Graffiti
+#region CONVENIENCE
 
 proc `-`*(a, b: char): int = ord(a) - ord(b)
 proc `+`*(a: char, b: int): char = char(ord(a) + b)
@@ -25,12 +26,12 @@ proc `*=`*(l: var seq[int], v: int) =
     for i in 0..l.len-1:
         l[i] *= v
 
-let compass = {"N": (0, -1),
+let compassRD = {"N": (0, -1),
     "S": (0, 1),
     "E": (1, 0),
     "W": (-1, 0),
-    "NE": (1, -1),
     "SE": (1, 1),
+    "NE": (1, -1),
     "NW": (-1, -1),
     "SW": (-1, 1)}.toTable
 
@@ -39,18 +40,22 @@ let compass = {"N": (0, -1),
 proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
 proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
 
+#endregion
+
 # __________                     .__
 # \______   \_____ _______  _____|__| ____    ____
 #  |     ___/\__  \\_  __ \/  ___/  |/    \  / ___\
 #  |    |     / __ \|  | \/\___ \|  |   |  \/ /_/  >
 #  |____|    (____  /__|  /____  >__|___|  /\___  /
 #                 \/           \/        \//_____/
-
+#region PARSING
 proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"):
         result.add(r.parseInt)
 
 # TODO: notInts
+
+#endregion
 
 #   _________
 #  /   _____/ ____  ________ __   ____   ____   ____  ____   ______
@@ -58,6 +63,7 @@ proc ints*(s: string): seq[int] =
 #  /        \  ___< <_|  |  |  /\  ___/|   |  \  \__\  ___/ \___ \
 # /_______  /\___  >__   |____/  \___  >___|  /\___  >___  >____  >
 #         \/     \/   |__|           \/     \/     \/    \/     \/
+#region SEQUENCES
 
 proc rollR[T](a: var seq[T], ps, pe: int) =
     let t = a[pe]
@@ -122,12 +128,15 @@ iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
         if l2 == dt.len:
             yield li
 
+#endregion
+
 # .___        __                         __
 # |   | _____/  |_  ___  __ ____   _____/  |_  ___________  ______
 # |   |/    \   __\ \  \/ // __ \_/ ___\   __\/  _ \_  __ \/  ___/
 # |   |   |  \  |    \   /\  ___/\  \___|  | (  <_> )  | \/\___ \
 # |___|___|  /__|     \_/  \___  >\___  >__|  \____/|__|  /____  >
 #          \/                  \/     \/                       \/
+#region INTVECTORS
 
 type
     Vec2i* = object
@@ -155,26 +164,107 @@ proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
 proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
 
+#endregion
+
 # _________                         .___             __
 # \_   ___ \  ____   ___________  __| _/______ _____/  |_  ______
 # /    \  \/ /  _ \ /  _ \_  __ \/ __ |/  ___// __ \   __\/  ___/
 # \     \___(  <_> |  <_> )  | \/ /_/ |\___ \\  ___/|  |  \___ \
 #  \______  /\____/ \____/|__|  \____ /____  >\___  >__| /____  >
 #         \/                         \/    \/     \/          \/
+#region COORDSETS
 
+#region 2D
 type Coord2D = (int, int)
 type Coords2D = HashSet[Coord2D]
 
+proc coord2d(v: seq[int]): Coord2D = (v[0], v[1])
+proc coord2d(x, y: int): Coord2D = (x, y)
+
+proc toCoords2D(data: seq[string], symbol: char): Coords2D =
+    for yi, y in data:
+        for xi, x in y:
+            if x == symbol:
+                result.incl((xi, yi))
+
+proc toCoords2D(data: seq[Coord2D]): Coords2D =
+    for i in data:
+        result.incl(i)
+
+proc `*`(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
+proc `-`(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
+proc `+`(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
+proc max(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
+proc min(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
+
+proc fill(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
+
+proc faces(T: typedesc[Coords2D]): array[4, Coord2D] = [
+    (1, 0), (-1, 0),
+    (0, 1), (0, -1)]
+
+proc one(T: typedesc[Coords2D]): Coord2D = (1, 1)
+proc zero(T: typedesc[Coords2D]): Coord2D = (0, 0)
+
+proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
+    for x in cmin[0]..cmax[0]:
+        result.incl(coord2d(x, cmin[1]))
+        result.incl(coord2d(x, cmax[1]))
+    for y in cmin[1]..cmax[1]:
+        result.incl(coord2d(cmin[0], y))
+        result.incl(coord2d(cmax[0], y))
+
+#endregion
+
+#region PACKED
+const PACKEDW = 8
+const PACKEDL = 1 shl PACKEDW
+
+type Packed2D = int
+type Packeds2D = IntSet
+
+proc packed2d(x, y: int): Packed2D =
+    # doAssert x >= 0 and y >= 0
+    (y shl PACKEDW) + x
+
+proc packed2d(v: (int, int)): Packed2D =
+    # doAssert v[0] >= 0 and v[0] >= 0
+    (v[1] shl PACKEDW) + v[0]
+
+proc coord2d(v: Packed2D): Coord2D =
+    # doAssert v >= 0
+    let t = v shr PACKEDW
+    (v-(t shl PACKEDW), t)
+
+proc pack(data: Coords2D, offset = (0, 0)): Packeds2D =
+    for v in data:
+        result.incl((v + offset).packed2d)
+
+proc pack(data: seq[Coord2D]): Packeds2D =
+    for i in data:
+        result.incl(packed2d(i))
+
+proc unpack(pv: Packeds2D): Coords2D =
+    for v in pv:
+        result.incl(v.coord2d)
+
+# proc `+`(a, b: Packed2D): Packed2D = a+b
+# proc `-`(a, b: Packed2D): Packed2D = a-b
+# proc max(a, b: Packed2D): Packed2D = max(a, b)
+# proc min(a, b: Packed2D): Packed2D = min(a, b)
+
+proc fill(T: typedesc[Packeds2D], v: int): Packed2D = v
+proc faces(T: typedesc[Packeds2D]): array[4, Packed2D] = [1, -1, PACKEDL, -PACKEDL]
+proc one(T: typedesc[Packeds2D]): Packed2D = PACKEDL + 1
+proc zero(T: typedesc[Packeds2D]): Packed2D = 0
+
+#endregion
+
+#region 3D
 type Coord3D = (int, int, int)
 type Coords3D = HashSet[Coord3D]
 
-type AnyCoord = Coord2D | Coord3D
-type AnyCoords = Coords2D | Coords3D
-
-proc coord2d(v: seq[int]): Coord2D = (v[0], v[1])
 proc coord3d(v: seq[int]): Coord3D = (v[0], v[1], v[2])
-
-proc coord2d(x, y: int): Coord2D = (x, y)
 proc coord3d(x, y, z: int): Coord3D = (x, y, z)
 
 # def cross(a, b):
@@ -188,27 +278,49 @@ proc `+`(a, b: Coord3D): Coord3D = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
 proc max(a, b: Coord3D): Coord3D = (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
 proc min(a, b: Coord3D): Coord3D = (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
 
-proc `*`(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
-proc `-`(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
-proc `+`(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
-proc max(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
-proc min(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
-
-proc fill(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
 proc fill(T: typedesc[Coords3D], v: int): Coord3D = (v, v, v)
-
-proc faces(T: typedesc[Coords2D]): array[4, Coord2D] = [
-    (1, 0), (-1, 0),
-    (0, 1), (0, -1)]
 
 proc faces(T: typedesc[Coords3D]): array[6, Coord3D] = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
     (0, 0, 1), (0, 0, -1)]
 
-proc one(T: typedesc[Coords2D]): Coord2D = (1, 1)
-proc zero(T: typedesc[Coords2D]): Coord2D = (0, 0)
 proc one(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
+
+proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
+    var total: seq[string]
+    let h = dims[1]
+    let w = dims[0]
+    for y in 0..h-1:
+        var l: seq[char]
+        for x in 0..w-1:
+            if (x, y) + offset in cds:
+                l.add('#')
+            else:
+                l.add('.')
+        total.add(l.join)
+    total.join("\n") & "\n"
+
+proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
+    for x in cmin[0]..cmax[0]:
+        for y in cmin[1]..cmax[1]:
+            result.incl(coord3d(x, y, cmin[2]))
+            result.incl(coord3d(x, y, cmax[2]))
+    for x in cmin[0]..cmax[0]:
+        for z in cmin[2]..cmax[2]:
+            result.incl(coord3d(x, cmin[1], z))
+            result.incl(coord3d(x, cmax[1], z))
+    for y in cmin[1]..cmax[1]:
+        for z in cmin[2]..cmax[2]:
+            result.incl(coord3d(cmin[0], y, z))
+            result.incl(coord3d(cmax[0], y, z))
+
+#endregion
+
+#region ANY
+
+type AnyCoord = Coord2D | Coord3D | Packed2D
+type AnyCoords = Coords2D | Coords3D | Packeds2D
 
 proc max(cb: AnyCoords): AnyCoord =
     result = AnyCoords.fill(int.low)
@@ -222,6 +334,7 @@ proc min(cb: AnyCoords): AnyCoord =
 
 proc `+`(cb: AnyCoords, v: AnyCoord): AnyCoords =
     for i in cb:
+        # TODO: why this excl?
         result.excl(v)
         result.incl(i+v)
 
@@ -252,28 +365,6 @@ proc allDirections(cb: AnyCoords): seq[AnyCoords] =
         for loc in AnyCoords.faces:
             result.add(c+loc)
 
-proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
-    for x in cmin[0]..cmax[0]:
-        result.incl(coord2d(x, cmin[1]))
-        result.incl(coord2d(x, cmax[1]))
-    for y in cmin[1]..cmax[1]:
-        result.incl(coord2d(cmin[0], y))
-        result.incl(coord2d(cmax[0], y))
-
-proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
-    for x in cmin[0]..cmax[0]:
-        for y in cmin[1]..cmax[1]:
-            result.incl(coord3d(x, y, cmin[2]))
-            result.incl(coord3d(x, y, cmax[2]))
-    for x in cmin[0]..cmax[0]:
-        for z in cmin[2]..cmax[2]:
-            result.incl(coord3d(x, cmin[1], z))
-            result.incl(coord3d(x, cmax[1], z))
-    for y in cmin[1]..cmax[1]:
-        for z in cmin[2]..cmax[2]:
-            result.incl(coord3d(cmin[0], y, z))
-            result.incl(coord3d(cmax[0], y, z))
-
 iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T): T =
     let drone = AnyCoords.one
     let cmin = cubes.min - drone * 2
@@ -286,34 +377,9 @@ iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T)
         innerNodes = nextStep
         yield run(innerNodes)
 
-iterator filter(cds: Coords2D, run: proc (ind: Coord2D): bool): Coord2D =
-    for c in cds:
-        if run(c):
-            yield c
+#endregion
 
-proc toCoords2D(data: seq[string], symbol: char): Coords2D =
-    for yi, y in data:
-        for xi, x in y:
-            if x == symbol:
-                result.incl((xi, yi))
-
-proc toCoords2D(data: seq[Coord2D]): Coords2D =
-    for i in data:
-        result.incl(i)
-
-proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
-    var total: seq[string]
-    let h = dims[1]
-    let w = dims[0]
-    for y in 0..h-1:
-        var l: seq[char]
-        for x in 0..w-1:
-            if (x, y) + offset in cds:
-                l.add('#')
-            else:
-                l.add('.')
-        total.add(l.join)
-    total.join("\n") & "\n"
+#endregion
 
 # ___________.__        .__
 # \__    ___/|__| _____ |__| ____    ____
@@ -321,6 +387,7 @@ proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
 #   |    |   |  |  Y Y  \  |   |  \/ /_/  >
 #   |____|   |__|__|_|  /__|___|  /\___  /
 #                     \/        \//_____/
+#region TIMING
 
 proc prtTime*(t: Duration) =
     let mstime = t.inMicroseconds
@@ -345,6 +412,7 @@ template oneTimeIt(body: untyped): untyped =
 #         d = min(d, nd)
 #         inc i
 #     (vals[0], d)
+#endregion
 
 # .____                         __  .__
 # |    |    ____   ____ _____ _/  |_|__| ____   ____     _____   ____   _____   ___________ ___.__.
@@ -352,6 +420,7 @@ template oneTimeIt(body: untyped): untyped =
 # |    |__(  <_> )  \___ / __ \|  | |  (  <_> )   |  \ |  Y Y  \  ___/|  Y Y  (  <_> )  | \/\___  |
 # |_______ \____/ \___  >____  /__| |__|\____/|___|  / |__|_|  /\___  >__|_|  /\____/|__|   / ____|
 #         \/          \/     \/                    \/        \/     \/      \/              \/
+#region LOCATIONMEMORY
 
 type
     Positionals[T] = object
@@ -391,12 +460,15 @@ proc rollLeft(p: var Positionals, ps, pe: int) =
     p.data.rollL(ps, pe)
     p.index.rollL(ps, pe)
 
+#endregion
+
 # __________
 # \______   \ ____   ____  __ _________  ______ ___________  ______
 #  |       _// __ \_/ ___\|  |  \_  __ \/  ___// __ \_  __ \/  ___/
 #  |    |   \  ___/\  \___|  |  /|  | \/\___ \\  ___/|  | \/\___ \
 #  |____|_  /\___  >\___  >____/ |__|  /____  >\___  >__|  /____  >
 #         \/     \/     \/                  \/     \/           \/
+#region RECURSERS
 
 proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int =
     ## Bisection for integer funtions
@@ -426,3 +498,5 @@ proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int
         dec curLoop
 
     assert false, "findRoot reached end without finding anything"
+
+#endregion
