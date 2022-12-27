@@ -217,22 +217,21 @@ proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
 #endregion
 
 #region PACKED
-const PACKEDW = 8
-const PACKEDL = 1 shl PACKEDW
-
 type Packed2D = int
 type Packeds2D = IntSet
 
+# TODO: template or macro constructor for variable PACKEDW
+
+const PACKEDW = 8
+const PACKEDL = 1 shl PACKEDW
+
 proc packed2d(x, y: int): Packed2D =
-    # doAssert x >= 0 and y >= 0
     (y shl PACKEDW) + x
 
 proc packed2d(v: (int, int)): Packed2D =
-    # doAssert v[0] >= 0 and v[0] >= 0
     (v[1] shl PACKEDW) + v[0]
 
 proc coord2d(v: Packed2D): Coord2D =
-    # doAssert v >= 0
     let t = v shr PACKEDW
     (v-(t shl PACKEDW), t)
 
@@ -245,6 +244,10 @@ proc pack(data: seq[Coord2D]): Packeds2D =
         result.incl(packed2d(i))
 
 proc unpack(pv: Packeds2D): Coords2D =
+    for v in pv:
+        result.incl(v.coord2d)
+
+proc unpack(pv: seq[Packed2D]): Coords2D =
     for v in pv:
         result.incl(v.coord2d)
 
