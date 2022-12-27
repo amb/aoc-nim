@@ -1,58 +1,50 @@
 include ../aoc
-import ../tracer
 
-let data = "23/input".readFile.strip.split("\n")
+var elfRotation = 0
+const MAGIC = (600, 601).packed2d
+const DIRS = [-256, 256, -1, 1]
 
-var elfCheck: seq[seq[Packed2D]]
-for dirs in @[("NE", "N", "NW"), ("SE", "S", "SW"), ("NW", "W", "SW"), ("NE", "E", "SE")]:
-    var il: seq[Packed2D]
-    il.add(compassRD[dirs[0]].packed2d)
-    il.add(compassRD[dirs[1]].packed2d)
-    il.add(compassRD[dirs[2]].packed2d)
-    elfCheck.add(il)
-
-let surround = compassRD.values.toSeq.pack
-
-const MAGIC = (60000,60001).packed2d
-
-proc proposal(elf: Packed2D, tiles: Packeds2D): Packed2D {.meter.} =
-    for dirs in elfCheck:
-        var hasPos = true
-        for direction in dirs:
-            if (elf+direction) in tiles:
-                hasPos = false
-                break
-        if hasPos:
-            return elf+dirs[1]
-    return MAGIC
-
-proc getprops(elfs: Packeds2D, tb: var Table[Packed2D, Packed2D]) {.meter.} =
-    # Gather suggestions
+proc getpropsB(elfs: Packeds2D, tb: var Table[int, int]) =
     for elf in elfs:
-        var hugging = false
-        for it in surround:
-            if elf+it in elfs:
-                hugging = true
-                break
-        if hugging:
-            let move = elf.proposal(elfs)
-            if move != MAGIC:
+        let dNW = (elf-257) notin elfs
+        let dN  = (elf-256) notin elfs
+        let dNE = (elf-255) notin elfs
+        let dSW = (elf+255) notin elfs
+        let dS  = (elf+256) notin elfs
+        let dSE = (elf+257) notin elfs
+        let dW  = (elf-1) notin elfs
+        let dE  = (elf+1) notin elfs
+
+        if dN and dNW and dNE and dS and dSW and dSE and dW and dE:
+            continue
+        
+        let rr = [dN and dNW and dNE, 
+                  dS and dSW and dSE, 
+                  dW and dNW and dSW, 
+                  dE and dNE and dSE]
+
+        for i in 0..3:
+            let x = (i+elfRotation) mod 4
+            if rr[x]:
+                let move = elf+DIRS[x]
                 if move notin tb:
                     tb[move] = elf
                 else:
                     tb[move] = MAGIC
+                break
 
-proc solve(elfs: var Packeds2D): (int, int) {.meter.} =
+
+proc solve(elfs: var Packeds2D): (int, int) =
     var r = 0
-    var props: Table[Packed2D, Packed2D]
+    var props: Table[int, int]
     while true:
         inc r
         if r > 1000:
             assert false, "Too too long to run."
+            break
 
         props.clear()
-        getprops(elfs, props)
-
+        getpropsB(elfs, props)
         if props.len == 0:
             break
 
@@ -61,18 +53,16 @@ proc solve(elfs: var Packeds2D): (int, int) {.meter.} =
                 elfs.excl(elf)
                 elfs.incl(move)
 
-        elfCheck.rollL(0, elfCheck.high)
+        inc elfRotation
+        if elfRotation == 4:
+            elfRotation = 0
 
     let relfs = elfs.unpack
     let box = relfs.max-relfs.min+(1,1)
     (box[0] * box[1] - relfs.len, r)
 
-metricsConfirm()
-
+let data = "23/input".readFile.strip.split("\n")
 var elfs = data.toCoords2D('#').pack(offset=(31, 31))
-
-echo elfs.max
-echo elfs.min
 
 let width = data[0].len
 let height = data.len
@@ -80,10 +70,7 @@ let height = data.len
 echo fmt"w: {width}, h: {height}"
 echo fmt"elfs: {elfs.len}"
 
-# let s = oneTimeIt:
-let s = solve(elfs)
-
-metricsShow()
+let s = oneTimeIt: solve(elfs)
 
 assert s == (15173, 963)
 echo s

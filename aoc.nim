@@ -500,3 +500,29 @@ proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int
     assert false, "findRoot reached end without finding anything"
 
 #endregion
+
+
+#region RANDOM
+
+type
+    IntTable = object
+        data: array[65536, int]
+        something: IntSet
+
+proc clear(t: var IntTable) =
+    for i in t.something:
+        t.data[i] = 0
+    t.something.clear()
+
+proc `[]=`(t: var IntTable, p: int, val: int) = 
+    t.something.incl(p)
+    t.data[p] = val
+
+proc `in`(val: int, tb: IntTable): bool = val in tb.something
+proc `notin`(val: int, tb: IntTable): bool = not (val in tb.something)
+
+iterator pairs(t: IntTable): tuple[key: int, val: int] =
+    for i in t.something:
+        yield (key: i, val: t.data[i])
+
+#endregion
