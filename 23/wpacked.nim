@@ -4,16 +4,16 @@ var elfRotation = 0
 const MAGIC = (600, 601).packed2d
 const DIRS = [-256, 256, -1, 1]
 
-proc getpropsB(elfs: Packeds2D, tb: var Table[int, int]) =
+proc getpropsB(elfs: Packeds2D, blocked: array[65536, int], tb: var Table[int, int]) =
     for elf in elfs:
-        let dNW = (elf-257) notin elfs
-        let dN  = (elf-256) notin elfs
-        let dNE = (elf-255) notin elfs
-        let dSW = (elf+255) notin elfs
-        let dS  = (elf+256) notin elfs
-        let dSE = (elf+257) notin elfs
-        let dW  = (elf-1) notin elfs
-        let dE  = (elf+1) notin elfs
+        let dNW = blocked[elf-257] == 0
+        let dN  = blocked[elf-256] == 0
+        let dNE = blocked[elf-255] == 0
+        let dSW = blocked[elf+255] == 0
+        let dS  = blocked[elf+256] == 0
+        let dSE = blocked[elf+257] == 0
+        let dW  = blocked[elf-1] == 0
+        let dE  = blocked[elf+1] == 0
 
         if dN and dNW and dNE and dS and dSW and dSE and dW and dE:
             continue
@@ -37,6 +37,11 @@ proc getpropsB(elfs: Packeds2D, tb: var Table[int, int]) =
 proc solve(elfs: var Packeds2D): (int, int) =
     var r = 0
     var props: Table[int, int]
+
+    var blocked: array[65536, int]
+    for elf in elfs:
+        blocked[elf] = 1
+    
     while true:
         inc r
         if r > 1000:
@@ -44,7 +49,7 @@ proc solve(elfs: var Packeds2D): (int, int) =
             break
 
         props.clear()
-        getpropsB(elfs, props)
+        getpropsB(elfs, blocked, props)
         if props.len == 0:
             break
 
@@ -52,6 +57,8 @@ proc solve(elfs: var Packeds2D): (int, int) =
             if elf != MAGIC:
                 elfs.excl(elf)
                 elfs.incl(move)
+                blocked[elf] = 0
+                blocked[move] = 1
 
         inc elfRotation
         if elfRotation == 4:

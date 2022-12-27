@@ -518,11 +518,13 @@ proc `[]=`(t: var IntTable, p: int, val: int) =
     t.something.incl(p)
     t.data[p] = val
 
-proc `in`(val: int, tb: IntTable): bool = val in tb.something
-proc `notin`(val: int, tb: IntTable): bool = not (val in tb.something)
+proc `in`(val: int, tb: IntTable): bool = tb.data[val] != 0
+proc `notin`(val: int, tb: IntTable): bool = tb.data[val] == 0
 
 iterator pairs(t: IntTable): tuple[key: int, val: int] =
     for i in t.something:
         yield (key: i, val: t.data[i])
+
+proc len(t: IntTable): int = t.something.len
 
 #endregion
