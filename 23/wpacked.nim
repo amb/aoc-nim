@@ -1,22 +1,22 @@
 include ../aoc
+import std/[bitops]
 
-var elfRotation = 0
 const MAGIC = -1
 const DIRS = [-256, 256, -1, 1]
 
 proc solve(elfs: var Packeds2D): (int, int) =
-    var r = 0
     var props: Table[int, int]
-
+    var elfRotation = 0
     var blocked: array[65536, int]
     for elf in elfs:
         blocked[elf] = 1
     
+    var r = 0
     while true:
         inc r
-        if r > 1000:
-            assert false, "Too too long to run."
-            break
+        # if r > 1000:
+        #     echo "Took too long to run."
+        #     break
 
         props.clear()
 
@@ -39,7 +39,7 @@ proc solve(elfs: var Packeds2D): (int, int) =
                     dE and dNE and dSE]
 
             for i in 0..3:
-                let x = (i+elfRotation) mod 4
+                let x = (i+elfRotation).bitand(3)
                 if rr[x]:
                     let move = elf+DIRS[x]
                     if move notin props:
@@ -58,12 +58,10 @@ proc solve(elfs: var Packeds2D): (int, int) =
                 blocked[elf] = 0
                 blocked[move] = 1
 
-        inc elfRotation
-        if elfRotation == 4:
-            elfRotation = 0
+        elfRotation = (elfRotation+1).bitand(3)
 
     let relfs = elfs.unpack
-    let box = relfs.max-relfs.min+(1,1)
+    let box = relfs.max - relfs.min + (1,1)
     (box[0] * box[1] - relfs.len, r)
 
 let data = "23/input".readFile.strip.split("\n")
