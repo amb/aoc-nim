@@ -197,6 +197,9 @@ proc `+`(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
 proc max(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
 proc min(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
 
+proc inBounds(a: Coord2D, w, h: int): bool =
+    a[0] >= 0 and a[1] >= 0 and a[0] < w and a[1] < h
+
 proc fill(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
 
 proc faces(T: typedesc[Coords2D]): array[4, Coord2D] = [
@@ -213,6 +216,32 @@ proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
     for y in cmin[1]..cmax[1]:
         result.incl(coord2d(cmin[0], y))
         result.incl(coord2d(cmax[0], y))
+
+proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
+    var total: seq[string]
+    let h = dims[1]
+    let w = dims[0]
+    for y in 0..h-1:
+        var l: seq[char]
+        for x in 0..w-1:
+            if (x, y) + offset in cds:
+                l.add('#')
+            else:
+                l.add('.')
+        total.add(l.join)
+    total.join("\n") & "\n"
+
+proc toGrid(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
+    let h = dims[1]
+    let w = dims[0]
+    for y in 0..h-1:
+        var l: seq[int]
+        for x in 0..w-1:
+            if (x, y) + offset in cds:
+                l.add(1)
+            else:
+                l.add(0)
+        result.add(l)
 
 #endregion
 
@@ -289,20 +318,6 @@ proc faces(T: typedesc[Coords3D]): array[6, Coord3D] = [
     (0, 0, 1), (0, 0, -1)]
 
 proc one(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
-
-proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
-    var total: seq[string]
-    let h = dims[1]
-    let w = dims[0]
-    for y in 0..h-1:
-        var l: seq[char]
-        for x in 0..w-1:
-            if (x, y) + offset in cds:
-                l.add('#')
-            else:
-                l.add('.')
-        total.add(l.join)
-    total.join("\n") & "\n"
 
 proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
     for x in cmin[0]..cmax[0]:
