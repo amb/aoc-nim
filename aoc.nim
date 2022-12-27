@@ -361,6 +361,10 @@ proc `-`(ca, cb: AnyCoords): AnyCoords =
         if cube notin cb:
             result.incl(cube)
 
+proc `-=`(ca: var AnyCoords, cb: AnyCoords) =    
+    for cube in cb:
+        ca.excl(cube)
+
 proc `+`(ca, cb: AnyCoords): AnyCoords =
     for cube in ca:
         result.incl(cube)
@@ -376,7 +380,7 @@ proc neighbours(cb: AnyCoords): AnyCoords =
     for c in cb:
         for loc in AnyCoords.faces:
             result.incl(c+loc)
-    result = result - cb
+    result -= cb
 
 proc allDirections(cb: AnyCoords): seq[AnyCoords] =
     for c in cb:

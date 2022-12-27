@@ -27,4 +27,5 @@ proc walk(a, b: Coord2D, start: int): int =
     step
 
 let wh1 = (width-1, height-1)
-echo walk((0, 0), wh1, walk(wh1, (0, 0), walk((0, 0), wh1, 0)))
+let a = oneTimeIt: walk((0, 0), wh1, walk(wh1, (0, 0), walk((0, 0), wh1, 0)))
+echo a
