@@ -249,46 +249,40 @@ proc toGrid(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
 type Packed2D = int
 type Packeds2D = IntSet
 
-# TODO: template or macro constructor for variable PACKEDW
+template initPacked2D(bits: untyped): untyped =
+    const PACKEDW = bits
+    const PACKEDL = 1 shl PACKEDW
 
-const PACKEDW = 8
-const PACKEDL = 1 shl PACKEDW
+    proc packed2d(x, y: int): Packed2D =
+        (y shl PACKEDW) + x
 
-proc packed2d(x, y: int): Packed2D =
-    (y shl PACKEDW) + x
+    proc packed2d(v: (int, int)): Packed2D =
+        (v[1] shl PACKEDW) + v[0]
 
-proc packed2d(v: (int, int)): Packed2D =
-    (v[1] shl PACKEDW) + v[0]
+    proc coord2d(v: Packed2D): Coord2D =
+        let t = v shr PACKEDW
+        (v-(t shl PACKEDW), t)
 
-proc coord2d(v: Packed2D): Coord2D =
-    let t = v shr PACKEDW
-    (v-(t shl PACKEDW), t)
+    proc pack(data: Coords2D, offset = (0, 0)): Packeds2D =
+        for v in data:
+            result.incl((v + offset).packed2d)
 
-proc pack(data: Coords2D, offset = (0, 0)): Packeds2D =
-    for v in data:
-        result.incl((v + offset).packed2d)
+    proc pack(data: seq[Coord2D]): Packeds2D =
+        for i in data:
+            result.incl(packed2d(i))
 
-proc pack(data: seq[Coord2D]): Packeds2D =
-    for i in data:
-        result.incl(packed2d(i))
+    proc unpack(pv: Packeds2D): Coords2D =
+        for v in pv:
+            result.incl(v.coord2d)
 
-proc unpack(pv: Packeds2D): Coords2D =
-    for v in pv:
-        result.incl(v.coord2d)
+    proc unpack(pv: seq[Packed2D]): Coords2D =
+        for v in pv:
+            result.incl(v.coord2d)
 
-proc unpack(pv: seq[Packed2D]): Coords2D =
-    for v in pv:
-        result.incl(v.coord2d)
-
-# proc `+`(a, b: Packed2D): Packed2D = a+b
-# proc `-`(a, b: Packed2D): Packed2D = a-b
-# proc max(a, b: Packed2D): Packed2D = max(a, b)
-# proc min(a, b: Packed2D): Packed2D = min(a, b)
-
-proc fill(T: typedesc[Packeds2D], v: int): Packed2D = v
-proc faces(T: typedesc[Packeds2D]): array[4, Packed2D] = [1, -1, PACKEDL, -PACKEDL]
-proc one(T: typedesc[Packeds2D]): Packed2D = PACKEDL + 1
-proc zero(T: typedesc[Packeds2D]): Packed2D = 0
+    proc fill(T: typedesc[Packeds2D], v: int): Packed2D = v
+    proc faces(T: typedesc[Packeds2D]): array[4, Packed2D] = [1, -1, PACKEDL, -PACKEDL]
+    proc one(T: typedesc[Packeds2D]): Packed2D = PACKEDL + 1
+    proc zero(T: typedesc[Packeds2D]): Packed2D = 0
 
 #endregion
 
@@ -411,29 +405,30 @@ iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T)
 #                     \/        \//_____/
 #region TIMING
 
-proc prtTime*(t: Duration) =
+proc microTime*(t: Duration): (int, int) =
     let mstime = t.inMicroseconds
     let mlsecs = mstime div 1000
     let mcsecs = mstime - (mlsecs * 1000)
-    echo fmt"Time: {mlsecs} ms, {mcsecs} µs"
+    (mlsecs.int, mcsecs.int)
 
 template oneTimeIt(body: untyped): untyped =
     let timeStart = getMonoTime()
     let val = body
-    (getMonoTime() - timeStart).prtTime
+    block:
+        let tvals {.inject.} = (getMonoTime() - timeStart).microTime
+        echo fmt"Time: {tvals[0]} ms, {tvals[1]} µs"
     val
 
-# template timeIt*(body: untyped): untyped =
-#     var i = 1
-#     var (val, d) = oneTimeIt(body)
-#     var vals = [val].toSeq
-#     while i<3000 and (d*i).inMilliseconds<1000:
-#         let (nval, nd) = oneTimeIt(body)
-#         if nval != val:
-#             vals.add nval
-#         d = min(d, nd)
-#         inc i
-#     (vals[0], d)
+template aocIt(name, answer, body: untyped): untyped =
+    let timeStart = getMonoTime()
+    let val: int = body
+    let tres = (getMonoTime() - timeStart).microTime
+    let timing = ", in " & $tres[0] & " ms, " & $tres[1] & " µs"
+    if answer != val:
+        echo name & ": INCORRECT RESULT " & $val & timing
+    else:
+        echo name & ": " & $val & timing
+
 #endregion
 
 # .____                         __  .__

@@ -3,9 +3,11 @@ import std/[bitops]
 
 const MAGIC = -1
 const DIRS = [-256, 256, -1, 1]
-const SCAN = [-257, -256, -255, 1, 257, 256, 255, -1]
+const SCAN = [-257, -256, -255, 255, 256, 257, -1, 1]
 
-proc solve(elfs: var Packeds2D): (int, int) =
+initPacked2D(8)
+
+proc solve(elfs: Packeds2D): (int, int) =
     var props: Table[int, int]
     var elfRotation = 0
     var blocked: array[65536, int]
@@ -18,6 +20,7 @@ proc solve(elfs: var Packeds2D): (int, int) =
     while true:
         inc r
 
+        # var hits = 0
         props.clear()
         for ei, elf in velfs:
             let dNW = blocked[elf-257] == 0
@@ -28,6 +31,8 @@ proc solve(elfs: var Packeds2D): (int, int) =
             let dSE = blocked[elf+257] == 0
             let dW  = blocked[elf-1] == 0
             let dE  = blocked[elf+1] == 0
+
+            # let (dNW, dN, dNW, dSW, dS, dSE, dW, dE) = SCAN.mapIt(blocked[elf+it] == 0)
 
             if dN and dNW and dNE and dS and dSW and dSE and dW and dE:
                 continue
@@ -40,6 +45,7 @@ proc solve(elfs: var Packeds2D): (int, int) =
             for i in 0..3:
                 let x = (i+elfRotation).bitand(3)
                 if rr[x]:
+                    # inc hits
                     let move = elf+DIRS[x]
                     if move notin props:
                         props[move] = ei
@@ -47,6 +53,7 @@ proc solve(elfs: var Packeds2D): (int, int) =
                         props[move] = MAGIC
                     break
 
+        # if hits == 0:
         if props.len == 0:
             break
 

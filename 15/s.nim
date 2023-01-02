@@ -35,16 +35,7 @@ for line in "15/input".lines:
         let s = vec2i(sx, sy)
         sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
 
-let timeStart = getMonoTime()
-let locs = sensors.findBacon(0, 4000000)
-(getMonoTime() - timeStart).prtTime
 
-let answer = locs[0]*4000000+locs[1]
-assert answer == 12051287042458
-echo locs
-echo answer
-
-# 1. an isolated cell can only appear in the gap between two parallel lines with distance 2 between
-# 2. in fact 2 sets of parallel lines, one pair in the / direction and one pair in the \ direction
-# 3. so if you find such an arrangement in the / and \ direction, their intersections gives you the only possible candidates for such a location
-# 4. this solution only scales with the number of lines of input
+aocIt "Part 2", 12051287042458.int: 
+    let locs = sensors.findBacon(0, 4000000)
+    locs[0]*4000000+locs[1]
