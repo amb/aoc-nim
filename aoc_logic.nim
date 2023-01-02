@@ -57,7 +57,7 @@ template part*(p: int, answer, solution: untyped): untyped =
             return red($val)
 
 proc getInput(day: int): string =
-    let filename = fmt"inputs\\day{day}.in"
+    let filename = fmt"inputs/day{day}.in"
     if fileExists filename:
         return readFile filename
     assert false, "Input file not found for day " & $day
