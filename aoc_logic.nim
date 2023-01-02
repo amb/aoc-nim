@@ -1,6 +1,7 @@
 # Lots of dumb stuff here
 # Compiling tips:
 # nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:orc 10/s.nim
+# --deepCopy?
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times]
@@ -94,7 +95,7 @@ proc `*=`*(l: var seq[int], v: int) =
     for i in 0..l.len-1:
         l[i] *= v
 
-let compassRD = {"N": (0, -1),
+let compassRD* = {"N": (0, -1),
     "S": (0, 1),
     "E": (1, 0),
     "W": (-1, 0),
@@ -133,13 +134,13 @@ proc ints*(s: string): seq[int] =
 #         \/     \/   |__|           \/     \/     \/    \/     \/
 #region SEQUENCES
 
-proc rollR[T](a: var seq[T], ps, pe: int) =
+proc rollR*[T](a: var seq[T], ps, pe: int) =
     let t = a[pe]
     for i in countdown(pe, ps+1):
         a[i] = a[i-1]
     a[ps] = t
 
-proc rollL[T](a: var seq[T], ps, pe: int) =
+proc rollL*[T](a: var seq[T], ps, pe: int) =
     let t = a[ps]
     for i in countup(ps, pe-1):
         a[i] = a[i+1]
@@ -243,41 +244,41 @@ proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y
 #region COORDSETS
 
 #region 2D
-type Coord2D = (int, int)
-type Coords2D = HashSet[Coord2D]
+type Coord2D* = (int, int)
+type Coords2D* = HashSet[Coord2D]
 
-proc coord2d(v: seq[int]): Coord2D = (v[0], v[1])
-proc coord2d(x, y: int): Coord2D = (x, y)
+proc coord2d*(v: seq[int]): Coord2D = (v[0], v[1])
+proc coord2d*(x, y: int): Coord2D = (x, y)
 
-proc toCoords2D(data: seq[string], symbol: char): Coords2D =
+proc toCoords2D*(data: seq[string], symbol: char): Coords2D =
     for yi, y in data:
         for xi, x in y:
             if x == symbol:
                 result.incl((xi, yi))
 
-proc toCoords2D(data: seq[Coord2D]): Coords2D =
+proc toCoords2D*(data: seq[Coord2D]): Coords2D =
     for i in data:
         result.incl(i)
 
-proc `*`(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
-proc `-`(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
-proc `+`(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
-proc max(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
-proc min(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
+proc `*`*(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
+proc `-`*(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
+proc `+`*(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
+proc max*(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
+proc min*(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
 
-proc inBounds(a: Coord2D, w, h: int): bool =
+proc inBounds*(a: Coord2D, w, h: int): bool =
     a[0] >= 0 and a[1] >= 0 and a[0] < w and a[1] < h
 
-proc fill(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
+proc fill*(T: typedesc[Coords2D], v: int): Coord2D = (v, v)
 
-proc faces(T: typedesc[Coords2D]): array[4, Coord2D] = [
+proc faces*(T: typedesc[Coords2D]): array[4, Coord2D] = [
     (1, 0), (-1, 0),
     (0, 1), (0, -1)]
 
-proc one(T: typedesc[Coords2D]): Coord2D = (1, 1)
-proc zero(T: typedesc[Coords2D]): Coord2D = (0, 0)
+proc one*(T: typedesc[Coords2D]): Coord2D = (1, 1)
+proc zero*(T: typedesc[Coords2D]): Coord2D = (0, 0)
 
-proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
+proc fillBoundary*(cmin, cmax: Coord2D): Coords2D =
     for x in cmin[0]..cmax[0]:
         result.incl(coord2d(x, cmin[1]))
         result.incl(coord2d(x, cmax[1]))
@@ -285,7 +286,7 @@ proc fillBoundary(cmin, cmax: Coord2D): Coords2D =
         result.incl(coord2d(cmin[0], y))
         result.incl(coord2d(cmax[0], y))
 
-proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
+proc show*(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
     var total: seq[string]
     let h = dims[1]
     let w = dims[0]
@@ -299,7 +300,7 @@ proc show(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
         total.add(l.join)
     total.join("\n") & "\n"
 
-proc toGrid(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
+proc toGrid*(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
     let h = dims[1]
     let w = dims[0]
     for y in 0..h-1:
@@ -314,10 +315,10 @@ proc toGrid(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
 #endregion
 
 #region PACKED
-type Packed2D = int
-type Packeds2D = IntSet
+type Packed2D* = int
+type Packeds2D* = IntSet
 
-template initPacked2D(bits: untyped): untyped =
+template initPacked2D*(bits: untyped): untyped =
     const PACKEDW = bits
     const PACKEDL = 1 shl PACKEDW
 
@@ -355,33 +356,33 @@ template initPacked2D(bits: untyped): untyped =
 #endregion
 
 #region 3D
-type Coord3D = (int, int, int)
-type Coords3D = HashSet[Coord3D]
+type Coord3D* = (int, int, int)
+type Coords3D* = HashSet[Coord3D]
 
-proc coord3d(v: seq[int]): Coord3D = (v[0], v[1], v[2])
-proc coord3d(x, y, z: int): Coord3D = (x, y, z)
+proc coord3d*(v: seq[int]): Coord3D = (v[0], v[1], v[2])
+proc coord3d*(x, y, z: int): Coord3D = (x, y, z)
 
 # def cross(a, b):
 #     c = [a[1]*b[2] - a[2]*b[1],
 #          a[2]*b[0] - a[0]*b[2],
 #          a[0]*b[1] - a[1]*b[0]]
 
-proc `*`(a: Coord3D, b: int): Coord3D = (a[0]*b, a[1]*b, a[2]*b)
-proc `-`(a, b: Coord3D): Coord3D = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
-proc `+`(a, b: Coord3D): Coord3D = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
-proc max(a, b: Coord3D): Coord3D = (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
-proc min(a, b: Coord3D): Coord3D = (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
+proc `*`*(a: Coord3D, b: int): Coord3D = (a[0]*b, a[1]*b, a[2]*b)
+proc `-`*(a, b: Coord3D): Coord3D = (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+proc `+`*(a, b: Coord3D): Coord3D = (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+proc max*(a, b: Coord3D): Coord3D = (max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2]))
+proc min*(a, b: Coord3D): Coord3D = (min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2]))
 
-proc fill(T: typedesc[Coords3D], v: int): Coord3D = (v, v, v)
+proc fill*(T: typedesc[Coords3D], v: int): Coord3D = (v, v, v)
 
-proc faces(T: typedesc[Coords3D]): array[6, Coord3D] = [
+proc faces*(T: typedesc[Coords3D]): array[6, Coord3D] = [
     (1, 0, 0), (-1, 0, 0),
     (0, 1, 0), (0, -1, 0),
     (0, 0, 1), (0, 0, -1)]
 
-proc one(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
+proc one*(T: typedesc[Coords3D]): Coord3D = (1, 1, 1)
 
-proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
+proc fillBoundary*(cmin, cmax: Coord3D): Coords3D =
     for x in cmin[0]..cmax[0]:
         for y in cmin[1]..cmax[1]:
             result.incl(coord3d(x, y, cmin[2]))
@@ -399,57 +400,57 @@ proc fillBoundary(cmin, cmax: Coord3D): Coords3D =
 
 #region ANY
 
-type AnyCoord = Coord2D | Coord3D | Packed2D
-type AnyCoords = Coords2D | Coords3D | Packeds2D
+type AnyCoord* = Coord2D | Coord3D | Packed2D
+type AnyCoords* = Coords2D | Coords3D | Packeds2D
 
-proc max(cb: AnyCoords): AnyCoord =
+proc max*(cb: AnyCoords): AnyCoord =
     result = AnyCoords.fill(int.low)
     for c in cb:
         result = max(result, c)
 
-proc min(cb: AnyCoords): AnyCoord =
+proc min*(cb: AnyCoords): AnyCoord =
     result = AnyCoords.fill(int.high)
     for c in cb:
         result = min(result, c)
 
-proc `+`(cb: AnyCoords, v: AnyCoord): AnyCoords =
+proc `+`*(cb: AnyCoords, v: AnyCoord): AnyCoords =
     for i in cb:
         # TODO: why this excl?
         result.excl(v)
         result.incl(i+v)
 
-proc `-`(ca, cb: AnyCoords): AnyCoords =
+proc `-`*(ca, cb: AnyCoords): AnyCoords =
     for cube in ca:
         if cube notin cb:
             result.incl(cube)
 
-proc `-=`(ca: var AnyCoords, cb: AnyCoords) =    
+proc `-=`*(ca: var AnyCoords, cb: AnyCoords) =    
     for cube in cb:
         ca.excl(cube)
 
-proc `+`(ca, cb: AnyCoords): AnyCoords =
+proc `+`*(ca, cb: AnyCoords): AnyCoords =
     for cube in ca:
         result.incl(cube)
     for loc in cb:
         result.incl(loc)
 
-proc `&`(ca, cb: AnyCoords): AnyCoords =
+proc `&`*(ca, cb: AnyCoords): AnyCoords =
     for loc in cb:
         if loc in ca:
             result.incl(loc)
 
-proc neighbours(cb: AnyCoords): AnyCoords =
+proc neighbours*(cb: AnyCoords): AnyCoords =
     for c in cb:
         for loc in AnyCoords.faces:
             result.incl(c+loc)
     result -= cb
 
-proc allDirections(cb: AnyCoords): seq[AnyCoords] =
+proc allDirections*(cb: AnyCoords): seq[AnyCoords] =
     for c in cb:
         for loc in AnyCoords.faces:
             result.add(c+loc)
 
-iterator throwNet[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T): T =
+iterator throwNet*[AnyCoords, T](cubes: AnyCoords, run: proc (ind: AnyCoords): T): T =
     let drone = AnyCoords.one
     let cmin = cubes.min - drone * 2
     let cmax = cubes.max + drone * 2
@@ -479,7 +480,7 @@ proc microTime*(t: Duration): (int, int) =
     let mcsecs = mstime - (mlsecs * 1000)
     (mlsecs.int, mcsecs.int)
 
-template oneTimeIt(body: untyped): untyped =
+template oneTimeIt*(body: untyped): untyped =
     let timeStart = getMonoTime()
     let val = body
     block:
@@ -487,7 +488,7 @@ template oneTimeIt(body: untyped): untyped =
         echo fmt"Time: {tvals[0]} ms, {tvals[1]} µs"
     val
 
-template aocIt(name, answer, body: untyped): untyped =
+template aocIt*(name, answer, body: untyped): untyped =
     let timeStart = getMonoTime()
     let val: int = body
     let tres = (getMonoTime() - timeStart).microTime
@@ -508,26 +509,26 @@ template aocIt(name, answer, body: untyped): untyped =
 #region LOCATIONMEMORY
 
 type
-    Positionals[T] = object
+    Positionals*[T] = object
         data: seq[T]
         index: seq[int]
         position: seq[int]
 
-proc `[]`[T](p: Positionals[T], l: int): T = p.data[l]
-proc len[T](p: Positionals[T]): int = p.data.len
+proc `[]`*[T](p: Positionals[T], l: int): T = p.data[l]
+proc len*[T](p: Positionals[T]): int = p.data.len
 
-proc newPositionals[T](d: seq[T]): Positionals[T] =
+proc newPositionals*[T](d: seq[T]): Positionals[T] =
     result.data = d
     result.index = toSeq(0..d.len-1)
     result.position = toSeq(0..d.len-1)
     assert result.data.len == result.position.len
 
-proc swapItems(p: var Positionals, a, b: int) =
+proc swapItems*(p: var Positionals, a, b: int) =
     swap(p.data[a], p.data[b])
     swap(p.index[a], p.index[b])
     swap(p.position[p.index[a]], p.position[p.index[b]])
 
-proc rollRight(p: var Positionals, ps, pe: int) =
+proc rollRight*(p: var Positionals, ps, pe: int) =
     for i in ps..pe:
         let rpos = p.index[i]
         inc p.position[rpos]
@@ -536,7 +537,7 @@ proc rollRight(p: var Positionals, ps, pe: int) =
     p.data.rollR(ps, pe)
     p.index.rollR(ps, pe)
 
-proc rollLeft(p: var Positionals, ps, pe: int) =
+proc rollLeft*(p: var Positionals, ps, pe: int) =
     for i in ps..pe:
         let rpos = p.index[i]
         dec p.position[rpos]
@@ -555,7 +556,7 @@ proc rollLeft(p: var Positionals, ps, pe: int) =
 #         \/     \/     \/                  \/     \/           \/
 #region RECURSERS
 
-proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int =
+proc findRoot*(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int =
     ## Bisection for integer funtions
     # Apparently this is called bisection
     # ad-hoc implementation, probably could be improved by a lot
@@ -586,27 +587,6 @@ proc findRoot(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): int
 
 #endregion
 
-#region MMARSALEK
-
-const ops* = toTable {
-    "+": proc(x, y: float): float = x+y,
-    "-": proc(x, y: float): float = x-y,
-    "*": proc(x, y: float): float = x*y,
-    "/": proc(x, y: float): float = x/y,
-}
-
-proc binarySearch*(f: float -> float, lo = -1e100, hi = 1e100, precision = 1.0): float =
-    var lo = lo
-    var hi = hi
-    while hi - lo > precision:
-        result = (lo + hi) / 2.0
-        if f(result) < 0.0:
-            hi = result
-        else:
-            lo = result
-
-#endregion
-
 #region RANDOM
 
 type
@@ -631,5 +611,23 @@ iterator pairs(t: IntTable): tuple[key: int, val: int] =
         yield (key: i, val: t.data[i])
 
 proc len(t: IntTable): int = t.something.len
+
+
+const fops* = toTable {
+    "+": proc(x, y: float): float = x+y,
+    "-": proc(x, y: float): float = x-y,
+    "*": proc(x, y: float): float = x*y,
+    "/": proc(x, y: float): float = x/y,
+}
+
+proc binarySearch*(f: float -> float, lo = -1e100, hi = 1e100, precision = 1.0): float =
+    var lo = lo
+    var hi = hi
+    while hi - lo > precision:
+        result = (lo + hi) / 2.0
+        if f(result) < 0.0:
+            hi = result
+        else:
+            lo = result
 
 #endregion

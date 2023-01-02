@@ -1,5 +1,5 @@
-include ../aoc
-import ../tracer
+include aoc
+import tracer
 
 let data = "23/input".readFile.strip.split("\n")
 
