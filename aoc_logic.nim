@@ -208,7 +208,7 @@ iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
 
 type
     Vec2i* = object
-        x, y: int
+        x*, y*: int
 
 proc vec2i*(x, y: int): Vec2i = Vec2i(x: x, y: y)
 proc vec2i*(t: (int, int)): Vec2i = Vec2i(x: t[0], y: t[1])
