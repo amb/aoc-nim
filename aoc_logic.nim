@@ -70,7 +70,18 @@ proc run*(day: int) =
     stdout.write "Day " & $day & ":"
     for k in results.keys.toSeq.sorted:
         stdout.write fmt" [P{k}: {results[k]}]"
-    stdout.write fmt" Time: {finish-start}"
+    let ttime = (finish-start).inMicroseconds
+    if ttime < 10000:
+        # Under 10 ms
+        stdout.write fmt" {green($ttime)} µs"
+    elif ttime < 100000:
+        # Under 100 ms
+        stdout.write fmt" {$ttime} µs"
+    elif ttime < 1000000:
+        # Under 1 s
+        stdout.write fmt" {yellow($ttime)} µs"
+    else:
+        stdout.write fmt" {red($ttime)} µs"
 
 #endregion
 
