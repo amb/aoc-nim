@@ -44,7 +44,7 @@ template part*(p: int, solution: untyped): untyped =
             solution
         return yellow($inner())
 
-template part*(p, answer: int, solution: untyped): untyped =
+template part*(p: int, answer, solution: untyped): untyped =
     ## Defines a part solution function with test for correctness.
     parts[p] = proc (): string =
         proc inner(): auto =
