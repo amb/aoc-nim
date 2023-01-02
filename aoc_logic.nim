@@ -82,6 +82,7 @@ proc run*(day: int) =
         stdout.write fmt" {yellow($ttime)} µs"
     else:
         stdout.write fmt" {red($ttime)} µs"
+    echo ""
 
 #endregion
 
