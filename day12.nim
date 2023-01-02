@@ -1,4 +1,4 @@
-include ../aoc
+include aoc
 import std/[monotimes, times]
 
 var timeStart = getMonoTime()
@@ -17,8 +17,10 @@ var grid = collect:
 
 let height = grid.len
 let width = grid[0].len
-echo fmt"width: {width}, height: {height}"
-echo fmt"start: {startLoc}, end: {endLoc}"
+
+# echo fmt"width: {width}, height: {height}"
+# echo fmt"start: {startLoc}, end: {endLoc}"
+
 grid[endLoc] = 'z'
 grid[startLoc] = 'a'
 
@@ -59,7 +61,6 @@ let pathLens = collect:
     for i in 0..<height:
         forwardWavefront(grid, (i, 0), endLoc)
 
-echo pathLens
 echo min(pathLens)
 
 let mstime = (getMonoTime() - timeStart).inMicroseconds
