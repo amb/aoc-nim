@@ -1,4 +1,4 @@
-include ../aoc
+include aoc
 import memo
 
 type

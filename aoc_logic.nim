@@ -1,7 +1,23 @@
 # Lots of dumb stuff here
+
 # Compiling tips:
-# nim c -d:danger -d:strip -d:lto -d:useMalloc --mm:orc 10/s.nim
+# nim c -d:danger -d:strip -d:lto --mm:orc 10/s.nim
+# -d:useMalloc?
 # --deepCopy?
+
+# beef @ discord
+# --hint[Performance]: on
+# type MyObject = object
+#   a: string
+# proc consume(s: sink MyObject) = discard
+# proc doThing() =
+#   var a = MyObject(a: "hello world")
+#   consume(a)
+#   echo a
+# doThing()
+# ...
+# /tmp/test.nim(9, 11) Hint: passing 'a' to a sink parameter introduces an implicit copy; if possible, rearrange your program's control flow to prevent it [Performance]
+# Make a config.nims or myproject.nims
 
 import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times]
@@ -60,7 +76,8 @@ proc getInput(day: int): string =
     let filename = fmt"inputs\\day{day}.in"
     if fileExists filename:
         return readFile filename
-    assert false, "Input file not found for day " & $day
+    echo "Input file not found for day " & $day
+    quit(QuitFailure)
     
 proc run*(day: int) =
     ## Runs given day solution on the corresponding input.
@@ -274,6 +291,7 @@ proc toCoords2D*(data: seq[Coord2D]): Coords2D =
 proc `*`*(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
 proc `-`*(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
 proc `+`*(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
+proc `==`*(a: Coord2D, b: Vec2i): bool = a[0]==b.x and  a[1]==b.y
 proc max*(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
 proc min*(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
 

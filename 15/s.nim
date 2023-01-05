@@ -36,6 +36,10 @@ for line in "15/input".lines:
         sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
 
 
-aocIt "Part 2", 12051287042458.int: 
+let v = oneTimeIt: 
     let locs = sensors.findBacon(0, 4000000)
     locs[0]*4000000+locs[1]
+
+echo v
+
+# 12051287042458.int
