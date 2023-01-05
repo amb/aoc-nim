@@ -1,25 +1,25 @@
 include aoc
 import bitty
 
-func `[]`(b: BitArray2d, v: Vec2i): bool = b[v.y, v.x]
-func `[]=`(b: BitArray2d, v: Vec2i, o: bool) = b[v.y, v.x] = o
+func `[]`(b: BitArray2d, v: Coord2D): bool = b[v.y, v.x]
+func `[]=`(b: BitArray2d, v: Coord2D, o: bool) = b[v.y, v.x] = o
 
 day 14:
-    let scans = lines.mapIt(it.ints.partition(2).mapIt(it.vec2i))
+    let scans = lines.mapIt(it.ints.partition(2).mapIt(it.coord2d))
 
-    var maxV = vec2i(int.low, int.low)
-    var minV = vec2i(int.high, int.high)
+    var maxV = coord2d(int.low, int.low)
+    var minV = coord2d(int.high, int.high)
     for d in scans:
         for v in d:
             maxV = max(v, maxV)
             minV = min(v, minV)
 
-    minV.y = 0
-    var grSize = maxV-minV + vec2i(1, 1)
+    minV = (minV.x, 0)
+    var grSize = maxV-minV + coord2d(1, 1)
 
-    let displace = vec2i(grSize.y-1, 0)
+    let displace = coord2d(grSize.y-1, 0)
     var groundInit = newBitArray2D(grSize.x + displace.x*2, grSize.y + 2)
-    grSize = vec2i(grSize.x + displace.x*2, grSize.y + 2)
+    grSize = coord2d(grSize.x + displace.x*2, grSize.y + 2)
 
     for scan in scans:
         var loc = scan[0]
@@ -41,10 +41,10 @@ day 14:
         var walls = ground.deepCopy
         var inBounds = true
 
-        proc oob(v: Vec2i): bool = v.x < 0 or v.y < 0 or v.x >= grSize.x or v.y >= grSize.y
-        proc empty(v: Vec2i): bool = return not ground[v]
-        proc place(v: Vec2i) = ground[v] = true
-        proc tryMove(v: var Vec2i, move: Vec2i): bool =
+        proc oob(v: Coord2D): bool = v.x < 0 or v.y < 0 or v.x >= grSize.x or v.y >= grSize.y
+        proc empty(v: Coord2D): bool = return not ground[v]
+        proc place(v: Coord2D) = ground[v] = true
+        proc tryMove(v: var Coord2D, move: Coord2D): bool =
             let nextLoc = v+move
             if nextLoc.oob:
                 inBounds = false
@@ -55,13 +55,13 @@ day 14:
             return false
 
         var count = 0
-        let sandSpawnerLoc = vec2i(500-minV.x+displace.x, 0)
+        let sandSpawnerLoc = coord2d(500-minV.x+displace.x, 0)
         while inBounds:
             var loc = sandSpawnerLoc
             while true:
-                if loc.tryMove(vec2i(0, 1)): continue
-                if loc.tryMove(vec2i(-1, 1)): continue
-                if loc.tryMove(vec2i(1, 1)): continue
+                if loc.tryMove(coord2d(0, 1)): continue
+                if loc.tryMove(coord2d(-1, 1)): continue
+                if loc.tryMove(coord2d(1, 1)): continue
                 break
 
             loc.place

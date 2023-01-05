@@ -4,7 +4,7 @@ import shadows
 
 type
     Sensor = object
-        location: Vec2i
+        location: Coord2D
         area: int
 
 proc sensorScanline(sensor: Sensor, y: int): Option[(int, int)] =
@@ -32,8 +32,8 @@ var sensors: seq[Sensor]
 for line in "15/input".lines:
     var sx, sy, bx, by: int
     if line.scanf(dscan, sx, sy, bx, by):
-        let s = vec2i(sx, sy)
-        sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
+        let s = coord2d(sx, sy)
+        sensors.add(Sensor(location: s, area: s.manhattan(coord2d(bx, by))))
 
 
 let v = oneTimeIt: 

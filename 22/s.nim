@@ -53,10 +53,10 @@ var x = int.high
 for i in ground:
     if i[1] == 1:
         x = min(x, i[0])
-var location = vec2i(x, 1)
+var location = coord2d(x, 1)
 
 # Initially facing right
-var facing = vec2i(1, 0)
+var facing = coord2d(1, 0)
 for step in movements:
     for _ in 1..step[0]:
         var newLoc = location + facing

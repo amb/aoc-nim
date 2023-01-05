@@ -236,31 +236,44 @@ iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
 #          \/                  \/     \/                       \/
 #region INTVECTORS
 
-type
-    Vec2i* = object
-        x*, y*: int
+# type
+#     Coord2D* = object
+#         x*, y*: int
+type Coord2D* = (int, int)
+type Coords2D* = HashSet[Coord2D]
 
-proc vec2i*(x, y: int): Vec2i = Vec2i(x: x, y: y)
-proc vec2i*(t: (int, int)): Vec2i = Vec2i(x: t[0], y: t[1])
-proc vec2i*(t: seq[int]): Vec2i = Vec2i(x: t[0], y: t[1])
-proc `*`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x*b, y: a.y*b)
-proc `/`*(a: Vec2i, b: Vec2i): Vec2i = Vec2i(x: a.x div b.x, y: a.y div b.y)
-proc `/`*(a: Vec2i, b: int): Vec2i = Vec2i(x: a.x div b, y: a.y div b)
-proc `-`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x - b.x, y: a.y - b.y)
-proc `-=`*(a: var Vec2i, b: Vec2i) = a = a-b
-proc `+`*(a, b: Vec2i): Vec2i = Vec2i(x: a.x + b.x, y: a.y + b.y)
-proc `+=`*(a: var Vec2i, b: Vec2i) = a = a+b
-proc `==`*(a: var Vec2i, b: (int, int)): bool = a.x == b[0] and a.y == b[1]
-proc min*(a, b: Vec2i): Vec2i = Vec2i(x: min(a.x, b.x), y: min(a.y, b.y))
-proc max*(a, b: Vec2i): Vec2i = Vec2i(x: max(a.x, b.x), y: max(a.y, b.y))
-proc abs*(a: Vec2i): Vec2i = Vec2i(x: abs(a.x), y: abs(a.y))
-proc sgn*(a: Vec2i): Vec2i = Vec2i(x: sgn(a.x), y: sgn(a.y))
+proc x*(c: Coord2D): int = c[0]
+proc y*(c: Coord2D): int = c[1]
+
+proc coord2d*(x, y: int): Coord2D = (x, y)
+proc coord2d*(v: seq[int]): Coord2D = (v[0], v[1])
+proc coord2d*(t: (int, int)): Coord2D = (t[0], t[1])
+
+# proc `*`*(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
+# proc `-`*(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
+# proc `+`*(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
+# proc `==`*(a: Coord2D, b: Coord2D): bool = a[0]==b.x and  a[1]==b.y
+# proc max*(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
+# proc min*(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
+
+proc `*`*(a: Coord2D, b: int): Coord2D = (x: a.x*b, y: a.y*b)
+proc `/`*(a: Coord2D, b: Coord2D): Coord2D = (x: a.x div b.x, y: a.y div b.y)
+proc `/`*(a: Coord2D, b: int): Coord2D = (x: a.x div b, y: a.y div b)
+proc `-`*(a, b: Coord2D): Coord2D = (x: a.x - b.x, y: a.y - b.y)
+proc `-=`*(a: var Coord2D, b: Coord2D) = a = a-b
+proc `+`*(a, b: Coord2D): Coord2D = (x: a.x + b.x, y: a.y + b.y)
+proc `+=`*(a: var Coord2D, b: Coord2D) = a = a+b
+proc `==`*(a: var Coord2D, b: (int, int)): bool = a.x == b[0] and a.y == b[1]
+proc min*(a, b: Coord2D): Coord2D = (x: min(a.x, b.x), y: min(a.y, b.y))
+proc max*(a, b: Coord2D): Coord2D = (x: max(a.x, b.x), y: max(a.y, b.y))
+proc abs*(a: Coord2D): Coord2D = (x: abs(a.x), y: abs(a.y))
+proc sgn*(a: Coord2D): Coord2D = (x: sgn(a.x), y: sgn(a.y))
 # TODO: len should be maxcoord, manhattan should be len
-proc len*(a: Vec2i): int = max(abs(a.x), abs(a.y))
-proc manhattan*(a, b: Vec2i): int = abs(a.x-b.x) + abs(a.y-b.y)
-proc asTuple*(v: Vec2i): (int, int) = (v.x, v.y)
-proc asFloatArray*(v: Vec2i): array[2, float] = [v.x.float, v.y.float]
-proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y: v.x*d) else: v)
+proc len*(a: Coord2D): int = max(abs(a.x), abs(a.y))
+proc manhattan*(a, b: Coord2D): int = abs(a.x-b.x) + abs(a.y-b.y)
+proc asTuple*(v: Coord2D): (int, int) = (v.x, v.y)
+proc asFloatArray*(v: Coord2D): array[2, float] = [v.x.float, v.y.float]
+proc rot90*(v: Coord2D, d: int): Coord2D = (if d == 1 or d == -1: (-v.y*d, v.x*d) else: v)
 
 #endregion
 
@@ -273,11 +286,6 @@ proc rot90*(v: Vec2i, d: int): Vec2i = (if d == 1 or d == -1: Vec2i(x: -v.y*d, y
 #region COORDSETS
 
 #region 2D
-type Coord2D* = (int, int)
-type Coords2D* = HashSet[Coord2D]
-
-proc coord2d*(v: seq[int]): Coord2D = (v[0], v[1])
-proc coord2d*(x, y: int): Coord2D = (x, y)
 
 proc toCoords2D*(data: seq[string], symbol: char): Coords2D =
     for yi, y in data:
@@ -288,13 +296,6 @@ proc toCoords2D*(data: seq[string], symbol: char): Coords2D =
 proc toCoords2D*(data: seq[Coord2D]): Coords2D =
     for i in data:
         result.incl(i)
-
-proc `*`*(a: Coord2D, b: int): Coord2D = (a[0]*b, a[1]*b)
-proc `-`*(a, b: Coord2D): Coord2D = (a[0]-b[0], a[1]-b[1])
-proc `+`*(a, b: Coord2D): Coord2D = (a[0]+b[0], a[1]+b[1])
-proc `==`*(a: Coord2D, b: Vec2i): bool = a[0]==b.x and  a[1]==b.y
-proc max*(a, b: Coord2D): Coord2D = (max(a[0], b[0]), max(a[1], b[1]))
-proc min*(a, b: Coord2D): Coord2D = (min(a[0], b[0]), min(a[1], b[1]))
 
 proc inBounds*(a: Coord2D, w, h: int): bool =
     a[0] >= 0 and a[1] >= 0 and a[0] < w and a[1] < h

@@ -1,9 +1,9 @@
 include ../aoc
-proc follow(tail: var Vec2i, head: Vec2i) =
+proc follow(tail: var Coord2D, head: Coord2D) =
     let ds = head - tail
     if ds.len > 1: tail += (if ds.x * ds.y == 0: ds/len(ds) else: ds/abs(ds))
-let mdir = {'L': vec2i(-1, 0), 'R': vec2i(1, 0), 'U': vec2i(0, -1), 'D': vec2i(0, 1)}.toTable
-var knots = newSeq[Vec2i](10)
+let mdir = {'L': coord2d(-1, 0), 'R': coord2d(1, 0), 'U': coord2d(0, -1), 'D': coord2d(0, 1)}.toTable
+var knots = newSeq[Coord2D](10)
 var trail1, trail9: HashSet[(int, int)]
 for m in fil(9).mapIt(it.scanTuple("$c $i")).filterIt(it[0]).mapIt(mdir[it[1]] * it[2]):
     for step in 0..<m.len:

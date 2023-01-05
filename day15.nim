@@ -5,7 +5,7 @@ import shadows
 day 15:
     type
         Sensor = object
-            location: Vec2i
+            location: Coord2D
             area: int
 
     proc sensorScanline(sensor: Sensor, y: int): Option[(int, int)] =
@@ -45,8 +45,8 @@ day 15:
     for line in lines:
         var sx, sy, bx, by: int
         if line.scanf(dscan, sx, sy, bx, by):
-            let s = vec2i(sx, sy)
-            sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
+            let s = coord2d(sx, sy)
+            sensors.add(Sensor(location: s, area: s.manhattan(coord2d(bx, by))))
 
     part 1, 4725496: sensors.scanLine(2000000) - 1
     part 2, 12051287042458.int:

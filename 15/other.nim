@@ -3,7 +3,7 @@ import std/parseutils
 
 type
     Sensor = object
-        location: Vec2i
+        location: Coord2D
         area: int
 
 const dscan = "Sensor at x=$i, y=$i: closest beacon is at x=$i, y=$i"
@@ -11,8 +11,8 @@ var sensors: seq[Sensor]
 for line in "15/input".lines:
     var sx, sy, bx, by: int
     if line.scanf(dscan, sx, sy, bx, by):
-        let s = vec2i(sx, sy)
-        sensors.add(Sensor(location: s, area: s.manhattan(vec2i(bx, by))))
+        let s = coord2d(sx, sy)
+        sensors.add(Sensor(location: s, area: s.manhattan(coord2d(bx, by))))
 
 # 1. an isolated cell can only appear in the gap between two parallel lines with distance 2 between
 # 2. in fact 2 sets of parallel lines, one pair in the / direction and one pair in the \ direction
@@ -20,7 +20,7 @@ for line in "15/input".lines:
 # 4. this solution only scales with the number of lines of input
 
 let (yz0, yz1) = oneTimeIt:
-    proc atZero(o: Vec2i, v: Vec2i, area, s: int): int =
+    proc atZero(o: Coord2D, v: Coord2D, area, s: int): int =
         var pt = o
         pt.x += area * v.sgn.x + v.sgn.x
         # s=-1 => /, s=1  => \
@@ -38,11 +38,11 @@ let (yz0, yz1) = oneTimeIt:
                 let ds = diff.sgn
                 
                 # \ line
-                if ds in [vec2i(1, 1), vec2i(-1, -1)]:
+                if ds in [coord2d(1, 1), coord2d(-1, -1)]:
                     y0 = atZero(sx.location, diff, sx.area, 1)
 
                 # / line
-                if ds in [vec2i(-1, 1), vec2i(1, -1)]:
+                if ds in [coord2d(-1, 1), coord2d(1, -1)]:
                     y1 = atZero(sx.location, diff, sx.area, -1)
     (y0, y1)
 
