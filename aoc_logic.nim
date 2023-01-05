@@ -73,7 +73,7 @@ template part*(p: int, answer, solution: untyped): untyped =
             return red($val)
 
 proc getInput(day: int): string =
-    let filename = fmt"inputs\\day{day}.in"
+    let filename = fmt"inputs/day{day}.in"
     if fileExists filename:
         return readFile filename
     echo "Input file not found for day " & $day
@@ -99,6 +99,7 @@ proc run*(day: int) =
         stdout.write fmt" {yellow($ttime)} µs"
     else:
         stdout.write fmt" {red($ttime)} µs"
+    echo ""
 
 #endregion
 
