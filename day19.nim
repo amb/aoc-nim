@@ -1,4 +1,4 @@
-include ../aoc
+include aoc
 
 type
     Mineral = enum Ore, Clay, Obsidian, Geode

@@ -35,7 +35,6 @@ day 15:
             if r.isSome:
                 slines.addShadow(r.get)
         slines.finalize()
-        echo slines.lines.len
         for s in 0..<slines.lines.len:
             let sl = slines.lines[s]
             result += (sl.b - sl.a + 1)
