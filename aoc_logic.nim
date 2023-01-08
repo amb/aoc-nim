@@ -19,6 +19,9 @@
 # /tmp/test.nim(9, 11) Hint: passing 'a' to a sink parameter introduces an implicit copy; if possible, rearrange your program's control flow to prevent it [Performance]
 # Make a config.nims or myproject.nims
 
+# For profiling on Windows11/VerySleepy, this works:
+# nim c --debugger:native -d:release --mm:arc day15.nim
+
 import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times]
 

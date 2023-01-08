@@ -25,6 +25,8 @@ graph.png
 *.dylib
 *.zip
 *.iss
+*.pdb
+*.ilk
 
 mapping.txt
 tags
