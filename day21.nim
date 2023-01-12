@@ -5,7 +5,6 @@ day 21:
         Monke = object
             value: Option[int]
             a, b: string
-            up: string
             op: proc (a, b: int): int
 
     proc parse(input: string): Table[string, Monke] =
@@ -23,20 +22,7 @@ day 21:
                 let fm = val.split(" ")
                 result[monkey].a = fm[0]
                 result[monkey].b = fm[2]
-                let opt = fm[1]
-                if opt == "+": result[monkey].op = (proc (a, b: int): int = a+b)
-                elif opt == "-": result[monkey].op = (proc (a, b: int): int = a-b)
-                elif opt == "/": result[monkey].op = (proc (a, b: int): int = a div b)
-                elif opt == "*": result[monkey].op = (proc (a, b: int): int = a*b)
-                else: assert false, "Unknown op"
-
-                if fm[0] notin result:
-                    result[fm[0]] = Monke()
-                if fm[2] notin result:
-                    result[fm[2]] = Monke()
-
-                result[fm[0]].up = monkey
-                result[fm[2]].up = monkey
+                result[monkey].op = iops[fm[1]]
 
     var monkeys = parse(input)
     var cloneMonkeys = monkeys.deepCopy

@@ -22,6 +22,9 @@
 # For profiling on Windows11/VerySleepy, this works:
 # nim c --debugger:native -d:release --mm:arc day15.nim
 
+# Also could look into https://github.com/wolfpld/tracy
+# Integration: https://luxeengine.com/integrating-tracy-profiler-in-cpp/
+
 import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times]
 
@@ -71,7 +74,8 @@ template part*(p: int, answer, solution: untyped): untyped =
             solution
         let val = inner()
         if val == answer:
-            return green($val)
+            # return green($val)
+            return green("✓")
         else:
             return red($val)
 
@@ -83,26 +87,32 @@ proc getInput(day: int): string =
     quit(QuitFailure)
 
 proc run*(day: int) =
-    ## Runs given day solution on the corresponding input.
-    let start = getMonoTime()
-    let results = SOLUTIONS[day](getInput day)
-    let finish = getMonoTime()
-    stdout.write "Day " & $day & ":"
-    for k in results.keys.toSeq.sorted:
-        stdout.write fmt" [P{k}: {results[k]}]"
-    let ttime = (finish-start).inMicroseconds
-    if ttime < 10000:
-        # Under 10 ms
-        stdout.write fmt" {green($ttime)} µs"
-    elif ttime < 100000:
-        # Under 100 ms
-        stdout.write fmt" {$ttime} µs"
-    elif ttime < 1000000:
-        # Under 1 s
-        stdout.write fmt" {yellow($ttime)} µs"
+    if day in SOLUTIONS:
+        ## Runs given day solution on the corresponding input.
+        let start = getMonoTime()
+        let results = SOLUTIONS[day](getInput day)
+        let finish = getMonoTime()
+
+        stdout.write "Day " & $day & ":"
+        for k in results.keys.toSeq.sorted:
+            stdout.write fmt" [P{k}: {results[k]}]"
+        let ttime = (finish-start).inMicroseconds
+        if ttime < 10000:
+            # Under 10 ms
+            stdout.write fmt" {green($ttime)} µs"
+        elif ttime < 100000:
+            # Under 100 ms
+            stdout.write fmt" {$ttime} µs"
+        elif ttime < 1000000:
+            # Under 1 s
+            stdout.write fmt" {yellow($ttime)} µs"
+        else:
+            stdout.write fmt" {red($ttime)} µs"
+        echo ""
     else:
-        stdout.write fmt" {red($ttime)} µs"
-    echo ""
+        stdout.write "Day " & $day & ": "
+        stdout.write yellow("Missing")
+        echo ""
 
 #endregion
 

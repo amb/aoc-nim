@@ -16,12 +16,10 @@ proc parse(fl: string): Table[string, Valve] =
     let data = fl.readFile.strip.splitLines
     var valves: Table[string, Valve]
     for line in data:
-        let vlv = line[6..7]
-        valves[vlv] = Valve(name: vlv, rate: line[23..24].replace(";","").parseInt)
+        valves[line[6..7]] = Valve(name: line[6..7], rate: line.ints[0])
 
     for line in data:
-        let vlv = line[6..7]
-        valves[vlv].nodes = line.split(", ").mapIt(valves[it[^2..^1]])
+        valves[line[6..7]].nodes = line.split(", ").mapIt(valves[it[^2..^1]])
 
     # Check that the graph is bi-directional
     for v in valves.values:
@@ -30,13 +28,3 @@ proc parse(fl: string): Table[string, Valve] =
     valves
 
 var valves = parse("16/test")
-for v in valves.values:
-    echo v
-
-proc releasedPressure(vlv: HashSet[string]): int =
-    for k in vlv:
-        result += valves[k].rate
-
-var loc = "AA"
-var timeLeft = 30
-var totalPressureRelease = 0
