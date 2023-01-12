@@ -27,4 +27,4 @@ proc parse(fl: string): Table[string, Valve] =
             assert v in cv.nodes
     valves
 
-var valves = parse("16/test")
+# var valves = parse("16/test")
