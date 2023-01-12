@@ -35,6 +35,7 @@ proc markRemoved(sl: var ShadowLines, i: int) =
     sl.empties.add(i)
 
 proc finalize*(sl: var ShadowLines) =
+    # TODO: sort smart and just .setLen to sl.lines.len-invalids.len
     sl.lines = collect:
         for l in sl.lines:
             if l.valid: l
