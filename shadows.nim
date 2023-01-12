@@ -2,11 +2,11 @@ import std/[algorithm, sugar]
 
 type
     ShadowLine* = object
-        a*, b*: int
+        a*, b*: int64
         valid: bool
     ShadowLines* = object
         lines*: seq[ShadowLine]
-        empties: seq[int]
+        empties: seq[int64]
     SegRelationship* = enum
         TouchingLeft, TouchingRight, Inside, Container, Outside
 
@@ -30,7 +30,7 @@ proc addItem(sl: var ShadowLines, i: ShadowLine) =
         let ol = sl.empties.pop()
         sl.lines[ol] = i
 
-proc markRemoved(sl: var ShadowLines, i: int) =
+proc markRemoved(sl: var ShadowLines, i: int64) =
     sl.lines[i].valid = false
     sl.empties.add(i)
 
@@ -45,7 +45,7 @@ proc reset*(sl: var ShadowLines) =
     sl.empties.setLen(0)
     sl.lines.setLen(0)
 
-proc addShadowSorted4*(sl: var ShadowLines, seg: (int, int)) =
+proc addShadowSorted4*(sl: var ShadowLines, seg: (int64, int64)) =
     var finalSeg = ShadowLine(a: seg[0], b: seg[1], valid: true)
     assert sl.lines.len <= 4
     
@@ -68,7 +68,7 @@ proc addShadowSorted4*(sl: var ShadowLines, seg: (int, int)) =
 
     assert false, "Undone"
 
-proc addShadow*(sl: var ShadowLines, seg: (int, int)) =
+proc addShadow*(sl: var ShadowLines, seg: (int64, int64)) =
     var finalSeg = ShadowLine(a: seg[0], b: seg[1], valid: true)
     for si in 0..<sl.lines.len:
         let s = sl.lines[si]
@@ -88,12 +88,12 @@ proc addShadow*(sl: var ShadowLines, seg: (int, int)) =
             discard
     sl.addItem(finalSeg)
 
-# TODO: two sorted shadowline (set of non-intersecting ranges)
+# TODO: two sorted shadowline (set of non-int64ersecting ranges)
 #       do not require sorting to join or test for collisions
 #       IMPLEMENT both
 
 # TODO: super stupid, doesn't actually clip left or right
-iterator empties*(segs: ShadowLines, lval, hval: int): (int, int) =
+iterator empties*(segs: ShadowLines, lval, hval: int64): (int64, int64) =
     var i = 0
     while i < segs.lines.len-1:
         let left = segs.lines[i]

@@ -6,16 +6,16 @@ day 15:
     type
         Sensor = object
             location: Coord2D
-            area: int
+            area: int64
 
-    proc sensorScanline(sensor: Sensor, y: int): Option[(int, int)] =
+    proc sensorScanline(sensor: Sensor, y: int64): Option[(int64, int64)] =
         let ydisp = abs(sensor.location.y-y)
         if ydisp > sensor.area:
-            return none((int, int))
+            return none((int64, int64))
         let closeToFringe = (sensor.area-ydisp)
         return some((sensor.location.x - closeToFringe, sensor.location.x + closeToFringe))
 
-    proc findBacon(sensors: seq[Sensor], lval, hval: int): (int, int) =
+    proc findBacon(sensors: seq[Sensor], lval, hval: int64): (int64, int64) =
         var slines: ShadowLines
         for ry in lval..hval:
             for si, s in sensors:
@@ -28,7 +28,7 @@ day 15:
                     return (e[0]+1, ry)
             slines.reset()
 
-    proc scanLine(sensors: seq[Sensor], lval: int): int =
+    proc scanLine(sensors: seq[Sensor], lval: int64): int64 =
         var slines: ShadowLines
         for si, s in sensors:
             let r = s.sensorScanline(lval)
@@ -48,6 +48,6 @@ day 15:
             sensors.add(Sensor(location: s, area: s.manhattan(coord2d(bx, by))))
 
     part 1, 4725496: sensors.scanLine(2000000) - 1
-    part 2, 12051287042458.int:
-        let locs = sensors.findBacon(0, 4000000)
-        locs[0]*4000000+locs[1]
+    # part 2, 12051287042458.int64:
+    #     let locs = sensors.findBacon(0, 4000000)
+    #     locs[0]*4000000+locs[1]
