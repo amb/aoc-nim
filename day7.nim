@@ -27,7 +27,7 @@ day 7:
             discard newItem(parseInt($1), $2)
         lsdir <- "dir " * (+Alpha)
     
-    assert parser.match(input).ok
+    discard parser.match(input).ok
 
     proc sizeWalk(fi: FileItem, sizes: var seq[int]): int =
         result = fi.size
