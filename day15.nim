@@ -48,6 +48,6 @@ day 15:
             sensors.add(Sensor(location: s, area: s.manhattan(coord2d(bx, by))))
 
     part 1, 4725496: sensors.scanLine(2000000) - 1
-    # part 2, 12051287042458.int64:
-    #     let locs = sensors.findBacon(0, 4000000)
-    #     locs[0]*4000000+locs[1]
+    part 2, 12051287042458.int64:
+        let locs = sensors.findBacon(0, 4000000)
+        locs[0]*4000000+locs[1]
