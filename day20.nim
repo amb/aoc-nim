@@ -19,4 +19,4 @@ day 20:
     p2i.data *= 811589153
 
     part 1, 14526: p1i.solve(1)
-    part 2, 9738258246847.int: p2i.solve(10)
+    part 2, 9738258246847.int64: p2i.solve(10)
