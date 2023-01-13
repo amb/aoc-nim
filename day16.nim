@@ -1,4 +1,5 @@
-include aoc
+import aoc_logic
+import std/[deques, strutils, strformat, sequtils, tables]
 import memo
 
 type
@@ -27,4 +28,6 @@ proc parse(fl: string): Table[string, Valve] =
             assert v in cv.nodes
     valves
 
-# var valves = parse("16/test")
+var valves = parse("16/test")
+
+echo valves

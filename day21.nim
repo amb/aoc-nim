@@ -24,7 +24,7 @@ day 21:
                 result[monkey].b = fm[2]
                 result[monkey].op = iops[fm[1]]
 
-    var monkeys = parse(input)
+    let monkeys = parse(input)
     var cloneMonkeys = monkeys.deepCopy
 
     proc calculate(tryThis: int): int =

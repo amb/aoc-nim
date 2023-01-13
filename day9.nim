@@ -2,7 +2,7 @@ include aoc
 
 day 9:
     let moves = collect:
-        for line in "9/input".readFile.splitLines:
+        for line in lines:
             let (r, d, s) = line.scanTuple("$c $i")
             if r: coord2d(int(d=='R')-int(d=='L'), int(d=='D')-int(d=='U')) * s
 

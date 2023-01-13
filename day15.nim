@@ -28,7 +28,7 @@ day 15:
 
     const dscan = "Sensor at x=$i, y=$i: closest beacon is at x=$i, y=$i"
     var sensors: seq[Sensor]
-    for line in "15/input".lines:
+    for line in lines:
         var sx, sy, bx, by: int
         if line.scanf(dscan, sx, sy, bx, by):
             let s = coord2d(sx, sy)

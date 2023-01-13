@@ -603,27 +603,27 @@ proc findRoot*(fn: proc (v: int): int, maxSteps = int.high, startVal = 1000): in
 #region RANDOM
 
 type
-    IntTable = object
+    IntTable* = object
         data: array[65536, int]
         something: IntSet
 
-proc clear(t: var IntTable) =
+proc clear*(t: var IntTable) =
     for i in t.something:
         t.data[i] = 0
     t.something.clear()
 
-proc `[]=`(t: var IntTable, p: int, val: int) =
+proc `[]=`*(t: var IntTable, p: int, val: int) =
     t.something.incl(p)
     t.data[p] = val
 
-proc `in`(val: int, tb: IntTable): bool = tb.data[val] != 0
-proc `notin`(val: int, tb: IntTable): bool = tb.data[val] == 0
+proc `in`*(val: int, tb: IntTable): bool = tb.data[val] != 0
+proc `notin`*(val: int, tb: IntTable): bool = tb.data[val] == 0
 
-iterator pairs(t: IntTable): tuple[key: int, val: int] =
+iterator pairs*(t: IntTable): tuple[key: int, val: int] =
     for i in t.something:
         yield (key: i, val: t.data[i])
 
-proc len(t: IntTable): int = t.something.len
+proc len*(t: IntTable): int = t.something.len
 
 
 const fops* = toTable {
