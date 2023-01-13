@@ -1,64 +1,56 @@
 include aoc
 
 day 12:
+    let data = lines
+    let height = data.len
+    let width = data[0].len
+    let asize = height * width
+
     # grid[rows][columns]
-    var startLoc, endLoc: (int, int)
-    var grid = collect:
-        for y, line in lines:
-            collect:
-                for x, c in line:
-                    if c=='S': startLoc = (y, x)
-                    if c=='E': endLoc = (y, x)
-                    c
+    var startLoc, endLoc: int
+    var grid = newSeq[char](asize)
+    for y, line in data:
+        for x, c in line:
+            if c=='S': startLoc = y*width+x
+            if c=='E': endLoc = y*width+x
+            grid[x+y*width] = c
 
-    let height = grid.len
-    let width = grid[0].len
-
-    # echo fmt"width: {width}, height: {height}"
-    # echo fmt"start: {startLoc}, end: {endLoc}"
+    let dirs: array[4, int] = [-1, 1, width, -width]
+    var mask = newSeq[int](asize)
 
     grid[endLoc] = 'z'
     grid[startLoc] = 'a'
 
-    proc neighbours(l: (int, int)): seq[(int, int)] =
-        let ly= l[0]
-        let lx = l[1]
-        @[(ly-1, lx), (ly+1, lx), (ly, lx-1), (ly, lx+1)]
-
-    proc directions(grd: seq[seq[char]], loc: (int, int),
-        test: proc (a: char, b: char): bool): seq[(int, int)] =
-        let grw = grd[0].len
-        let grh = grd.len
-        collect:
-            for (y, x) in loc.neighbours:
-                if y >= 0 and x >= 0 and y < grh and x < grw:
-                    if test(grd[loc], grd[y][x]):
-                        (y, x)
-
     # Dijkstra wavefront
-    proc forwardWavefront(grd: seq[seq[char]], sLoc: (int, int), eLoc: (int, int)): int =
-        var previous = {sLoc: sLoc}.toTable
-        var waveFront = [sLoc].toHashSet
-        var newFront: HashSet[(int, int)]
+    proc forwardWavefront(grd: seq[char], mask: var seq[int], sLoc: int, eLoc: int): int =
+        var waveFront = @[sLoc]
+        var newFront: seq[int]
         var step = 0
-        while true:
-            for item in waveFront:
-                for loc in grd.directions(item, (a, b) => (a.ord >= b.ord - 1)):
-                    if loc notin previous:
-                        previous[loc] = item
-                        newFront.incl(loc)
+        while waveFront.len > 0:
             inc step
-            if newFront.len == 0 or eLoc in newFront: break
-            waveFront = newFront
-            newFront.clear
+            newFront.setLen(0)
+            for item in waveFront:
+                if item == eLoc:
+                    return step-1
+                mask[item] = 1
+                for d in dirs:
+                    let loc = item + d
+                    if loc >= 0 and loc < asize and 
+                    grd[item].ord - grd[loc].ord >= -1 and mask[loc] != 1:
+                        newFront.add(loc)
+                        mask[loc] = 1
+            waveFront.setLen(0)
+            for it in newFront:
+                waveFront.add(it)
         step
 
     part 1, 497:
-        forwardWavefront(grid, startLoc, endLoc)
+        forwardWavefront(grid, mask, startLoc, endLoc)
 
     part 2, 492: 
         # TODO: this is inefficient
-        let pathLens = collect:
-            for i in 0..<height:
-                forwardWavefront(grid, (i, 0), endLoc)
-        min(pathLens)
+        var minVal = int.high
+        for i in 0..<height:
+            for s in 0..<asize: mask[s] = 0
+            minVal=min(minVal, forwardWavefront(grid, mask, i*width, endLoc))
+        minVal
