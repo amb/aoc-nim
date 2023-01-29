@@ -146,11 +146,6 @@ let compassRD* = {"N": (0, -1),
     "NW": (-1, -1),
     "SW": (-1, 1)}.toTable
 
-# Get and set for seq[seq[T]] with tuple (int, int) indexing
-# TODO: [y][x] instead of [x][y]
-proc `[]`*[T](gd: seq[seq[T]], tp: (int, int)): T = return gd[tp[0]][tp[1]]
-proc `[]=`*[T](gd: var seq[seq[T]], tp: (int, int), val: T) = gd[tp[0]][tp[1]] = val
-
 #endregion
 
 # __________                     .__
@@ -230,8 +225,7 @@ iterator slidingWindow*[T](dt: openArray[T], size: int): Slice[int] =
     for i in 0..dt.len-size:
         yield (i..<i+size)
 
-# TODO: openarray
-iterator searchSeq*[T](sc: seq[T], dt: seq[T]): int =
+iterator searchSeq*[T](sc: openArray[T], dt: openArray[T]): int =
     for li in 0..sc.len-dt.len:
         var l2 = 0
         while l2 < dt.len and li+l2 < sc.len and sc[li+l2] == dt[l2]:
