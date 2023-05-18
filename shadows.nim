@@ -12,6 +12,7 @@ type
 
 
 proc segRelationship(a, b: ShadowLine): SegRelationship =
+    # What is b in relation to a?
     if (a.a <= b.b and a.a >= b.a and b.b <= a.b): 
         return SegRelationship.TouchingLeft
     elif (a.b <= b.b and a.b >= b.a and b.a >= a.a): 
@@ -92,12 +93,18 @@ proc addShadow*(sl: var ShadowLines, seg: (int64, int64)) =
 #       do not require sorting to join or test for collisions
 #       IMPLEMENT both
 
-# TODO: super stupid, doesn't actually clip left or right
 iterator empties*(segs: ShadowLines, lval, hval: int64): (int64, int64) =
     var i = 0
     while i < segs.lines.len-1:
-        let left = segs.lines[i]
-        let right = segs.lines[i+1]
-        assert right.a > left.b
-        yield (left.b, right.a)
+        let ls = segs.lines[i].b
+        let hs = segs.lines[i+1].a
+        assert hs > ls
+        assert not (ls < lval and hs > hval)
+        if hs < lval or ls > hval: continue
+        if ls < lval: 
+            yield (lval, hs)
+        elif hs > hval: 
+            yield (ls, hval)
+        else:
+            yield (ls, hs)
         inc i
