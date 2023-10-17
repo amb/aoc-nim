@@ -11,8 +11,8 @@ day 12:
     var grid = newSeq[char](asize)
     for y, line in data:
         for x, c in line:
-            if c=='S': startLoc = y*width+x
-            if c=='E': endLoc = y*width+x
+            if c == 'S': startLoc = y*width+x
+            if c == 'E': endLoc = y*width+x
             grid[x+y*width] = c
 
     let dirs: array[4, int] = [-1, 1, width, -width]
@@ -35,7 +35,7 @@ day 12:
                 mask[item] = 1
                 for d in dirs:
                     let loc = item + d
-                    if loc >= 0 and loc < asize and 
+                    if loc >= 0 and loc < asize and
                     grd[item].ord - grd[loc].ord >= -1 and mask[loc] != 1:
                         newFront.add(loc)
                         mask[loc] = 1
@@ -47,10 +47,10 @@ day 12:
     part 1, 497:
         forwardWavefront(grid, mask, startLoc, endLoc)
 
-    part 2, 492: 
+    part 2, 492:
         # TODO: this is inefficient
         var minVal = int.high
         for i in 0..<height:
             for s in 0..<asize: mask[s] = 0
-            minVal=min(minVal, forwardWavefront(grid, mask, i*width, endLoc))
+            minVal = min(minVal, forwardWavefront(grid, mask, i*width, endLoc))
         minVal

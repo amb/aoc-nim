@@ -53,7 +53,7 @@ day 17:
 
     proc show(e: Engine) =
         for l in e.ringGrid.grid:
-            echo "|" & l.mapIt(if it==1: "#" else: " ").join & "|"
+            echo "|" & l.mapIt(if it == 1: "#" else: " ").join & "|"
 
     # Read blocks
     # TODO: just write the seq directly instead
@@ -83,7 +83,7 @@ day 17:
         for line in blk.split('\n'):
             var scanline = newSeq[int](4)
             for ci, c in line[^4..^1]:
-                let occupied = (if c=='#': 1 else: 0)
+                let occupied = (if c == '#': 1 else: 0)
                 if occupied == 1:
                     width = max(ci, width)
                 scanline[ci] = occupied
@@ -91,7 +91,7 @@ day 17:
         blocks.add(Piece(grid: newBlock, width: width+1, height: newBlock.len))
 
     # Read test data
-    let winds = input.mapIt(if it=='<': -1 else: 1)
+    let winds = input.mapIt(if it == '<': -1 else: 1)
 
     # chamber width: 7
     # rocks appear at loc 2, starting from 0
@@ -145,7 +145,7 @@ day 17:
                 inc e.windCounter
                 if x+wind >= 0 and x+wind+blk.width-1 <= 6:
                     if collide(blk, x+wind, y, e.ringGrid) == 0:
-                        x=x+wind
+                        x = x+wind
                 # Ground collision
                 if collide(blk, x, y+1, e.ringGrid) != 0:
                     break

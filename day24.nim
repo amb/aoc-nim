@@ -3,7 +3,7 @@ include aoc
 day 24:
     var blizzards: seq[seq[seq[int]]]
     for c in ['>', '<', '^', 'v']:
-        blizzards.add(lines.toCoords2D(c).toGrid((lines[0].len-2, lines.len-2), offset=(1, 1)))
+        blizzards.add(lines.toCoords2D(c).toGrid((lines[0].len-2, lines.len-2), offset = (1, 1)))
     let (width, height) = (blizzards[0][0].len, blizzards[0].len)
 
     proc blizVal(nv: (int, int), step: int): int =

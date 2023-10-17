@@ -55,7 +55,7 @@ day 15:
                 # From sx to sy
                 let diff = sy.location - sx.location
                 let ds = diff.sgn
-                
+
                 # \ line
                 if ds in [coord2d(1, 1), coord2d(-1, -1)]:
                     y0 = atZero(sx.location, diff, sx.area, 1)

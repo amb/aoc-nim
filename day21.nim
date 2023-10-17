@@ -15,7 +15,7 @@ day 21:
 
             if monkey notin result:
                 result[monkey] = Monke()
-            
+
             if val[0].isDigit:
                 result[monkey].value = some(val.parseInt)
             else:
@@ -41,7 +41,7 @@ day 21:
         let mroot = cloneMonkeys["root"]
         return cloneMonkeys[mroot.a].value.get - cloneMonkeys[mroot.b].value.get
 
-    part 1, 223971851179174: 
+    part 1, 223971851179174:
         discard calculate(monkeys["humn"].value.get)
         cloneMonkeys["root"].value.get
 

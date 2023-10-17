@@ -20,7 +20,7 @@ let test = """
 10R5L5R10L4R5L5"""
 
 day 22:
-    const SIDES = [(1,0), (0,1), (-1,0), (0,-1)]
+    const SIDES = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     type Side = enum right, bottom, left, top
 
     # Parsing
@@ -51,14 +51,14 @@ day 22:
     6
     """
 
-    transition[((2,0), (3,0))] = ((1,0), Side.left, false)
-    transition[((1,0), (0,0))] = ((2,0), Side.right, false)
+    transition[((2, 0), (3, 0))] = ((1, 0), Side.left, false)
+    transition[((1, 0), (0, 0))] = ((2, 0), Side.right, false)
 
-    transition[((1,1), (2,1))] = ((1,1), Side.left, false)
-    transition[((1,1), (0,1))] = ((1,1), Side.right, false)
-    
-    transition[((1,2), (2,2))] = ((0,2), Side.left, false)
-    transition[((0,2), (-1,2))] = ((1,2), Side.right, false)
+    transition[((1, 1), (2, 1))] = ((1, 1), Side.left, false)
+    transition[((1, 1), (0, 1))] = ((1, 1), Side.right, false)
+
+    transition[((1, 2), (2, 2))] = ((0, 2), Side.left, false)
+    transition[((0, 2), (-1, 2))] = ((1, 2), Side.right, false)
 
     # Initially facing right
     var facing = coord2d(1, 0)
@@ -78,7 +78,7 @@ day 22:
                 break
             loc = newLoc
 
-        facing = rot90(facing, int(step[1]=='R') - int(step[1]=='L'))
+        facing = rot90(facing, int(step[1] == 'R') - int(step[1] == 'L'))
 
     part 1, 181128: loc.y * 1000 + loc.x * 4 + SIDES.find(facing)
 

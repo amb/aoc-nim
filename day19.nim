@@ -32,7 +32,7 @@ proc `<=`(a, b: Goods): bool =
     return true
 proc sgn(a: Goods): Goods =
     for i in Mineral:
-        result[i] = (if a[i]>0: 1 else: 0)
+        result[i] = (if a[i] > 0: 1 else: 0)
 proc `/`(a, b: Goods): Goods =
     for i in Mineral:
         result[i] = a[i].ceilDiv(b[i])
@@ -64,7 +64,7 @@ proc turnsToBuild(bench: Situation, rb: Mineral): Option[int] =
 
         # inventory + robots * turns >= blueprint[rb]
         # turns = (blueprint[rb] - inventory) / robots
-        
+
         # (2-2)/1 => 0 (0)
         # (2-1)/3 => 1 (0)
         # (2-5)/2 => 0 (-1)
@@ -81,7 +81,7 @@ proc turnsToBuild(bench: Situation, rb: Mineral): Option[int] =
                 turns[m] = tdif.ceilDiv(mrob)
 
         return some(max(turns))
-        
+
     return none(int)
 
 proc doesNotDelay(bench: Situation, rba, rbb: Mineral): bool =
@@ -101,7 +101,7 @@ proc doesNotDelay(bench: Situation, rba, rbb: Mineral): bool =
         inc tb.robots[rbb]
 
     let t1 = tb.turnsToBuild(rba).get
-    
+
     return t0.get < t1
 
 var bench: Situation

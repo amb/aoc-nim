@@ -19,7 +19,7 @@ day 25:
             snum.add(numToSnafu[rr])
             v = rd
         snum.reversed.join
-    
-    part 1, "2-0=11=-0-2-1==1=-22": 
+
+    part 1, "2-0=11=-0-2-1==1=-22":
         let ssnaf = collect(for d in lines: desnafu(d)).sum
         snafu(ssnaf)

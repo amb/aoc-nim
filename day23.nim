@@ -26,13 +26,13 @@ day 23:
             props.clear()
             for ei, elf in velfs:
                 let dNW = blocked[elf-257] == 0
-                let dN  = blocked[elf-256] == 0
+                let dN = blocked[elf-256] == 0
                 let dNE = blocked[elf-255] == 0
                 let dSW = blocked[elf+255] == 0
-                let dS  = blocked[elf+256] == 0
+                let dS = blocked[elf+256] == 0
                 let dSE = blocked[elf+257] == 0
-                let dW  = blocked[elf-1] == 0
-                let dE  = blocked[elf+1] == 0
+                let dW = blocked[elf-1] == 0
+                let dE = blocked[elf+1] == 0
 
                 # let (dNW, dN, dNW, dSW, dS, dSE, dW, dE) = SCAN.mapIt(blocked[elf+it] == 0)
 
@@ -70,7 +70,7 @@ day 23:
         let box = relfs.max - relfs.min + (1, 1)
         (box[0] * box[1] - relfs.len, r)
 
-    var elfs = lines.toCoords2D('#').pack(offset=(31, 31))
+    var elfs = lines.toCoords2D('#').pack(offset = (31, 31))
 
     part 1, 4045: solve(elfs, 10)[0]
     part 2, 963: solve(elfs)[1]

@@ -25,15 +25,15 @@ day 13:
                         return -1
                     if ch1 > ch0:
                         return 1
-                if isNum(ch0) and ch1=='[':
+                if isNum(ch0) and ch1 == '[':
                     pkt0 = pkt0[0..<pt0] & "[" & ch0 & "]" & pkt0[pt0+1..^1]
                     pkt0[pt0] = '['
-                elif isNum(ch1) and ch0=='[':
+                elif isNum(ch1) and ch0 == '[':
                     pkt1 = pkt1[0..<pt1] & "[" & ch1 & "]" & pkt1[pt1+1..^1]
                     pkt1[pt1] = '['
-                if ch1==']' and ch0!=']':
+                if ch1 == ']' and ch0 != ']':
                     return -1
-                elif ch0==']' and ch1!=']':
+                elif ch0 == ']' and ch1 != ']':
                     return 1
             inc pt0
             inc pt1
@@ -43,7 +43,7 @@ day 13:
         let data1 = data.split("\n\n")
         let answer = collect:
             for il, l in data1:
-                var pkt = l.splitLines 
+                var pkt = l.splitLines
                 if isRightOrder(pkt[0], pkt[1]) < 0: il+1 else: 0
         answer.sum
 
