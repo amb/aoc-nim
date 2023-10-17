@@ -40,7 +40,7 @@ proc finalize*(sl: var ShadowLines) =
     sl.lines = collect:
         for l in sl.lines:
             if l.valid: l
-    sl.lines.sort((a, b) => a.a > b.a)
+    sl.lines.sort((a, b) => a.a - b.a)
 
 proc reset*(sl: var ShadowLines) =
     sl.empties.setLen(0)

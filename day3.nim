@@ -11,7 +11,7 @@ day 3:
         else: 0
 
     iterator priorities(): int =
-        for line in "3/input".readFile.splitLines:
+        for line in input.readFile.splitLines:
             doAssert len(line) mod 2 == 0
             let ll = len(line) div 2
             var si = intersection(toHashSet(line[0..<ll]), toHashSet(line[ll..<line.len]))
@@ -20,7 +20,7 @@ day 3:
             yield priority(si.pop())
 
     iterator groupsOfThree(): int =
-        for group in "3/input".readFile.strip.splitLines.partition(3):
+        for group in input.readFile.strip.splitLines.partition(3):
             var si = toHashSet(group[0]) * toHashSet(group[1]) * toHashSet(group[2])
             doAssert len(si) == 1, "Set length failure"
             yield priority(si.pop())
