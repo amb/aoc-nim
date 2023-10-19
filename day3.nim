@@ -10,20 +10,20 @@ day 3:
         elif isUpperAscii(c): c-'A'+27
         else: 0
 
-    iterator priorities(): int =
-        for line in input.readFile.splitLines:
+    proc firstPart(): int =
+        for line in input.splitLines:
             doAssert len(line) mod 2 == 0
             let ll = len(line) div 2
             var si = intersection(toHashSet(line[0..<ll]), toHashSet(line[ll..<line.len]))
             if len(si) == 0:
                 continue
-            yield priority(si.pop())
+            result += priority(si.pop())
 
-    iterator groupsOfThree(): int =
-        for group in input.readFile.strip.splitLines.partition(3):
+    proc groupsOfThree(): int =
+        for group in input.strip.splitLines.partition(3):
             var si = toHashSet(group[0]) * toHashSet(group[1]) * toHashSet(group[2])
             doAssert len(si) == 1, "Set length failure"
-            yield priority(si.pop())
+            result += priority(si.pop())
 
-    part 1, 7581: sum(toSeq(priorities))
-    part 2, 2525: sum(toSeq(groupsOfThree))
+    part 1, 7581: firstPart()
+    part 2, 2525: groupsOfThree()

@@ -1,7 +1,7 @@
 import math
 
 # 0x5f375a86 fast isqrt
-proc Q_rsqrt(number: float32): float32 =
+proc rsqrt(number: float32): float32 =
     var half = 0.5f32 * number
     var i: int32 = cast[int32](number)
     i = 0x5f375a86 - (i shr 1)
@@ -10,5 +10,6 @@ proc Q_rsqrt(number: float32): float32 =
     x = x * (1.5 - half * x * x)
     return x
 
-echo Q_rsqrt(4.0)
-echo 1.0/sqrt(4.0)
+if isMainModule:
+    echo rsqrt(4.0)
+    echo 1.0/sqrt(4.0)
