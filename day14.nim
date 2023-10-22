@@ -1,4 +1,6 @@
-include aoc
+import aoc
+import sequtils, strutils, tables
+
 import bitty
 
 func `[]`(b: BitArray2d, v: Coord2D): bool = b[v.y, v.x]

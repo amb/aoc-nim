@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, math, algorithm, sugar
 
 day 13:
     # : is ascii code after 9

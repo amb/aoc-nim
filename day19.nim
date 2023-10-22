@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, math, strscans, options, strformat
 
 type
     Mineral = enum Ore, Clay, Obsidian, Geode

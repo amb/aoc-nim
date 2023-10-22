@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, sequtils, sugar, math, algorithm, tables
 
 day 1:
     let sums = input.split("\n\n").map(i => sum(i.split.mapIt(parseInt(it)))).sorted

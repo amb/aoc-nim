@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, sugar, strscans
 
 day 5:
     # Parse the input into arrays

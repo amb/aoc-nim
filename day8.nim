@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, sugar
 
 # Picked a really awkward way to solve it and stuck with it
 
@@ -23,14 +24,14 @@ day 8:
                 doAssert x < asize and y < asize
                 trees[(x, y)] = parseInt($c)
 
-    proc printTrees(tr: TreeTable) =
-        var grid = newSeqWith(asize, newSeq[char](asize))
-        echo "-".repeat(asize)
-        for (k, v) in tr.pairs:
-            grid[k[1]][k[0]] = chr(ord('0')+v)
-        for i in grid:
-            echo i.join
-        echo "-".repeat(asize)
+    # proc printTrees(tr: TreeTable) =
+    #     var grid = newSeqWith(asize, newSeq[char](asize))
+    #     echo "-".repeat(asize)
+    #     for (k, v) in tr.pairs:
+    #         grid[k[1]][k[0]] = chr(ord('0')+v)
+    #     for i in grid:
+    #         echo i.join
+    #     echo "-".repeat(asize)
 
     proc scanVisible(tr: TreeTable): TreeTable =
         var scanline = newSeq[int](asize)

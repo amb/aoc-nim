@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, sets, math, sugar
 
 day 18:
     let cb = input.split.mapIt(it.ints.coord3d).toHashSet

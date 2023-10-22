@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables
 
 day 12:
     let data = lines

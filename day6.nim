@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, sets
 
 day 6:
     proc solve(wsize: int): int =

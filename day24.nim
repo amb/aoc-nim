@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, sets, math
 
 day 24:
     var blizzards: seq[seq[seq[int]]]

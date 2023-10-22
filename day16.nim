@@ -1,5 +1,5 @@
-import aoc_logic
-import std/[deques, strutils, strformat, sequtils, tables, hashes, sets]
+import aoc
+import std/[strutils, strformat, sequtils, tables, hashes, sets]
 import memo
 
 type

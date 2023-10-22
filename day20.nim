@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, math
 
 day 20:
     proc solve(p: var Positionals[int], mp: int): int =

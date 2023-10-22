@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, sets, sugar, strscans
 
 day 9:
     let moves = collect:

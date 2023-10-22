@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, math, algorithm, sugar
 
 type
     Operation = object

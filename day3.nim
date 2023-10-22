@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, sets
 
 # a->z = 1->25
 # A->Z = 27-52

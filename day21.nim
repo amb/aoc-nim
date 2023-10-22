@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, options
 
 day 21:
     type

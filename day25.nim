@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, math, algorithm, sugar
 
 day 25:
     let numToSnafu = ['=', '-', '0', '1', '2']

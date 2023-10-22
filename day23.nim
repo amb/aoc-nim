@@ -1,4 +1,6 @@
-include aoc
+import aoc
+import strutils, tables, sets, intsets
+
 import std/[bitops]
 
 day 23:

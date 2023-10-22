@@ -1,5 +1,5 @@
-include aoc
-import std/[enumerate]
+import aoc
+import sequtils, strutils, tables, sets, re
 
 type Grid[T] = seq[seq[T]]
 

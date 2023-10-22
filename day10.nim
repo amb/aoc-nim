@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import sequtils, strutils, tables, math, algorithm, sugar
 
 day 10:
     let commands = input.split({'\n', ' '})

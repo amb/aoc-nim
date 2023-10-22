@@ -1,4 +1,6 @@
-include aoc
+import aoc
+import strutils, tables, options, strscans
+
 import std/parseutils
 import shadows
 

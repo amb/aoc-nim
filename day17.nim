@@ -1,4 +1,6 @@
-include aoc
+import aoc
+import sequtils, strutils, tables
+
 import std/[bitops]
 
 type Grid[T] = seq[seq[T]]

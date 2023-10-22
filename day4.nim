@@ -1,4 +1,5 @@
-include aoc
+import aoc
+import strutils, tables, strscans
 
 day 4:
     proc isInside(a, b, x, y: int): bool =
