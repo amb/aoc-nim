@@ -20,20 +20,20 @@ day 14:
     var grSize = maxV-minV + coord2d(1, 1)
 
     let displace = coord2d(grSize.y-1, 0)
-    var groundInit = newBitArray2D(grSize.x + displace.x*2, grSize.y + 2)
     grSize = coord2d(grSize.x + displace.x*2, grSize.y + 2)
 
-    for scan in scans:
-        var loc = scan[0]
-        for scanLoc in scan[1..^1]:
-            let line = scanLoc - loc
-            for _ in 0..<line.len:
-                groundInit[loc - minV + displace] = true
-                loc += line.sgn
-            groundInit[loc - minV + displace] = true
-
     proc solve(drawFloor = false): int =
-        var ground = groundInit.deepCopy
+        # Build grid
+        var ground = newBitArray2D(grSize.x + displace.x*2, grSize.y + 2)
+
+        for scan in scans:
+            var loc = scan[0]
+            for scanLoc in scan[1..^1]:
+                let line = scanLoc - loc
+                for _ in 0..<line.len:
+                    ground[loc - minV + displace] = true
+                    loc += line.sgn
+                ground[loc - minV + displace] = true
 
         # Create ground level
         if drawFloor:
@@ -58,19 +58,21 @@ day 14:
 
         var count = 0
         let sandSpawnerLoc = coord2d(500-minV.x+displace.x, 0)
+        
+        var grains: seq[Coord2D]
+
         while inBounds:
-            var loc = sandSpawnerLoc
+            grains.add(sandSpawnerLoc)
             while true:
-                if loc.tryMove(coord2d(0, 1)): continue
-                if loc.tryMove(coord2d(-1, 1)): continue
-                if loc.tryMove(coord2d(1, 1)): continue
+                if grains[0].tryMove(coord2d(0, 1)): continue
+                if grains[0].tryMove(coord2d(-1, 1)): continue
+                if grains[0].tryMove(coord2d(1, 1)): continue
                 break
 
+            let loc = grains.pop()
             loc.place
             inc count
-            if loc == sandSpawnerLoc:
-                break
-            if count > 300000:
+            if loc == sandSpawnerLoc or count > 300000:
                 break
         count
 
