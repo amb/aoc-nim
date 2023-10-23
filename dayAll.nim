@@ -7,3 +7,5 @@ discard oneTimeIt:
     for i in 1..25:
         run i
     0
+
+{. warning[UnusedImport]:off .}

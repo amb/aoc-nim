@@ -35,9 +35,8 @@ day 10:
                 result = pix.mapIt(if it==0: '.' else: '#').join() & "\n"
             inc cycle
 
-        let signal = collect:
-            for line in commands: line.solve2
-
         # Confirm result by uncommenting
+        # let signal = collect:
+        #     for line in commands: line.solve2
         # echo signal.join()
         "BRJLFULP"

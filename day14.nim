@@ -40,7 +40,7 @@ day 14:
             for i in 0..<grSize.x:
                 ground[grSize.y-1, i] = true
 
-        var walls = ground.deepCopy
+        # var walls = ground.deepCopy
         var inBounds = true
 
         proc oob(v: Coord2D): bool = v.x < 0 or v.y < 0 or v.x >= grSize.x or v.y >= grSize.y
