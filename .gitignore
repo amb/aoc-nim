@@ -39,3 +39,6 @@ doc/*.idx
 /web/upload
 build/*
 bin/*
+
+session.txt
+*.in

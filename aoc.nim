@@ -1,3 +1,5 @@
+#region NOTES
+
 # Lots of dumb stuff here
 
 # Compiling tips:
@@ -25,8 +27,10 @@
 # Also could look into https://github.com/wolfpld/tracy
 # Integration: https://luxeengine.com/integrating-tracy-profiler-in-cpp/
 
-import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
-import std/[sets, intsets, tables, re, options, monotimes, times]
+#endregion
+
+import std/[strutils, strscans, strformat, sequtils, sugar, algorithm, math, os]
+import std/[sets, intsets, tables, re, options, monotimes, times, paths, files, httpclient]
 
 #    _____         _________
 #   /  _  \   ____ \_   ___ \
@@ -644,5 +648,73 @@ proc binarySearch*(f: float -> float, lo = -1e100, hi = 1e100, precision = 1.0):
             hi = result
         else:
             lo = result
+
+#endregion
+
+#    _____         _________   ___________     __         .__
+#   /  _  \   ____ \_   ___ \  \_   _____/____/  |_  ____ |  |__   ___________
+#  /  /_\  \ /  _ \/    \  \/   |    __)/ __ \   __\/ ___\|  |  \_/ __ \_  __ \
+# /    |    (  <_> )     \____  |     \\  ___/|  | \  \___|   Y  \  ___/|  | \/
+# \____|__  /\____/ \______  /  \___  / \___  >__|  \___  >___|  /\___  >__|
+#         \/               \/       \/      \/          \/     \/     \/
+#region AOCFETCHER
+
+proc getFetcherPath*(): string =
+    result = os.getCurrentDir()
+
+proc getCookie*(): string =
+    let cookiePath = getFetcherPath() / "session.txt"
+
+    if not fileExists cookiePath:
+        writeFile(cookiePath, "")
+
+    result = readFile(cookiePath).strip()
+
+    if result == "":
+        raise newException(IOError, fmt"Please write your AoC cookie to '{cookiePath}'.")
+
+    var token: string
+    if not result.scanf("session=$+", token):
+        raise newException(
+            ValueError,
+            fmt"Session token should be of format 'session=128_CHAR_HEX_NUMBER', " &
+            fmt"but got '{result}' instead."
+        )
+
+    if token.len != 128:
+        raise newException(
+            ValueError,
+            fmt"Session token should be a 128 character long hexadecimal number, " &
+            fmt"but got '{token}' which is {token.len} characters long."
+        )
+
+    try:
+        discard parseHexInt(token)
+    except ValueError:
+        raise newException(
+            ValueError,
+            fmt"Session token should be a hexadecimal number, " &
+            fmt"but could not parse' {token}' as a hexadecimal."
+        )
+
+proc getInput*(year, day: int): string =
+    let inputPath = getFetcherPath() / $year / "inputs" / fmt"day{day}.in"
+    if fileExists inputPath:
+        return readFile(inputPath)
+    else:
+        raise newException(
+            ValueError,
+            fmt"Input data missing: {inputPath}"
+        )
+
+proc fetchAoC*(year, day: int) =
+    let inputPath = getFetcherPath() / $year / "inputs" / fmt"day{day}.in"
+    echo fmt"Downloading input for year {year}, day {day}."
+    let client = newHttpClient()
+    defer: client.close()
+    client.headers["cookie"] = getCookie()
+
+    let content = client.getContent(fmt"https://adventofcode.com/{year}/day/{day}/input")
+    inputPath.writeFile(content)
 
 #endregion
