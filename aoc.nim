@@ -30,7 +30,7 @@
 #endregion
 
 import std/[strutils, strscans, strformat, sequtils, sugar, algorithm, math, os]
-import std/[sets, intsets, tables, re, options, monotimes, times, paths, files, httpclient]
+import std/[sets, intsets, tables, re, options, monotimes, times, paths, httpclient]
 
 #    _____         _________
 #   /  _  \   ____ \_   ___ \
@@ -59,7 +59,7 @@ template day*(day: int, solution: untyped): untyped =
 
             var parts {.inject.}: OrderedTable[int, proc (): string]
             solution
-            for k, v in parts:
+            for k, v in parts.pairs:
                 result[k] = $v()
 
     if isMainModule:
