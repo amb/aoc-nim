@@ -659,10 +659,10 @@ proc binarySearch*(f: float -> float, lo = -1e100, hi = 1e100, precision = 1.0):
 #         \/               \/       \/      \/          \/     \/     \/
 #region AOCFETCHER
 
-proc getFetcherPath*(): string =
+proc getFetcherPath(): string =
     result = os.getCurrentDir()
 
-proc getCookie*(): string =
+proc getCookie(): string =
     let cookiePath = getFetcherPath() / "session.txt"
 
     if not fileExists cookiePath:

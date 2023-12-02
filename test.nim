@@ -1,4 +1,4 @@
 import aoc
 import std/[sequtils, strutils]
 
-discard getInput(2023, 1)
+fetchAoC(2023, 2)

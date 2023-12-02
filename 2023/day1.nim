@@ -1,5 +1,5 @@
 import ../aoc
-import sugar, strutils, math, tables
+import strutils, tables
 
 
 func toInt(c: char): int =
@@ -10,8 +10,11 @@ func digits(i: string): seq[int] =
         if isDigit(c):
             result.add(c.toInt)
 
-let tnums = @{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+const tnums = @{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9}.toTable
+
+# TODO: parser that tracks location in each word (include also numbers, len: 1)
+#       for both back and forward search. Have to find only first from beginning and end
 
 proc endsWithNumber(i: seq[char]): int =
     for k in tnums.keys:
