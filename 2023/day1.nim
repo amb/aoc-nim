@@ -5,11 +5,6 @@ import strutils, tables
 func toInt(c: char): int =
     return int(c) - int('0')
 
-func digits(i: string): seq[int] =
-    for c in i:
-        if isDigit(c):
-            result.add(c.toInt)
-
 const tnums = @{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9}.toTable
 
@@ -46,8 +41,15 @@ day 1:
     part 1, 54338:
         var total = 0
         for line in lines:
-            let nums = line.digits
-            total += nums[0] * 10 + nums[^1]
+            for c in line:
+                if isDigit(c):
+                    total += c.toInt * 10
+                    break
+            for ci in countdown(line.high, line.low):
+                let c = line[ci]
+                if isDigit(c):
+                    total += c.toInt
+                    break
         total
 
     part 2, 53389:
