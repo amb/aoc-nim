@@ -1,46 +1,31 @@
 import ../aoc
-import strutils, math, sequtils, npeg
-
+import strutils, math, sequtils, npeg, tables
 
 day 2:
-    type Colors = object
-        red: int
-        green: int
-        blue: int
-
-    proc `>`(a, b: Colors): bool =
-        if a.red > b.red or a.green > b.green or a.blue > b.blue:
-            return true
-        return false
+    type Colors = array[3, int]
+    const cname = {"red": 0, "green": 1, "blue": 2}.toTable
 
     var games: seq[seq[Colors]]
 
     for line in lines:
-        let a = line.split(": ")
-        let game_n = a[0].split(" ")[1].parseInt()
-        let game_sets = a[1].split("; ")
+        let game_sets = line.split(": ")[1].split("; ")
         var color_sets = newSeq[Colors]()
         for fistful in game_sets:
-            var tcol = Colors(red: 0, green: 0, blue: 0)
+            var tcol = [0, 0, 0]
             for color in fistful.split(", "):
                 let color = color.split(" ")
-                if color[1] == "red":
-                    tcol.red = color[0].parseInt()
-                elif color[1] == "green":
-                    tcol.green = color[0].parseInt()
-                elif color[1] == "blue":
-                    tcol.blue = color[0].parseInt()
+                tcol[cname[color[1]]] = color[0].parseInt()
             color_sets.add(tcol)
         games.add(color_sets)
 
     part 1, 2006: 
-        let maxCubes = Colors(red: 12, green: 13, blue: 14)
+        let maxCubes = [12, 13, 14]
         var ids_sum = 0
         for i, c in games:
-            block innerloop:
+            block outerloop:
                 for gc in c:
-                    if gc > maxCubes:
-                        break innerloop
+                    if gc[0] > maxCubes[0] or gc[1] > maxCubes[1] or gc[2] > maxCubes[2]:
+                        break outerloop
                 ids_sum += i+1
         ids_sum
 
@@ -49,10 +34,7 @@ day 2:
         for i, c in games:
             var max_set = c[0]
             for gc in c:
-                max_set.red = max(max_set.red, gc.red)
-                max_set.green = max(max_set.green, gc.green)
-                max_set.blue = max(max_set.blue, gc.blue)
+                for n in 0..2:
+                    max_set[n] = max(max_set[n], gc[n])
             max_sets.add(max_set)
-        sum(max_sets.mapIt(it.red * it.green * it.blue))
-
-                
+        sum(max_sets.mapIt(it[0] * it[1] * it[2]))
