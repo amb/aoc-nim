@@ -53,10 +53,7 @@ template day*(day: int, solution: untyped): untyped =
     ## Defines a solution function, if isMainModule, runs it.
     block:
         SOLUTIONS[day] = proc (input: string): Table[int, string] =
-            var inputRaw {.inject, used.} = input
             var input {.inject, used.} = input.strip(false)
-            var lines {.inject, used.} = input.splitLines
-
             var parts {.inject.}: OrderedTable[int, proc (): string]
             solution
             for k, v in parts.pairs:
@@ -94,8 +91,9 @@ proc getInput(day: int): string =
 proc run*(day: int) =
     if day in SOLUTIONS:
         ## Runs given day solution on the corresponding input.
+        let dinp = getInput day
         let start = getMonoTime()
-        let results = SOLUTIONS[day](getInput day)
+        let results = SOLUTIONS[day](dinp)
         let finish = getMonoTime()
 
         stdout.write "Day " & $day & ":"

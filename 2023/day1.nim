@@ -1,5 +1,5 @@
 import ../aoc
-import strutils, tables, strformat
+import strutils, tables
 
 func toInt(c: char): int = int(c) - int('0')
 
@@ -14,7 +14,7 @@ proc parse(ap: var AccParse, c: char): int =
     result = -1
     for ni, n in ap.names:
         if n[ap.locs[ni]] == c:
-            ap.locs[ni] = ap.locs[ni] + 1
+            inc ap.locs[ni]
         else:
             # ffive
             ap.locs[ni] = (if n[0] != c: 0 else: 1)
@@ -27,9 +27,9 @@ proc parseReverse(ap: var AccParse, c: char): int =
     result = -1
     for ni, n in ap.names:
         if n[ap.locs[ni]] == c:
-            ap.locs[ni] = ap.locs[ni] - 1
+            dec ap.locs[ni]
         else:
-            ap.locs[ni] = (if n[n.len - 1] != c: n.len - 1 else: n.len - 2)
+            ap.locs[ni] = (if n[n.high] != c: n.high else: n.high - 1)
 
         if ap.locs[ni] == -1:
             result = ni
@@ -41,10 +41,12 @@ proc reset(ap: var AccParse) =
 
 proc resetReverse(ap: var AccParse) =
     for ni in 0..<ap.names.len:
-        ap.locs[ni] = ap.names[ni].len - 1
+        ap.locs[ni] = ap.names[ni].high
 
 
 day 1:
+    let lines = input.splitLines
+
     part 1, 54338:
         var total = 0
         for line in lines:

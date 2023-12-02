@@ -2,6 +2,8 @@ import ../aoc
 import strutils, math, sequtils, npeg, tables
 
 day 2:
+    let lines = input.splitLines
+
     type Colors = array[3, int]
     const cname = {"red": 0, "green": 1, "blue": 2}.toTable
 
