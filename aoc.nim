@@ -29,7 +29,7 @@
 
 #endregion
 
-import std/[strutils, strscans, strformat, sequtils, sugar, algorithm, math, os]
+import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times, paths, httpclient]
 
 #    _____         _________

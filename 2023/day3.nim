@@ -1,65 +1,62 @@
 import ../aoc
-import std/[sequtils, strutils, sets, tables, math]
+import std/[sequtils, strutils, tables, math, sugar]
 
 day 3:
     let lines = input.splitLines
     let (w, h) = lines.dims
 
-    let gridNumbers = lines.toCoords2D(proc (c: char): bool = c.isDigit)
-    let gridSymbols = lines.toCoords2D(proc (c: char): bool = (not c.isDigit) and (c != '.'))
+    const DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1), 
+                (-1, -1), (1, 1), (1, -1), (-1, 1)]
 
-    var start = gridSymbols.grow & gridNumbers
-    start = start.grow(gridNumbers)
-    start = start.grow(gridNumbers)
-    let eparts = gridNumbers & start
+    proc read(ar: seq[string], loc: (int, int)): char =
+        let (x, y) = loc
+        if x >= 0 and x < w and y >= 0 and y < h:
+            return ar[y][x]
+        return '.'
 
-    proc parseNums(na: Coords2D): (seq[int], Table[Coord2D, int]) =
-        var numberMap = initTable[Coord2D, int]()
-        var accum: seq[char]
-        for y in 0 ..< h:
-            for x in 0 ..< w + 1:
-                if lines[y][x].isDigit and (x, y) in na:
-                    accum.add(lines[y][x])
-                elif accum.len > 0:
-                    let val = parseInt(accum.join)
-                    for l in 1..accum.len:
-                        numberMap[coord2D(x-l, y)] = val
-                    result[0].add(val)
-                    accum.setLen(0)
-        result[1] = numberMap
+    proc readIds(at: Table[(int, int), (int, int)], loc: (int, int)): Table[int, int] =
+        for pos in DIRS:
+            if loc + pos in at:
+                let vat = at[loc + pos]
+                result[vat[0]] = vat[1]
 
-    part 1, 546312:
-        parseNums(eparts)[0].sum
+    var numberMap = initTable[(int, int), (int, int)]()
+    var eng_parts: seq[int]
+    var accum: seq[char]
+    var symbolsFlag = false
+    var counter = 0
+    for y in 0 ..< h:
+        for x in 0 ..< w + 1:
+            if lines.read((x, y)).isDigit:
+                accum.add(lines[y][x])
+                for loc in DIRS:
+                    let rc = lines.read(loc + (x, y))
+                    if rc != '.' and not rc.isDigit:
+                        symbolsFlag = true
+
+            elif accum.len > 0:
+                let val = parseInt(accum.join)
+                for l in 1..accum.len:
+                    numberMap[(x-l, y)] = (counter, val)
+
+                if symbolsFlag:
+                    eng_parts.add(val)
+                
+                inc counter
+                accum.setLen(0)
+                symbolsFlag = false
+
+    part 1, 546312: eng_parts.sum
 
     part 2, 87449461:
-        let gears = lines.toCoords2D('*')
-        let numberMap = parseNums(gridNumbers)[1]
-
         var total = 0
-        var nums: seq[int]
-
-        proc cinc(g: Coord2D, x, y: int): bool =
-            if g+(x, y) in gridNumbers:
-                nums.add(numberMap[g+(x, y)])
-                true
-            else:
-                false
-
+        let gears = collect:
+            for y in 0 ..< h:
+                for x in 0 ..< w:
+                    if lines.read((x, y)) == '*':
+                        (x, y)
         for g in gears:
-            discard g.cinc(-1,0)
-            discard g.cinc(1,0)       
-
-            if not g.cinc(0,-1):
-                discard g.cinc(-1,-1)
-                discard g.cinc(1,-1)
-
-            if not g.cinc(0,1):
-                discard g.cinc(-1,1)
-                discard g.cinc(1,1)
-
-            # echo nums
-            if nums.len == 2:
-                total += nums[0] * nums[1]
-
-            nums.setLen(0)
+            let gval = numberMap.readIds(g).values.toSeq
+            if gval.len == 2:
+                total += gval[0] * gval[1]
         total
