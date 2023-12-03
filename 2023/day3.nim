@@ -1,5 +1,5 @@
 import ../aoc
-import std/[sequtils, strutils, tables, math, sugar]
+import std/[sequtils, strutils, tables, math, intsets]
 
 day 3:
     let lines = input.splitLines
@@ -14,11 +14,11 @@ day 3:
             return ar[y][x]
         return '.'
 
-    proc readIds(at: Table[(int, int), (int, int)], loc: (int, int)): Table[int, int] =
+    proc readIds(at: Table[(int, int), (int, int)], loc: (int, int)): IntSet =
         for pos in DIRS:
             if loc + pos in at:
-                let vat = at[loc + pos]
-                result[vat[0]] = vat[1]
+                # ASSUMPTION: numbers are unique
+                result.incl(at[loc + pos][1])
 
     var numberMap = initTable[(int, int), (int, int)]()
     var eng_parts: seq[int]
@@ -52,8 +52,8 @@ day 3:
         var total = 0
         for y in 0 ..< h:
             for x in 0 ..< w:
-                if lines.read((x, y)) == '*':
-                    let gval = numberMap.readIds((x, y)).values.toSeq
+                if lines[y][x] == '*':
+                    let gval = numberMap.readIds((x, y)).toSeq
                     if gval.len == 2:
                         total += gval[0] * gval[1]
         total
