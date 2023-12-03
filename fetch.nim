@@ -1,4 +1,5 @@
 import std/[sequtils, strutils, strformat, strscans, times, parseutils, parseopt, os, httpclient]
+import cligen
 
 #    _____         _________   ___________     __         .__
 #   /  _  \   ____ \_   ___ \  \_   _____/____/  |_  ____ |  |__   ___________
@@ -9,16 +10,6 @@ import std/[sequtils, strutils, strformat, strscans, times, parseutils, parseopt
 
 proc getFetcherPath(): string =
     result = os.getCurrentDir()
-
-proc getInput*(year, day: int): string =
-    let inputPath = getFetcherPath() / $year / "inputs" / fmt"day{day}.in"
-    if fileExists inputPath:
-        return readFile(inputPath)
-    else:
-        raise newException(
-            ValueError,
-            fmt"Input data missing: {inputPath}"
-        )
 
 proc getCookie(): string =
     let cookiePath = getFetcherPath() / "session.txt"
@@ -68,37 +59,54 @@ proc fetchAoC(year, day: int) =
 proc fetchDate(year, day: int) =
     let fileName = fmt"{year}/day{day}.nim"
     let folderName = fmt"{year}/inputs"
+
+    if not dirExists(folderName):
+        createDir(folderName)
+
     if not fileExists(fileName):
-        echo "Fetching AoC input"
+        echo "Writing template"
 
-        fetchAoC(year, day)
-
-        if not dirExists(folderName):
-            createDir(folderName)
-
-        let fileText = fmt"""
-import ../aoc
-import std/[sequtils, strutils]
-
-day {day}:
-    let lines = input.splitLines
-
-    part 1:
-        404
-
-    part 2:
-        404
-        """
+        let templateText = readFile("template.txt").strip()
+        let fileText = templateText.replace("{{day}}", $day)
         writeFile(fileName, fileText)
+
+        echo "Fetching AoC input"
+        fetchAoC(year, day)
     else:
         echo "File already fetched."
 
-
-when isMainModule:
+proc cli(fetch="", args: seq[string]): int =
+    var year, day: int
     let date = now()
-    let day = date.monthday
-
-    if modate.month.ord == 12 and day <= 25:
-        fetchDate(date.year, day)
+    if "," in fetch:
+        let bits = fetch.split(",")
+        assert bits.len == 2
+        year = parseInt(bits[0])
+        day = parseInt(bits[1])
+    elif fetch != "":
+        year = now().year
+        day = parseInt(fetch)
     else:
-        echo "Not December yet."
+        year = date.year
+        day = date.monthday
+
+    if date.year < year:
+        echo "Year out of range."
+    elif date.year == year and date.month.ord < 12:
+        echo "Date out of range."
+    elif date.year == year and date.month.ord == 12 and date.monthday < day:
+        echo "Date out of range."
+    else:
+        fetchDate(year, day)
+        # echo year, ", ", day
+
+dispatch cli, help={"fetch": "Fetch AoC input for given date (YYYY,DD or DD like 2013,3). Empty uses current date."}
+
+# when isMainModule:
+#     let date = now()
+#     let day = date.monthday
+
+#     if date.month.ord == 12 and day <= 25:
+#         fetchDate(date.year, day)
+#     else:
+#         echo "Not December yet."
