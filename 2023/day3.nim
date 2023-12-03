@@ -39,34 +39,25 @@ day 3:
         for g in gears:
             var nums: seq[int]
             var count = 0
-            if g+(-1,0) in nn:
-                nums.add(numberMap[g+(-1,0)])
-                inc count
-            if g+(1,0) in nn:
-                nums.add(numberMap[g+(1,0)])
-                inc count
 
-            if not (g+(0,-1) in nn):
-                if g+(-1,-1) in nn:
-                    nums.add(numberMap[g+(-1,-1)])
+            proc cinc(x, y: int): bool =
+                if g+(x, y) in nn:
+                    nums.add(numberMap[g+(x, y)])
                     inc count
-                if g+(1,-1) in nn:
-                    nums.add(numberMap[g+(1,-1)])
-                    inc count
-            else:
-                nums.add(numberMap[g+(0,-1)])
-                inc count
+                    true
+                else:
+                    false
 
-            if not (g+(0,1) in nn):
-                if g+(-1,1) in nn:
-                    nums.add(numberMap[g+(-1,1)])
-                    inc count
-                if g+(1,1) in nn:
-                    nums.add(numberMap[g+(1,1)])
-                    inc count
-            else:
-                nums.add(numberMap[g+(0,1)])
-                inc count
+            discard cinc(-1,0)
+            discard cinc(1,0)       
+
+            if not cinc(0,-1):
+                discard cinc(-1,-1)
+                discard cinc(1,-1)
+
+            if not cinc(0,1):
+                discard cinc(-1,1)
+                discard cinc(1,1)
 
             # echo nums
             if nums.len == 2:
