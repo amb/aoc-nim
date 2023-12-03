@@ -18,29 +18,28 @@ day 3:
         var accum: seq[char]
         for y in 0 ..< h:
             for x in 0 ..< w + 1:
-                if na.contains(coord2D(x, y)):
+                if lines[y][x].isDigit and (x, y) in na:
                     accum.add(lines[y][x])
                 elif accum.len > 0:
                     let val = parseInt(accum.join)
                     for l in 1..accum.len:
                         numberMap[coord2D(x-l, y)] = val
                     result[0].add(val)
-                    accum = @[]
+                    accum.setLen(0)
         result[1] = numberMap
 
     part 1, 546312:
         parseNums(eparts)[0].sum
 
     part 2, 87449461:
-        let gears = lines.toCoords2D(proc (c: char): bool = c == '*')
-        let nn = gridNumbers
-        let numberMap = parseNums(nn)[1]
+        let gears = lines.toCoords2D('*')
+        let numberMap = parseNums(gridNumbers)[1]
 
         var total = 0
         var nums: seq[int]
 
         proc cinc(g: Coord2D, x, y: int): bool =
-            if g+(x, y) in nn:
+            if g+(x, y) in gridNumbers:
                 nums.add(numberMap[g+(x, y)])
                 true
             else:
