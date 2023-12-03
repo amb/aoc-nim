@@ -35,31 +35,32 @@ day 3:
         let gears = lines.toCoords2D(proc (c: char): bool = c == '*')
         let nn = gridNumbers
         let numberMap = parseNums(nn)[1]
+
         var total = 0
+        var nums: seq[int]
+
+        proc cinc(g: Coord2D, x, y: int): bool =
+            if g+(x, y) in nn:
+                nums.add(numberMap[g+(x, y)])
+                true
+            else:
+                false
+
         for g in gears:
-            var nums: seq[int]
-            var count = 0
+            discard g.cinc(-1,0)
+            discard g.cinc(1,0)       
 
-            proc cinc(x, y: int): bool =
-                if g+(x, y) in nn:
-                    nums.add(numberMap[g+(x, y)])
-                    inc count
-                    true
-                else:
-                    false
+            if not g.cinc(0,-1):
+                discard g.cinc(-1,-1)
+                discard g.cinc(1,-1)
 
-            discard cinc(-1,0)
-            discard cinc(1,0)       
-
-            if not cinc(0,-1):
-                discard cinc(-1,-1)
-                discard cinc(1,-1)
-
-            if not cinc(0,1):
-                discard cinc(-1,1)
-                discard cinc(1,1)
+            if not g.cinc(0,1):
+                discard g.cinc(-1,1)
+                discard g.cinc(1,1)
 
             # echo nums
             if nums.len == 2:
                 total += nums[0] * nums[1]
+
+            nums.setLen(0)
         total
