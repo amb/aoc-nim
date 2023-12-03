@@ -164,6 +164,9 @@ proc ints*(s: string): seq[int] =
 
 # TODO: notInts
 
+proc dims*(s: seq[string]): (int, int) =
+    (s[0].len, s.len)
+
 #endregion
 
 #   _________
@@ -275,11 +278,18 @@ proc manhattan*(a, b: Coord2D): int = abs(a.x-b.x) + abs(a.y-b.y)
 proc asTuple*(v: Coord2D): (int, int) = (v.x, v.y)
 proc asFloatArray*(v: Coord2D): array[2, float] = [v.x.float, v.y.float]
 proc rot90*(v: Coord2D, d: int): Coord2D = (if d == 1 or d == -1: (-v.y*d, v.x*d) else: v)
+proc `[]`*(a: Coords2D, i: (int, int)): Coord2D = a[Coord2D(i)]
 
 proc toCoords2D*(data: seq[string], symbol: char): Coords2D =
     for yi, y in data:
         for xi, x in y:
             if x == symbol:
+                result.incl((xi, yi))
+
+proc toCoords2D*(data: seq[string], filter: proc (c: char): bool): Coords2D =
+    for yi, y in data:
+        for xi, x in y:
+            if filter(x):
                 result.incl((xi, yi))
 
 proc toCoords2D*(data: seq[Coord2D]): Coords2D =
@@ -295,6 +305,12 @@ proc faces*(T: typedesc[Coords2D]): array[4, Coord2D] = [
     (1, 0), (-1, 0),
     (0, 1), (0, -1)]
 
+proc connected*(T: typedesc[Coords2D]): array[8, Coord2D] = [
+    (1, 1), (-1, -1),
+    (1, -1), (-1, 1),
+    (1, 0), (-1, 0),
+    (0, 1), (0, -1)]
+
 proc one*(T: typedesc[Coords2D]): Coord2D = (1, 1)
 proc zero*(T: typedesc[Coords2D]): Coord2D = (0, 0)
 
@@ -305,6 +321,20 @@ proc fillBoundary*(cmin, cmax: Coord2D): Coords2D =
     for y in cmin[1]..cmax[1]:
         result.incl(coord2d(cmin[0], y))
         result.incl(coord2d(cmax[0], y))
+
+proc grow*(cds: Coords2D, masked: Coords2D): Coords2D =
+    for c in cds:
+        result.incl(c)
+        for f in Coords2D.connected:
+            let loc = c+f
+            if loc in masked:
+                result.incl(loc)
+
+proc grow*(cds: Coords2D): Coords2D =
+    for c in cds:
+        result.incl(c)
+        for f in Coords2D.connected:
+            result.incl(c+f)
 
 proc show*(cds: Coords2D, dims: (int, int), offset = (0, 0)): string =
     var total: seq[string]
@@ -331,6 +361,10 @@ proc toGrid*(cds: Coords2D, dims: (int, int), offset = (0, 0)): seq[seq[int]] =
             else:
                 l.add(0)
         result.add(l)
+
+# iterator items*(cb: Coords2D): tuple[coord: Coord2D, index: int] =
+#     for i, c in cb.items:
+#         yield (coord: c, index: i)
 
 #endregion
 
@@ -440,7 +474,7 @@ proc `+`*(cb: AnyCoords, v: AnyCoord): AnyCoords =
         result.incl(i+v)
 
 proc `-`*(ca, cb: AnyCoords): AnyCoords =
-    for cube in ca:
+    for cube in ca.items:
         if cube notin cb:
             result.incl(cube)
 
@@ -449,13 +483,13 @@ proc `-=`*(ca: var AnyCoords, cb: AnyCoords) =
         ca.excl(cube)
 
 proc `+`*(ca, cb: AnyCoords): AnyCoords =
-    for cube in ca:
+    for cube in ca.items:
         result.incl(cube)
-    for loc in cb:
+    for loc in cb.items:
         result.incl(loc)
 
 proc `&`*(ca, cb: AnyCoords): AnyCoords =
-    for loc in cb:
+    for loc in cb.items:
         if loc in ca:
             result.incl(loc)
 
@@ -649,70 +683,4 @@ proc binarySearch*(f: float -> float, lo = -1e100, hi = 1e100, precision = 1.0):
 
 #endregion
 
-#    _____         _________   ___________     __         .__
-#   /  _  \   ____ \_   ___ \  \_   _____/____/  |_  ____ |  |__   ___________
-#  /  /_\  \ /  _ \/    \  \/   |    __)/ __ \   __\/ ___\|  |  \_/ __ \_  __ \
-# /    |    (  <_> )     \____  |     \\  ___/|  | \  \___|   Y  \  ___/|  | \/
-# \____|__  /\____/ \______  /  \___  / \___  >__|  \___  >___|  /\___  >__|
-#         \/               \/       \/      \/          \/     \/     \/
-#region AOCFETCHER
 
-proc getFetcherPath(): string =
-    result = os.getCurrentDir()
-
-proc getCookie(): string =
-    let cookiePath = getFetcherPath() / "session.txt"
-
-    if not fileExists cookiePath:
-        writeFile(cookiePath, "")
-
-    result = readFile(cookiePath).strip()
-
-    if result == "":
-        raise newException(IOError, fmt"Please write your AoC cookie to '{cookiePath}'.")
-
-    var token: string
-    if not result.scanf("session=$+", token):
-        raise newException(
-            ValueError,
-            fmt"Session token should be of format 'session=128_CHAR_HEX_NUMBER', " &
-            fmt"but got '{result}' instead."
-        )
-
-    if token.len != 128:
-        raise newException(
-            ValueError,
-            fmt"Session token should be a 128 character long hexadecimal number, " &
-            fmt"but got '{token}' which is {token.len} characters long."
-        )
-
-    try:
-        discard parseHexInt(token)
-    except ValueError:
-        raise newException(
-            ValueError,
-            fmt"Session token should be a hexadecimal number, " &
-            fmt"but could not parse' {token}' as a hexadecimal."
-        )
-
-proc getInput*(year, day: int): string =
-    let inputPath = getFetcherPath() / $year / "inputs" / fmt"day{day}.in"
-    if fileExists inputPath:
-        return readFile(inputPath)
-    else:
-        raise newException(
-            ValueError,
-            fmt"Input data missing: {inputPath}"
-        )
-
-proc fetchAoC*(year, day: int) =
-    let inputPath = getFetcherPath() / $year / "inputs" / fmt"day{day}.in"
-    echo fmt"Downloading input for year {year}, day {day}."
-    let client = newHttpClient()
-    defer: client.close()
-    client.headers["cookie"] = getCookie()
-
-    let content = client.getContent(fmt"https://adventofcode.com/{year}/day/{day}/input")
-    inputPath.writeFile(content)
-
-#endregion
