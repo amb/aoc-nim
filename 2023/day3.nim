@@ -50,13 +50,10 @@ day 3:
 
     part 2, 87449461:
         var total = 0
-        let gears = collect:
-            for y in 0 ..< h:
-                for x in 0 ..< w:
-                    if lines.read((x, y)) == '*':
-                        (x, y)
-        for g in gears:
-            let gval = numberMap.readIds(g).values.toSeq
-            if gval.len == 2:
-                total += gval[0] * gval[1]
+        for y in 0 ..< h:
+            for x in 0 ..< w:
+                if lines.read((x, y)) == '*':
+                    let gval = numberMap.readIds((x, y)).values.toSeq
+                    if gval.len == 2:
+                        total += gval[0] * gval[1]
         total
