@@ -60,6 +60,9 @@ proc fetchDate(year, day: int) =
     let fileName = fmt"{year}/day{day}.nim"
     let folderName = fmt"{year}/inputs"
 
+    if not dirExists(fmt"{year}"):
+        createDir(fmt"{year}")
+
     if not dirExists(folderName):
         createDir(folderName)
 
@@ -97,6 +100,7 @@ proc cli(fetch="", args: seq[string]): int =
     elif date.year == year and date.month.ord == 12 and date.monthday < day:
         echo "Date out of range."
     else:
+        echo "Fetch: ", year, ", ", day
         fetchDate(year, day)
         # echo year, ", ", day
 
