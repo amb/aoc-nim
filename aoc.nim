@@ -162,7 +162,9 @@ proc ints*(s: string): seq[int] =
     for r in s.findAll(re"-?\d+"):
         result.add(r.parseInt)
 
-# TODO: notInts
+iterator intsi*(s: string): int =
+    for r in s.findAll(re"-?\d+"):
+        yield r.parseInt
 
 proc dims*(s: seq[string]): (int, int) =
     (s[0].len, s.len)

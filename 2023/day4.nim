@@ -1,37 +1,32 @@
 import ../aoc
-import std/[sequtils, strutils, sets, tables, math, intsets]
+import std/[sequtils, strutils, tables, math, intsets, strscans, re]
 
 day 4:
     let lines = input.splitLines
-
-    type Scratch = object
-        index: int
-        winning: IntSet
-        own: IntSet
-        cardValue: int
-        matching: int
-        amount: int
-
-    var cards = newSeq[Scratch](lines.len)
-
-    proc calcValue(c: var Scratch) =
-        let mat = (c.winning * c.own).len
-        c.cardValue = (if mat > 0: 2^(mat-1) else: 0)
-        c.matching = mat
-
-    var total1 = 0
+    var amounts = newSeq[int](lines.len)
+    var total1, total2 = 0
+    var nums = newSeq[int](0)
+    var winning: IntSet
     for index, l in lines:
-        let nums = ints(l)
-        cards[index] = Scratch(index: nums[0], winning: nums[1..10].toIntSet, own: nums[11..^1].toIntSet, amount: 1)
-        cards[index].calcValue()
-        total1 += cards[index].cardValue
+        for r in l.findAll(re"\d+"):
+            nums.add r.parseInt
+        var mat = 0
+        winning.clear
+        for i in 1..10:
+            winning.incl(nums[i])
+        for i in 11..nums.high:
+            if nums[i] in winning:
+                inc mat
+        nums.setLen(0)
+
+        total1 += (if mat > 0: 2^(mat-1) else: 0)
+        inc amounts[index]
+        total2 += amounts[index]
+        var endPoint = min(index + mat, amounts.high)
+        for i in index+1..endPoint:
+            amounts[i] += amounts[index]
 
     part 1, 15205: total1
-    part 2, 6189740:
-        for idx, c in cards:
-            var endPoint = idx + c.matching
-            if endPoint > cards.high:
-                endPoint = cards.high
-            for i in idx+1..endPoint:
-                cards[i].amount += c.amount
-        cards.mapIt(it.amount).sum
+    part 2, 6189740: total2
+
+# nim c --cc:gcc --debugger:native -d:release --threads:off day4.nim
