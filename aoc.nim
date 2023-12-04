@@ -165,6 +165,21 @@ proc ints*(s: string): seq[int] =
 proc dims*(s: seq[string]): (int, int) =
     (s[0].len, s.len)
 
+proc parseUints*(s: string, nums: var seq[int]) =
+    var inNum = false
+    var startLoc = 0
+    for ci, c in s:
+        let digit = c.isDigit
+        if digit and not inNum:
+            inNum = true
+            startLoc = ci
+        elif not digit and inNum:
+            inNum = false
+            nums.add s[startLoc..ci-1].parseInt
+    if inNum:
+        nums.add s[startLoc..^1].parseInt
+
+
 #endregion
 
 #   _________

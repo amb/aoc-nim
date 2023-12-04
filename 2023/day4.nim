@@ -8,22 +8,8 @@ day 4:
     var nums = newSeq[int](0)
     var winning: IntSet
     for index, l in lines:
-        # 3 times slower :(
-        # for r in l.findAll(re"\d+"):
-        #     nums.add r.parseInt
-        var inNum = false
-        var startLoc = 0
-        for ci, c in l:
-            let digit = c.isDigit
-            if digit and not inNum:
-                inNum = true
-                startLoc = ci
-            elif not digit and inNum:
-                inNum = false
-                nums.add l[startLoc..ci-1].parseInt
-        if inNum:
-            nums.add l[startLoc..^1].parseInt
-            
+        l.parseUints(nums)
+
         var mat = 0
         winning.clear
         for i in 1..10:
