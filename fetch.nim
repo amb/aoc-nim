@@ -1,4 +1,4 @@
-import std/[sequtils, strutils, strformat, strscans, times, parseutils, parseopt, os, httpclient]
+import std/[sequtils, strutils, strformat, strscans, times, parseutils, parseopt, os, httpclient, re]
 import cligen
 
 #    _____         _________   ___________     __         .__
@@ -69,7 +69,7 @@ proc fetchDate(year, day: int) =
     if not fileExists(fileName):
         echo "Writing template"
 
-        let templateText = readFile("template.txt").strip()
+        let templateText = readFile("template.txt")
         let fileText = templateText.replace("{{day}}", $day)
         writeFile(fileName, fileText)
 
@@ -81,9 +81,17 @@ proc fetchDate(year, day: int) =
 proc cli(fetch="", args: seq[string]): int =
     var year, day: int
     let date = now()
+
+    # TODO: fix date logic
+
+    # enforce regex on fetch
+    if not re.match(fetch, re.re"((\d{4},)?\d)?"):
+        echo "Invalid fetch format."
+        return 1
+
     if "," in fetch:
         let bits = fetch.split(",")
-        assert bits.len == 2
+        doAssert bits.len == 2
         year = parseInt(bits[0])
         day = parseInt(bits[1])
     elif fetch != "":
