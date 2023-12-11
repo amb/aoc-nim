@@ -5,6 +5,8 @@ func toInt(c: char): int =
     return int(c) - int('0')
 
 day 1:
+    let lines = input.splitLines
+
     part 1, 54338:
         var total = 0
         for line in lines:

@@ -29,8 +29,8 @@
 
 #endregion
 
-import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
-import std/[sets, intsets, tables, re, options, monotimes, times, paths, httpclient]
+import std/[strutils, strformat, sequtils, algorithm, os]
+import std/[sets, intsets, tables, options, monotimes, times, paths, httpclient]
 
 #    _____         _________
 #   /  _  \   ____ \_   ___ \

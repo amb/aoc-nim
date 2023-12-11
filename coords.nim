@@ -1,5 +1,5 @@
-import std/[strutils, strformat, sequtils, sugar, algorithm, math, os]
-import std/[sets, intsets, tables, re, options, monotimes, times, paths, httpclient]
+import std/[strutils, sequtils, algorithm, math]
+import std/[sets, intsets, tables]
 
 # _________                         .___.__               __
 # \_   ___ \  ____   ___________  __| _/|__| ____ _____ _/  |_  ____   ______

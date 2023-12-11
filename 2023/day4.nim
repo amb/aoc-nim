@@ -1,4 +1,4 @@
-import ../aoc
+import ../[aoc, aoc_lib]
 import std/[sequtils, strutils, tables, math, intsets, strscans, re]
 
 day 4:
