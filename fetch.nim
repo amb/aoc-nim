@@ -58,13 +58,13 @@ proc fetchAoC(year, day: int) =
 
 proc fetchDate(year, day: int) =
     let fileName = fmt"{year}/day{day}.nim"
-    let folderName = fmt"{year}/inputs"
+    let inputsFolder = fmt"{year}/inputs"
 
     if not dirExists(fmt"{year}"):
         createDir(fmt"{year}")
 
-    if not dirExists(folderName):
-        createDir(folderName)
+    if not dirExists(inputsFolder):
+        createDir(inputsFolder)
 
     if not fileExists(fileName):
         echo "Writing template"
@@ -113,12 +113,3 @@ proc cli(fetch="", args: seq[string]): int =
         # echo year, ", ", day
 
 dispatch cli, help={"fetch": "Fetch AoC input for given date (YYYY,DD or DD like 2013,3). Empty uses current date."}
-
-# when isMainModule:
-#     let date = now()
-#     let day = date.monthday
-
-#     if date.month.ord == 12 and day <= 25:
-#         fetchDate(date.year, day)
-#     else:
-#         echo "Not December yet."
