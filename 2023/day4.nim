@@ -1,5 +1,5 @@
 import ../[aoc, aoc_lib]
-import std/[sequtils, strutils, tables, math, intsets, strscans, re]
+import std/[strutils, tables, math, intsets]
 
 day 4:
     let lines = input.splitLines

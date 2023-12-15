@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "nim run 2023",
+            "type": "process",
+            "command": "nim",
+            "args": [
+                "r",
+                // "-d:release",
+                "--threads:off",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "problemMatcher": [
+                "$nim"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/2023"
+            }
+        },
+    ]
+}
