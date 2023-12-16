@@ -47,7 +47,7 @@ proc ints*(s: string): seq[int] =
 proc dims*(s: seq[string]): (int, int) =
     (s[0].len, s.len)
 
-proc parseUints*(s: string, nums: var seq[int]) =
+proc parseUints*[T](s: string, nums: var seq[T]) =
     var inNum = false
     var startLoc = 0
     for ci, c in s:
@@ -61,6 +61,8 @@ proc parseUints*(s: string, nums: var seq[int]) =
     if inNum:
         nums.add s[startLoc..^1].parseInt
 
+proc parseUints64*(s: string): seq[int64] =
+    s.parseUints(result)
 
 #endregion
 

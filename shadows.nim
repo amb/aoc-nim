@@ -37,6 +37,7 @@ proc markRemoved(sl: var ShadowLines, i: int64) =
 
 proc finalize*(sl: var ShadowLines) =
     # TODO: sort smart and just .setLen to sl.lines.len-invalids.len
+    #       (just qsort style set pivot to sl.line.len-invalids.len, then swap all valids to left)
     sl.lines = collect:
         for l in sl.lines:
             if l.valid: l
