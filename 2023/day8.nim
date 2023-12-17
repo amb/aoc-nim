@@ -15,7 +15,6 @@ day 8:
     let lines = input.splitLines
     let movements = lines[0].mapIt(if it == 'L': 0 else: 1)
     let network = lines[2..^1].mapIt((it[0..2], MoveChoice(left: it[7..9], right: it[12..14]))).toTable
-    echo movements.len
 
     part 1, 12599:
         var location = "AAA"
@@ -60,12 +59,6 @@ day 8:
 
                 inc steps
                 doAssert steps < 100_000
-
-        doAssert loopLengths.len == ghosts.len
-
-        var speedyGhost: seq[int]
-        for i in 0..loopLengths.high:
-            speedyGhost.add(loopLengths[i])
 
         # figure out where the loops match
         var commonDivisor = loopLengths[0]

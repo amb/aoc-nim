@@ -19,9 +19,10 @@
                 "showReuseMessage": false,
                 "clear": true
             },
-            "problemMatcher": [
-                "$nim"
-            ],
+            // works, but causes terminal to hang on long lines
+            // "problemMatcher": [
+            //     "$nim"
+            // ],
             "options": {
                 "cwd": "${workspaceFolder}/2023"
             }
