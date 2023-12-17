@@ -13,8 +13,10 @@ const cardMapping = {'A': 12, 'K': 11, 'Q': 10, 'J': 9, 'T': 8,
 
 type HandComponents = tuple[pairs: int, triples: int, four: int, five: int, jokers: int]
 
+
 type HandType = enum
     HighCard, OnePair, TwoPairs, ThreeOfAKind, FullHouse, FourOfAKind, FiveOfAKind
+
 
 proc calcRank(hand: HandComponents): HandType =
     if hand.five == 1:
@@ -48,6 +50,9 @@ proc calcRank(hand: HandComponents): HandType =
         result = ThreeOfAKind
         if hand.jokers == 1:
             # 333JT
+            result = FourOfAKind
+        if hand.jokers == 3:
+            # JJJQT
             result = FourOfAKind
     elif hand.pairs == 2:
         # two pairs
@@ -101,13 +106,13 @@ proc countCards(s: string, mapping: Table[char, int]): HandComponents =
             inc result.five
 
 
-proc handValue(s: string, mapping: Table[char, int], jokersExist = false): int =
+proc handValue(s: string, mapping: Table[char, int], jokersExist = false): int64 =
     var hcmp = countCards(s, mapping)
 
     if not jokersExist:
         hcmp.jokers = 0
 
-    var totalValue = calcRank(hcmp).ord * 16
+    var totalValue: int64 = calcRank(hcmp).ord * 16
     for c in s:
         totalValue += mapping[c]
         totalValue *= 16
@@ -153,9 +158,9 @@ day 7:
 
         hands.sort(cmp2)
         for hi, h in hands:
-            if 'J' in h.cards:
-                var totalValue = calcRank(countCards(h.cards, cardMappingB))
-                echo h.cards, " -> ", totalValue
+            # if 'J' in h.cards:
+            var totalValue = calcRank(countCards(h.cards, cardMappingB))
+            echo h.cards, " -> ", totalValue
 
         var totals = 0
         for hi, h in hands:
@@ -164,4 +169,5 @@ day 7:
         totals
         # 245724373 too low
         # 245781267 too low
+        # 245794069 correct
         # 246238256 too high
