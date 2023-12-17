@@ -1,16 +1,5 @@
 import ../aoc
-import ../aoc_lib
-import std/[sequtils, strutils, strformat, tables, sugar, sets]
-
-let testInput = """RL
-
-AAA = (BBB, CCC)
-BBB = (DDD, EEE)
-CCC = (ZZZ, GGG)
-DDD = (DDD, DDD)
-EEE = (EEE, EEE)
-GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)"""
+import std/[sequtils, strutils, tables]
 
 type MoveChoice = object
     left: string
@@ -92,16 +81,15 @@ day 8:
 
         # figure out where the loops match
         # every loop only has one matching location (Z)
+        # TODO: this is quite slow, figure out better solution (math)
         var steps = 0
-        while steps < 100_000_000_000_000:
+        while steps < int64.high - 1:
             steps = max(speedyGhost)
-
-            for i in 0..speedyGhost.high:
-                if speedyGhost[i] < steps:
-                    speedyGhost[i] += loopLengths[i]
 
             var allMatch = true
             for i in 0..speedyGhost.high:
+                if speedyGhost[i] < steps:
+                    speedyGhost[i] += loopLengths[i]
                 if speedyGhost[i] != steps:
                     allMatch = false
 
