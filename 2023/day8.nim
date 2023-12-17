@@ -1,5 +1,5 @@
 import ../aoc
-import std/[sequtils, strutils, tables]
+import std/[sequtils, strutils, tables, math]
 
 type MoveChoice = object
     left: string
@@ -44,24 +44,12 @@ day 8:
             var steps = 0
             var ghost = ghosts[gi]
             var visited: Table[string, int]
-            var countZ = 0
-
             while true:
                 let visitId = ghost & $mloc
-                if ghost[2] == 'Z':
-                    echo "z at: ", steps
-                    inc countZ
-
                 if visitId notin visited:
                     visited[visitId] = steps
                 else:
-                    echo visitId
-                    echo "Total steps: ", steps
-                    echo "Loop start steps: ", visited[visitId]
-                    let ll = steps - visited[visitId]
-                    echo "Loop length: ", ll
-                    loopLengths.add(ll)
-                    doAssert countZ == 1
+                    loopLengths.add(steps - visited[visitId])
                     break
                 
                 ghost = network[ghost][movements[mloc]]
@@ -80,20 +68,7 @@ day 8:
             speedyGhost.add(loopLengths[i])
 
         # figure out where the loops match
-        # every loop only has one matching location (Z)
-        # TODO: this is quite slow, figure out better solution (math)
-        var steps = 0
-        while steps < int64.high - 1:
-            steps = max(speedyGhost)
-
-            var allMatch = true
-            for i in 0..speedyGhost.high:
-                if speedyGhost[i] < steps:
-                    speedyGhost[i] += loopLengths[i]
-                if speedyGhost[i] != steps:
-                    allMatch = false
-
-            if allMatch:
-                echo "All match at: ", steps
-                break
-        steps
+        var commonDivisor = loopLengths[0]
+        for i in 1..loopLengths.high:
+            commonDivisor = lcm(commonDivisor, loopLengths[i])
+        commonDivisor
