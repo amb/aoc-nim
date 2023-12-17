@@ -1,4 +1,5 @@
 import ../aoc
+import ../aoc_lib
 import std/[sequtils, strutils]
 
 day {{day}}:
@@ -9,3 +10,4 @@ day {{day}}:
 
     part 2:
         404
+
