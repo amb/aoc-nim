@@ -1,6 +1,5 @@
 import ../aoc
-import ../aoc_lib
-import std/[sequtils, strutils]
+import std/[sequtils, strutils, strformat, enumerate, tables, sets, math, options]
 
 day {{day}}:
     let lines = input.splitLines

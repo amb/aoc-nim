@@ -123,7 +123,7 @@ day 10:
         # printPipes(traveled)
         step
 
-    part 2:
+    part 2, 589:
         type Diver = enum Outside, Inside, UpperEdge, LowerEdge, Error
         var insideCounter = 0
         for li, l in lines:
@@ -137,39 +137,32 @@ day 10:
                     if (ci, li) in traveled:
                         dv = case cr:
                             of '|':  Inside
-                            of '-':  Error
                             of 'F':  UpperEdge
                             of 'L':  LowerEdge
-                            of 'J':  Error
-                            of '7':  Error
-                            else: dv
+                            else: Error
                     else:
                         lines[li][ci] = '_'
                 elif dv == Inside:
                     if (ci, li) in traveled:
                         dv = case cr:
                             of '|':  Outside
-                            of '-':  Error
                             of 'F':  LowerEdge
                             of 'L':  UpperEdge
                             of 'J':  Outside
                             of '7':  Outside
-                            else: dv
+                            else: Error
                     else:
                         lines[li][ci] = '*'
                         inc insideCounter
                 elif dv == UpperEdge or dv == LowerEdge:
                     if (ci, li) in traveled:
                         dv = case cr:
-                            of '|':  Error
                             of '-':  dv
-                            of 'F':  Error
-                            of 'L':  Error
                             of 'J':  (if dv == UpperEdge: Inside else: Outside)
                             of '7':  (if dv == UpperEdge: Outside else: Inside)
-                            else: dv
+                            else: Error
                 assert dv != Error
 
-        printPipes(traveled)
+        # printPipes(traveled)
         
         insideCounter
