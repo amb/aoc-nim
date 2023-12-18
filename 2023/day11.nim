@@ -1,67 +1,52 @@
 import ../aoc
 import ../coords
-import std/[sequtils, strutils, strformat, enumerate, tables, sets, math, options]
-
-const testInput = """...#......
-.......#..
-#.........
-..........
-......#...
-.#........
-.........#
-..........
-.......#..
-#...#....."""
+import std/[sequtils, strutils, strformat, enumerate, tables, sets, math, options, algorithm]
 
 day 11:
     let lines = input.splitLines
 
     # find empty rows
-    var emptyRows: HashSet[int]
+    var emptyRows: seq[int]
     for li, l in lines:
         if l.count('#') == 0:
-            emptyRows.incl(li)
+            emptyRows.add(li)
 
     # find empty columns
-    var emptyCols: HashSet[int]
+    var emptyCols: seq[int]
     for ci in 0..lines[0].high:
         var counter = 0
         for li in 0..lines.high:
             if lines[li][ci] == '#':
                 inc counter
         if counter == 0:
-            emptyCols.incl(ci)
+            emptyCols.add(ci)
 
-    # expand rows
-    var cursor = 0
-    var starMap: seq[string]
-    while cursor < lines.len:
-        if cursor in emptyRows:
-            starMap.add(".".repeat(lines[0].len))
-        starMap.add(lines[cursor])
-        inc cursor
+    # all stars
+    var starMap = lines.toCoords2D('#').toSeq
 
-    # expand columns
-    for li, l in starMap:
-        var newLine: seq[string]
-        for ci in 0..l.high:
-            if ci in emptyCols:
-                newLine.add(".")
-            newLine.add($l[ci])
-        starMap[li] = newLine.join("")
+    proc expand(starMap: seq[Coord2D], expansionStep: int): seq[Coord2D] =
+        result = starMap
 
-    # for l in starMap:
-    #     echo l
+        # expand rows
+        for ri, r in emptyRows:
+            for gi, g in result:
+                if g.y > r + ri * expansionStep:
+                    result[gi] = g + (0, expansionStep)
 
-    let galaxies = starMap.toCoords2D('#').toSeq
-    
-    var combs2: seq[array[2, int]]
-    for i in 0..<galaxies.len:
-        for j in 0..i-1:
-            combs2.add([i, j])
-            
-    part 1:
-        combs2.mapIt(galaxies[it[0]].manhattan(galaxies[it[1]])).sum
+        # expand cols
+        for ci, c in emptyCols:
+            for gi, g in result:
+                if g.x > c + ci * expansionStep:
+                    result[gi] = g + (expansionStep, 0)
 
-    part 2:
-        404
+    # calc comb sums
+    proc combSums(starMap: seq[Coord2D]): int =
+        for i in 0..<starMap.len:
+            for j in 0..i-1:
+                result += starMap[i].manhattan(starMap[j])
+
+    part 1, 10077850:
+        starMap.expand(1).combSums
+
+    part 2, 504715068438:
+        starMap.expand(1_000_000-1).combSums
