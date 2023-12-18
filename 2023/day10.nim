@@ -132,7 +132,6 @@ day 10:
             for ci, c in enumerate(l):
                 # hardcode S replacement
                 let cr = (if c != 'S': c else: 'J')
-                
                 if dv == Outside:
                     if (ci, li) in traveled:
                         dv = case cr:
@@ -145,9 +144,9 @@ day 10:
                 elif dv == Inside:
                     if (ci, li) in traveled:
                         dv = case cr:
-                            of '|':  Outside
                             of 'F':  LowerEdge
                             of 'L':  UpperEdge
+                            of '|':  Outside
                             of 'J':  Outside
                             of '7':  Outside
                             else: Error
@@ -162,7 +161,5 @@ day 10:
                             of '7':  (if dv == UpperEdge: Outside else: Inside)
                             else: Error
                 assert dv != Error
-
         # printPipes(traveled)
-        
         insideCounter
