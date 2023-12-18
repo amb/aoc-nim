@@ -61,7 +61,7 @@ day 8:
                 doAssert steps < 100_000
 
         # figure out where the loops match
-        var commonDivisor = loopLengths[0]
+        var common = loopLengths[0]
         for i in 1..loopLengths.high:
-            commonDivisor = lcm(commonDivisor, loopLengths[i])
-        commonDivisor
+            common = lcm(common, loopLengths[i])
+        common

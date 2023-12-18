@@ -45,6 +45,10 @@ proc grey*(s: string): string = "\e[90m" & s & "\e[0m"
 proc yellow*(s: string): string = "\e[33m" & s & "\e[0m"
 proc red*(s: string): string = "\e[31m" & s & "\e[0m"
 
+proc rgbText*(s: string, r: int, g: int, b: int): string =
+    # \033[38;2;146;255;12mHello!\033[0m
+    "\e[38;2;" & $r & ";" & $g & ";" & $b & "m" & s & "\e[0m"
+
 # https://github.com/MichalMarsalek/Advent-of-code/blob/master/2022/Nim/aoc_logic.nim
 
 var SOLUTIONS*: Table[int, proc (x: string): Table[int, string]]
