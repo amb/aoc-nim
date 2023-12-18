@@ -42,7 +42,7 @@ day 10:
                 if c == 'S':
                     startLoc = coord2d(ci, li)
                     break
-        echo "start at: ", startLoc
+        # echo "start at: ", startLoc
 
         proc move(loc: Coord2D, dir: Direction): Option[Coord2D] =
             let newLoc = case dir:
@@ -59,7 +59,6 @@ day 10:
         var traveled: Table[Coord2D, int]
         traveled[startLoc] = 0
 
-        # TODO: finish this
         proc getAvailableLocation(loc: Coord2D): Option[Coord2D] =
             const tests = ["|7F", "-LF", "-J7", "L|J"]
             result = none(Coord2D)
@@ -83,8 +82,6 @@ day 10:
 
                 heads.add(some(nh.get()))
                 traveled[nh.get()] = 1
-
-        echo "heads: ", heads.len
 
         var step = 1
         var furthestLoc = startLoc
@@ -113,18 +110,13 @@ day 10:
 
             inc step
 
-        echo "old char: ", getSymbol(furthestLoc)
-        lines[furthestLoc.y][furthestLoc.x] = 'X'
-        echo "end at: ", furthestLoc
-
+        # echo "old char: ", getSymbol(furthestLoc)
+        # lines[furthestLoc.y][furthestLoc.x] = 'X'
+        # echo "end at: ", furthestLoc
         # printPipes(traveled)
 
         step
 
-        # 7053 too low
-        # 7054 too low
-        # 14104 too high
-        # 14105 too high
 
     part 2:
         404

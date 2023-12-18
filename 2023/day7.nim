@@ -150,17 +150,17 @@ day 7:
         # 254837312 too high
         # 246163188 correct
 
-    part 2:
+    part 2, 245794069:
         proc cmp2(x, y: tuple[cards: string, bet: int]): int =
             let thvx = handValue(x.cards, cardMappingB, true)
             let thvy = handValue(y.cards, cardMappingB, true)
             return sgn(thvx - thvy)
 
         hands.sort(cmp2)
-        for hi, h in hands:
-            # if 'J' in h.cards:
-            var totalValue = calcRank(countCards(h.cards, cardMappingB))
-            echo h.cards, " -> ", totalValue
+        # for hi, h in hands:
+        #     # if 'J' in h.cards:
+        #     var totalValue = calcRank(countCards(h.cards, cardMappingB))
+        #     echo h.cards, " -> ", totalValue
 
         var totals = 0
         for hi, h in hands:
