@@ -85,8 +85,8 @@ proc cli(fetch="", args: seq[string]): int =
     # TODO: fix date logic
 
     # enforce regex on fetch
-    if not re.match(fetch, re.re"((\d{4},)?\d)?"):
-        echo "Invalid fetch format."
+    if not re.match(fetch, re.re"((\d{4},)?\d)"):
+        echo "Invalid fetch format. Use --help for more information."
         return 1
 
     if "," in fetch:
