@@ -1,66 +1,10 @@
 import ../aoc
+import ../aoc_lib
 import std/[sequtils, strutils, strformat, enumerate, tables, sets, math, options, streams]
 
-type Grid2D*[T] = object
-    data: seq[T]
-    width, height: int
-
-proc newGrid2D*[T](width, height: int): Grid2D[T] =
-    Grid2D[T](data: newSeq[T](width * height), width: width, height: height)
-
-proc `[]`*[T](grid: Grid2D[T], x, y: int): T =
-    grid.data[y * grid.width + x]
-
-proc `[]=`*[T](grid: var Grid2D[T], x, y: int, value: T) =
-    grid.data[y * grid.width + x] = value
-
-proc newGrid2DfromText*(text: string): Grid2D[char] =
-    let lines = text.splitLines
-    let width = lines[0].len
-    let height = lines.len
-    assert lines[height - 1].len == width
-
-    var grid = newGrid2D[char](width, height)
-    for y, line in lines:
-        for x in 0..<line.len:
-            grid[x, y] = line[x]
-    return grid
-
-proc printGrid2D*[T](grid: Grid2D[T]) =
-    for y in 0..<grid.height:
-        for x in 0..<grid.width:
-            stdout.write(grid[x, y])
-        echo ""
-
-proc `$`[char](grid: Grid2D[char]): string =
-    return grid.data.join("")
-
-const testInput = """O....#....
-O.OO#....#
-.....##...
-OO.#O....O
-.O.....O#.
-O.#..O.#.#
-..O..#O..O
-.......O..
-#....###..
-#OO..#...."""
-
 day 14:
-    # let lines = testInput.splitLines
-    # grid.printGrid2D
-
-    proc rollGrid(grid: var Grid2D[char], xd, yd: int): bool =
-        # result = if any of the rocks moved
-        for y in 0..<grid.height:
-            if y + yd < 0 or y + yd >= grid.height:
-                continue
-            for x in 0..<grid.width:
-                if not (x + xd < 0 or x + xd >= grid.width) and grid[x, y] == 'O':
-                    if grid[x + xd, y + yd] == '.':
-                        grid[x + xd, y + yd] = 'O'
-                        grid[x, y] = '.'
-                        result = true
+    proc `$`[char](grid: Grid2D[char]): string =
+        return grid.data.join("")
 
     proc countSupport(grid: Grid2D[char]): int =
         var total = 0
@@ -70,42 +14,56 @@ day 14:
                     total += grid.height - y
         total
 
+    proc eekOut(grid: var Grid2D[char]) =
+        for y in 0..<grid.height:
+            var counter = 0
+            var start = 0
+            for x in 0..<grid.width:
+                if grid[x, y] == 'O':
+                    inc counter
+                if grid[x, y] == '#':
+                    for i in start..<start + counter:
+                        grid[i, y] = 'O'
+                    for i in start + counter..<x:
+                        grid[i, y] = '.'
+                    start = x + 1
+                    counter = 0
+            if counter > 0:
+                for i in start..<start + counter:
+                    grid[i, y] = 'O'
+                for i in start + counter..<grid.width:
+                    grid[i, y] = '.'
+
     part 1, 109596:
-        var grid = newGrid2DfromText(input)
-
-        while rollGrid(grid, 0, -1):
-            discard
-
+        var grid = input.toGrid2D
+        grid.rotCCW
+        grid.eekOut
+        grid.rotCW
         countSupport(grid)
 
     part 2, 96105:
-        var grid = newGrid2DfromText(input)
+        var grid = input.toGrid2D
         var prevCycles: Table[string, int]
+        grid.rotCCW
 
         proc oneCycle() =
-            while rollGrid(grid, 0, -1): discard
-            while rollGrid(grid, -1, 0): discard
-            while rollGrid(grid, 0, 1): discard
-            while rollGrid(grid, 1, 0): discard
+            for _ in 0..<4:
+                grid.eekOut
+                grid.rotCW
 
         var remaining = 0
         for i in 0..<100_000:
-            if i > 0 and $grid in prevCycles:
-                echo "cycle found at ", i
-                let prev = prevCycles[$grid]
-                echo "connection: ", prev
+            let tgrid = $grid
+            if tgrid in prevCycles:
+                let prev = prevCycles[tgrid]
                 remaining = (1_000_000_000 - prev).floorMod(i - prev)
-                echo "remainder: ", remaining
                 break
             else:
-                prevCycles[$grid] = i
-            # if i < 4:
-            #     echo "After ", i, " cycles:"
-            #     grid.printGrid2D
-            #     echo ""
+                prevCycles[tgrid] = i
             oneCycle()
 
         for i in 0..<remaining:
             oneCycle()
 
+        grid.rotCW
         countSupport(grid)

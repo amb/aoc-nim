@@ -1,6 +1,71 @@
 import std/[strutils, strformat, sequtils, sugar, math, os]
 import std/[sets, intsets, tables, re, options, monotimes, times, paths, httpclient]
 
+# ________  ________                  .__    .___
+# \_____  \ \______ \      ___________|__| __| _/
+#  /  ____/  |    |  \    / ___\_  __ \  |/ __ | 
+# /       \  |    `   \  / /_/  >  | \/  / /_/ | 
+# \_______ \/_______  /  \___  /|__|  |__\____ | 
+#         \/        \/  /_____/               \/ 
+#region 2DGRID
+
+type Grid2D*[T] = object
+    data*: seq[T]
+    width*, height*: int
+
+proc newGrid2D*[T](width, height: int): Grid2D[T] =
+    Grid2D[T](data: newSeq[T](width * height), width: width, height: height)
+
+proc `[]`*[T](grid: Grid2D[T], x, y: int): T =
+    grid.data[y * grid.width + x]
+
+proc `[]=`*[T](grid: var Grid2D[T], x, y: int, value: T) =
+    grid.data[y * grid.width + x] = value
+
+proc toGrid2D*(text: string): Grid2D[char] =
+    let lines = text.splitLines
+    let width = lines[0].len
+    let height = lines.len
+    assert lines[height - 1].len == width
+
+    var grid = newGrid2D[char](width, height)
+    for y, line in lines:
+        for x in 0..<line.len:
+            grid[x, y] = line[x]
+    return grid
+
+proc printGrid2D*[char](grid: Grid2D[char]) =
+    for y in 0..<grid.height:
+        for x in 0..<grid.width:
+            stdout.write(grid[x, y])
+        echo ""
+
+proc transpose*[T](grid: var Grid2D[T]) =
+    assert grid.width == grid.height
+    for y in 0..<grid.height:
+        for x in 0..<y:
+            let t = grid[x, y]
+            grid[x, y] = grid[y, x]
+            grid[y, x] = t
+
+proc rotCW*[T](grid: var Grid2D[T]) =
+    transpose(grid)
+    for y in 0..<grid.height:
+        for x in 0..<grid.width div 2:
+            let t = grid[x, y]
+            grid[x, y] = grid[grid.width - x - 1, y]
+            grid[grid.width - x - 1, y] = t
+
+proc rotCCW*[T](grid: var Grid2D[T]) =
+    transpose(grid)
+    for y in 0..<grid.height div 2:
+        for x in 0..<grid.width:
+            let t = grid[x, y]
+            grid[x, y] = grid[x, grid.height - y - 1]
+            grid[x, grid.height - y - 1] = t
+
+#endregion
+
 # _________                                  .__
 # \_   ___ \  ____   _______  __ ____   ____ |__| ____   ____   ____  ____
 # /    \  \/ /  _ \ /    \  \/ // __ \ /    \|  |/ __ \ /    \_/ ___\/ __ \
