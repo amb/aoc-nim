@@ -19,7 +19,7 @@ const testInput = """???.### 1,1,3
 # there are more rules to check than these few, which are up to you to find. but this is a way to work out the solution.
 
 day 12:
-    let lines = testInput.splitLines
+    let lines = input.splitLines
 
     type Springs = object
         good: string
@@ -42,12 +42,7 @@ day 12:
             return false
         return true
 
-    type DFS_State = object
-        perms: int
-        maxDepth: int
-
     proc dfs(s: string, sloc: int, strips: seq[int], depth = 0): int =
-        # find first possible
         let spd = strips[depth]
         for i in sloc..s.len-spd:
             if s.possibleFit(spd, i):
@@ -61,13 +56,17 @@ day 12:
 
 
 
-    # per problem line
-    for ri, r in report:
-        # per continuous strip
-        echo r.good, " -> ", dfs(r.good, 0, r.strips)
 
     part 1:
-        404
+        # per problem line
+        var total = 0
+        for ri, r in report:
+            let configs = dfs(r.good, 0, r.strips)
+            echo r.good, " ",r.strips ," -> ", configs
+            total += configs
+        total
+
+        # 9109 too high
 
     part 2:
         404
