@@ -64,6 +64,13 @@ proc rotCCW*[T](grid: var Grid2D[T]) =
             grid[x, y] = grid[x, grid.height - y - 1]
             grid[x, grid.height - y - 1] = t
 
+proc rotCW*[T](grid_A: Grid2D[T], grid_B: var Grid2D[T]) =
+    assert grid_A.width == grid_B.height
+    assert grid_A.height == grid_B.width
+    for y in 0..<grid_A.height:
+        for x in 0..<grid_A.width:
+            grid_B[grid_B.width - y - 1, x] = grid_A[x, y]
+
 #endregion
 
 # _________                                  .__

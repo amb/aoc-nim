@@ -7,12 +7,10 @@ day 14:
         return grid.data.join("")
 
     proc countSupport(grid: Grid2D[char]): int =
-        var total = 0
         for y in 0..<grid.height:
             for x in 0..<grid.width:
                 if grid[x, y] == 'O':
-                    total += grid.height - y
-        total
+                    result += grid.height - y
 
     proc eekOut(grid: var Grid2D[char]) =
         for y in 0..<grid.height:
@@ -28,11 +26,10 @@ day 14:
                         grid[i, y] = '.'
                     start = x + 1
                     counter = 0
-            if counter > 0:
-                for i in start..<start + counter:
-                    grid[i, y] = 'O'
-                for i in start + counter..<grid.width:
-                    grid[i, y] = '.'
+            for i in start..<start + counter:
+                grid[i, y] = 'O'
+            for i in start + counter..<grid.width:
+                grid[i, y] = '.'
 
     part 1, 109596:
         var grid = input.toGrid2D
@@ -46,16 +43,21 @@ day 14:
         var prevCycles: Table[string, int]
         grid.rotCCW
 
+        var scratch = grid
+
         proc oneCycle() =
-            for _ in 0..<4:
+            for _ in 0..<2:
                 grid.eekOut
-                grid.rotCW
+                grid.rotCW(scratch)
+                scratch.eekOut
+                scratch.rotCW(grid)
 
         var remaining = 0
         for i in 0..<100_000:
             let tgrid = $grid
             if tgrid in prevCycles:
                 let prev = prevCycles[tgrid]
+                echo "Found cycle at ", i, " (", prev, ")"
                 remaining = (1_000_000_000 - prev).floorMod(i - prev)
                 break
             else:

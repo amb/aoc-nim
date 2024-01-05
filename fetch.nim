@@ -1,4 +1,4 @@
-import std/[sequtils, strutils, strformat, strscans, times, parseutils, parseopt, os, httpclient, re]
+import std/[strutils, strformat, strscans, times, parseutils, os, httpclient, re]
 import cligen
 
 #    _____         _________   ___________     __         .__
@@ -53,11 +53,24 @@ proc fetchAoC(year, day: int) =
     defer: client.close()
     client.headers["cookie"] = getCookie()
 
-    let content = client.getContent(fmt"https://adventofcode.com/{year}/day/{day}/input")
-    inputPath.writeFile(content)
+    try:
+        let content = client.getContent(fmt"https://adventofcode.com/{year}/day/{day}/input")
+        inputPath.writeFile(content)
+    except HttpRequestError:
+        raise newException(
+            ValueError,
+            fmt"Could not fetch input for year {year}, day {day}. " &
+            fmt"Please check your session token."
+        )
+
 
 proc fetchDate(year, day: int) =
-    let fileName = fmt"{year}/day{day}.nim"
+    let fullTemplate = readFile("template.txt")
+    let lines = fullTemplate.splitLines()
+    let suffix = lines[0].strip()
+    let templateText = lines[1..^1].join("\n")
+
+    let fileName = fmt"{year}/day{day}." & suffix
     let inputsFolder = fmt"{year}/inputs"
 
     if not dirExists(fmt"{year}"):
@@ -67,22 +80,18 @@ proc fetchDate(year, day: int) =
         createDir(inputsFolder)
 
     if not fileExists(fileName):
-        echo "Writing template"
-
-        let templateText = readFile("template.txt")
-        let fileText = templateText.replace("{{day}}", $day)
-        writeFile(fileName, fileText)
-
         echo "Fetching AoC input"
         fetchAoC(year, day)
+
+        echo "Writing template"
+        let fileText = templateText.replace("{{day}}", $day)
+        writeFile(fileName, fileText)
     else:
         echo "File already fetched."
 
 proc cli(fetch="", args: seq[string]): int =
     var year, day: int
     let date = now()
-
-    # TODO: fix date logic
 
     # enforce regex on fetch
     if not re.match(fetch, re.re"((\d{4},)?\d)"):
